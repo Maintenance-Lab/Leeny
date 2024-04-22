@@ -1,0 +1,8 @@
+from apps.api import blueprint
+from flask_restx import Api
+from apps.authentication.decorators import token_required
+
+from apps.api.forms import *
+from apps.webapp.models    import *
+
+api = Api(blueprint)

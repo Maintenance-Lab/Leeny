@@ -30,6 +30,16 @@ class ProductRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
+    
+@api.route('/borrowing/', methods=['GET'])
+class BorrowRoute(Resource):
+    def get(self):
+        all_objects = Product.query.all()
+        output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
+        return {
+                'data': output,
+                'success': True
+            }, 200
         
 @api.route('/manufacturer/', methods=['GET'])
 class ManufacturerRoute(Resource):

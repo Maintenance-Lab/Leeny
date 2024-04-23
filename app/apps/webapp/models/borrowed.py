@@ -8,7 +8,7 @@ class Borrowed(db.Model):
     __tablename__ = 'borrowed'
 
     # Primary key
-    product_id = db.Column(db.Integer, db.ForeignKey('Product.id'), primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), primary_key=True)
 
     # Properties

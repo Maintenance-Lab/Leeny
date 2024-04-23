@@ -22,5 +22,5 @@ class Ordered(db.Model):
     updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))
 
     # Relationships
-    product = db.relationship('Product', backref='Ordered')
-    vendor = db.relationship('Vendor', backref='Ordered')
+    product = db.relationship('Product', backref='ordered')
+    vendor = db.relationship('Vendor', backref='ordered')

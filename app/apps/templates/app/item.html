@@ -1,0 +1,211 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Item {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="card-body mt-5">
+    <div class="row">
+        <div class="col-xl-5 col-lg-6 text-center"> <img class="w-100 border-radius-lg shadow-lg mx-auto"
+                src="https://images.unsplash.com/photo-1616627781431-23b776aad6b2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1884&amp;q=80"
+                alt="chair">
+        </div>
+        <div class="col-lg-5 mx-auto">
+            <h3 class="mt-lg-0 mt-4">Minimal Bar Stool</h3>
+            <div class="d-flex align-items-center gap-3">
+                <div>
+                    <label class="mb-0 mt-3 mx-0">Available stock</label> <br>
+                    <h7>2/4</h7> <br> 
+                </div>
+                <div>
+                    <label class="mb-0 mt-3 mx-0">Purchase price</label><br>
+                    <h7>$1,419</h7> <br> 
+                </div>
+                <div>
+                    <label class="mb-0 mt-3 mx-0">Date registered</label><br>
+                    <h7>24-01-2023</h7> <br> 
+                </div>
+                
+            </div>
+
+            <label class="mt-4 mx-0">Description</label>
+            <p>
+                The most beautiful curves of this swivel stool adds an elegant touch to any environment.
+                Memory swivel seat returns to original seat position.
+                Comfortable integrated layered chair seat cushion design.
+                Fully assembled! No assembly required.
+            </p>
+
+            <div class="container d-flex gap-3 p-0">
+                <div class="w-50" style="word-wrap:break-word">
+                    <label class="mt-2 mx-0 ">Purchased at</label>
+                    <p><a>example.com</a></p>
+                </div>
+                <div class="w-50 " style="word-wrap:break-word">
+                    <label class="mt-2 mx-0 ">Documents</label>
+                    <p><a>example.com</a></p>
+                </div>
+            </div>
+            
+            <div class="row mt-4 px-2">
+                <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+                    <option selected>Open select menu</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                  </select>
+            </div>
+
+        </div>
+    </div>
+    <!-- <div class="row mt-5">
+        <div class="col-12">
+            <h5 class="ms-3">Other Products</h5>
+            <div class="table table-responsive">
+                <table class="table align-items-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price
+                            </th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Review
+                            </th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                Availability</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                Id</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="d-flex px-2 py-1">
+                                    <div> <img
+                                            src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-design-system/assets/img/ecommerce/black-chair.jpg"
+                                            class="avatar avatar-md me-3" alt="table image"> </div>
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">Christopher Knight Home</h6>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="text-sm text-secondary mb-0">$89.53</p>
+                            </td>
+                            <td>
+                                <div class="rating ms-lg-n4"> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star" aria-hidden="true"></i> <i class="fas fa-star"
+                                        aria-hidden="true"></i> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star-half-alt" aria-hidden="true"></i> </div>
+                            </td>
+                            <td class="align-middle text-sm">
+                                <div class="progress mx-auto">
+                                    <div class="progress-bar bg-gradient-success" role="progressbar" style="width: 80%"
+                                        aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-center"> <span class="text-secondary text-sm">230019</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex px-2 py-1">
+                                    <div> <img
+                                            src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-design-system/assets/img/ecommerce/chair-pink.jpg"
+                                            class="avatar avatar-md me-3" alt="table image"> </div>
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">Bar Height Swivel Barstool</h6>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="text-sm text-secondary mb-0">$99.99</p>
+                            </td>
+                            <td>
+                                <div class="rating ms-lg-n4"> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star" aria-hidden="true"></i> <i class="fas fa-star"
+                                        aria-hidden="true"></i> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star" aria-hidden="true"></i> </div>
+                            </td>
+                            <td class="align-middle text-sm">
+                                <div class="progress mx-auto">
+                                    <div class="progress-bar bg-gradient-success" role="progressbar" style="width: 90%"
+                                        aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-center"> <span class="text-secondary text-sm">87120</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex px-2 py-1">
+                                    <div> <img
+                                            src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-design-system/assets/img/ecommerce/chair-steel.jpg"
+                                            class="avatar avatar-md me-3" alt="table image"> </div>
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">Signature Design by Ashley</h6>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="text-sm text-secondary mb-0">$129.00</p>
+                            </td>
+                            <td>
+                                <div class="rating ms-lg-n4"> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star" aria-hidden="true"></i> <i class="fas fa-star"
+                                        aria-hidden="true"></i> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star-half-alt" aria-hidden="true"></i> </div>
+                            </td>
+                            <td class="align-middle text-sm">
+                                <div class="progress mx-auto">
+                                    <div class="progress-bar bg-gradient-warning" role="progressbar" style="width: 60%"
+                                        aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-center"> <span class="text-secondary text-sm">412301</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex px-2 py-1">
+                                    <div> <img
+                                            src="https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-design-system/assets/img/ecommerce/chair-wood.jpg"
+                                            class="avatar avatar-md me-3" alt="table image"> </div>
+                                    <div class="d-flex flex-column justify-content-center">
+                                        <h6 class="mb-0 text-sm">Modern Square</h6>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="text-sm text-secondary mb-0">$59.99</p>
+                            </td>
+                            <td>
+                                <div class="rating ms-lg-n4"> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star" aria-hidden="true"></i> <i class="fas fa-star"
+                                        aria-hidden="true"></i> <i class="fas fa-star" aria-hidden="true"></i> <i
+                                        class="fas fa-star-half-alt" aria-hidden="true"></i> </div>
+                            </td>
+                            <td class="align-middle text-sm">
+                                <div class="progress mx-auto">
+                                    <div class="progress-bar bg-gradient-warning" role="progressbar" style="width: 40%"
+                                        aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-center"> <span class="text-secondary text-sm">001992</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> -->
+    
+</div>
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+
+
+{% endblock %}

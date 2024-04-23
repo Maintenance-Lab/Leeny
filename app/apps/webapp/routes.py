@@ -20,6 +20,18 @@ from datetime import datetime
 def index():
     return render_template('app/index.html', segment='index', API_GENERATOR=len(API_GENERATOR))
 
+@blueprint.route('/start')
+def start():
+    return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
+
+@blueprint.route('/borrow')
+def borrow():
+    return render_template('app/borrow.html', API_GENERATOR=len(API_GENERATOR))
+
+@blueprint.route('/item/<int:id>')
+def item(id):
+    return render_template('app/item.html', API_GENERATOR=len(API_GENERATOR))
+
 @blueprint.route('/<template>')
 # @login_required
 def route_template(template):

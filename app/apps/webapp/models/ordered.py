@@ -4,7 +4,7 @@ from apps import db
 
 class Ordered(db.Model):
 
-    __tablename__ = 'Ordered'
+    __tablename__ = 'ordered'
 
     # Primary key
     id = db.Column(db.Integer, primary_key=True)

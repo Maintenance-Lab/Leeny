@@ -22,6 +22,10 @@ class Users(db.Model, UserMixin):
     email         = db.Column(db.String(64), unique=True)
     password      = db.Column(db.LargeBinary)
 
+    uid_1         = db.Column(db.String(64), unique=True, nullable=True)
+    uid_2         = db.Column(db.String(64), unique=True, nullable=True)
+    uid_3         = db.Column(db.String(64), unique=True, nullable=True)
+
     oauth_github  = db.Column(db.String(100), nullable=True)
 
     api_token     = db.Column(db.String(100))

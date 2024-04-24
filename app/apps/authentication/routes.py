@@ -20,7 +20,7 @@ from flask_dance.contrib.github import github
 
 from apps import db, login_manager
 from apps.authentication import blueprint
-from apps.authentication.forms import LoginForm, CreateAccountForm
+from apps.authentication.forms import *
 from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass, generate_token
@@ -42,6 +42,108 @@ def login_github():
 
     res = github.get("/user")
     return redirect(url_for('webapp_blueprint.index'))
+
+@blueprint.route('/rfid_login', methods=['GET', 'POST'])
+def rfid_login():
+    login_form = RfidLoginForm(request.form)
+
+    if request.method == 'POST':
+    
+        # read form data
+        username = request.form['username']
+        uid = request.form['uid']
+        password = request.form['password']
+        # password = request.form.get('password', None)
+        print('Username:', username)
+
+        # Locate user
+        if uid:
+            try:
+                user = Users.query.filter_by(uid1=uid).first()
+            except Exception:
+                try:
+                    user = Users.query.filter_by(uid2=uid).first()
+                except Exception:
+                    try:
+                        user = Users.query.filter_by(uid3=uid).first()
+                    except Exception as e:
+                        print('No user found for this card:', e)
+                        user = None
+        else:
+            print('No card found')
+            user = Users.query.filter_by(username=username).first()
+
+        # Check the password
+        if user and password and verify_pass(password, user.password):
+            login_user(user)
+            return redirect(url_for('authentication_blueprint.route_default'))
+        elif user and not password:
+            login_user(user)
+            return redirect(url_for('authentication_blueprint.route_default'))
+
+        # Something (user or pass) is not ok
+        return render_template('accounts/rfid_login.html',
+                               msg='Wrong user or password',
+                               form=login_form)
+
+    if current_user.is_authenticated:
+        return redirect(url_for('webapp_blueprint.index'))
+    else:
+        return render_template('accounts/rfid_login.html',
+                               form=login_form)
+
+
+@blueprint.route('/rfid_register', methods=['GET', 'POST'])
+def rfid_register():
+    create_account_form = RfidCreateAccountForm(request.form)
+    if 'register' in request.form:
+
+        username = request.form['username']
+        # uid1 = request.from.get('uid', None)
+        email = request.form['email']
+        # password = request.form['password']
+        uid_1 = request.form['uid_1'] or None
+        print('UID:', uid_1)
+
+        # Check usename exists
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            return render_template('accounts/rfid_register.html',
+                                   msg='Username already registered',
+                                   success=False,
+                                   form=create_account_form)
+        
+        # Check email exists
+        user = Users.query.filter_by(email=email).first()
+        if user:
+            return render_template('accounts/rfid_register.html',
+                                   msg='Email already registered',
+                                   success=False,
+                                   form=create_account_form)
+        
+        # Check uid exists
+        user = Users.query.filter_by(uid_1=uid_1).first()
+        if user and uid_1:
+            return render_template('accounts/rfid_register.html',
+                                   msg='Card already registered',
+                                   success=False,
+                                   form=create_account_form)
+
+        # else we can create the user
+        user = Users(**request.form)
+        db.session.add(user)
+        db.session.commit()
+
+        # Delete user from session
+        logout_user()
+
+        return render_template('accounts/rfid_register.html',
+                               msg='Card registered successfully.',
+                               success=True,
+                               form=create_account_form)
+
+    else:
+        return render_template('accounts/rfid_register.html', form=create_account_form)
 
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():

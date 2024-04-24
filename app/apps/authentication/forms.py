@@ -11,16 +11,30 @@ from wtforms.validators import Email, DataRequired, Optional
 
 
 class RfidLoginForm(FlaskForm):
+    uid = StringField('Rfid_uid',
+                      id='rfid_uid_login',
+                      validators=[Optional()])
     username = StringField('Username',
                            id='rfid_username_login',
                            validators=[Optional()])
     password = PasswordField('Password',
                              id='rfid_pwd_login',
                              validators=[Optional()])
-    uid = StringField('Rfid_uid',
-                        id='rfid_uid_login',
-                        validators=[Optional()])
-    
+
+    # def validate(self):
+    #     if not super().validate():
+    #         return False
+
+    #     # Check if uid is provided
+    #     if self.uid.data:
+    #         # If uid is provided, then username and password are optional
+    #         return True
+
+    #     # If uid is not provided, then username and password are required
+    #     if not self.username.data or not self.password.data:
+    #         raise ValidationError('UID or Username and Password are required.')
+
+    #     return True
 
 
 class RfidCreateAccountForm(FlaskForm):

@@ -48,29 +48,28 @@ def rfid_login():
     login_form = RfidLoginForm(request.form)
 
     if request.method == 'POST':
-    
+
         # read form data
         username = request.form['username']
         uid = request.form['uid']
         password = request.form['password']
         # password = request.form.get('password', None)
-        print('Username:', username)
 
         # Locate user
         if uid:
             try:
-                user = Users.query.filter_by(uid1=uid).first()
-            except Exception:
+                user = Users.query.filter_by(uid_1=uid).first()
+            except Exception as e1:
                 try:
-                    user = Users.query.filter_by(uid2=uid).first()
-                except Exception:
+                    user = Users.query.filter_by(uid_2=uid).first()
+                except Exception as e2:
                     try:
-                        user = Users.query.filter_by(uid3=uid).first()
-                    except Exception as e:
-                        print('No user found for this card:', e)
+                        user = Users.query.filter_by(uid_3=uid).first()
+                    except Exception as e3:
+                        print('No user found for this card:', e1, e2, e3)
                         user = None
         else:
-            print('No card found')
+            print('No card used, trying username')
             user = Users.query.filter_by(username=username).first()
 
         # Check the password
@@ -131,6 +130,8 @@ def rfid_register():
 
         # else we can create the user
         user = Users(**request.form)
+        if uid_1 is None:
+            user.uid_1 = uid_1
         db.session.add(user)
         db.session.commit()
 

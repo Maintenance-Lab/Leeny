@@ -6,7 +6,7 @@ from apps.authentication.decorators import token_required
 from apps.authentication.models import Users
 from apps.webapp.models import *
 from apps.webapp.forms import *
-from flask import request
+from flask import request, jsonify, Response
 from flask_restx import Api, Resource
 from werkzeug.datastructures import MultiDict
 
@@ -21,6 +21,24 @@ class TestRoute(Resource):
                 'data': 'Hello World',
                 'success': True
             }, 200
+
+
+@api.route('/barcode-scanning', methods=['POST'])
+class BarcodeScanningRoute(Resource):
+    def post(self):
+        # Get the barcode data from the request
+        data = request.get_json()
+        barcode = data['barcode']
+
+        # Process the barcode data to generate different data
+        updated_string = f"Hello from Flask! You scanned barcode: {barcode}"
+
+        return {
+            'data': updated_string,
+            'success': True
+        }, 200
+
+
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):
     def get(self):
@@ -30,7 +48,7 @@ class ProductRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-    
+
 @api.route('/borrowing/', methods=['GET'])
 class BorrowRoute(Resource):
     def get(self):
@@ -40,7 +58,7 @@ class BorrowRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-        
+
 @api.route('/manufacturer/', methods=['GET'])
 class ManufacturerRoute(Resource):
     def get(self):
@@ -50,7 +68,7 @@ class ManufacturerRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-        
+
 @api.route('/ordered/', methods=['GET'])
 class OrderedRoute(Resource):
     def get(self):
@@ -60,8 +78,8 @@ class OrderedRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-        
-@api.route('/vendor/', methods=['GET']) 
+
+@api.route('/vendor/', methods=['GET'])
 class VendorRoute(Resource):
     def get(self):
         all_objects = Vendor.query.all()

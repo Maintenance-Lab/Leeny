@@ -27,7 +27,7 @@
 
                     </table>
                     <div class="text-center">
-                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4" id="test">Continue</button>
+                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4" id="continue">Continue</button>
                     </div>
                 </div>
             </div>
@@ -50,12 +50,6 @@
   <script src="app/apps/scripts/barcode.js"></script>
 
   <script>
-
-    var addButton = document.getElementById("test");
-    addButton.addEventListener('click', function() {
-      addTableRow();
-    });
-
     function deleteRow(link) {
       // Find the closest row to the clicked link
       var row = link.closest('tr');
@@ -73,7 +67,7 @@
               <div class="d-flex px-2 py-1">
               <div class="d-flex flex-column justify-content-center">
 
-                  <h6 class="mb-0 text-sm text-wrap" id="item"></h6>
+                  <h6 class="mb-0 text-sm text-wrap item-name"></h6>
 
               </div>
               </div>
@@ -130,10 +124,14 @@
 
               // Update the HTML with the updated string received from the API
               addTableRow();
-              document.getElementById("item").innerHTML = data.data;
 
-              // // Clear the input field after processing
-              // document.getElementById("barcodeInputField").value = "";
+              // Adds information to table row with class item-name
+              const tableRows = document.querySelectorAll('.item-name');
+              const lastTableRow = tableRows[tableRows.length - 1];
+              lastTableRow.innerHTML = data.data;
+
+              // Clear the input field after processing
+              document.getElementById("barcodeInputField").value = "";
           })
 
         . catch(error => console.error('Error:', error));

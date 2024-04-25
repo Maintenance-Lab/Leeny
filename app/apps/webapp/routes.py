@@ -32,6 +32,11 @@ def start():
 def borrow():
     return render_template('app/borrow.html', API_GENERATOR=len(API_GENERATOR))
 
+
+@blueprint.route('/home')
+def home():
+    return render_template('app/home.html')
+
 @blueprint.route('/item/<int:id>')
 def item(id):
     api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")

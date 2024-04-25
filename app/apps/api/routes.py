@@ -98,3 +98,14 @@ class ItemRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
+    
+    
+@api.route('/home/', methods=['GET'])
+class ProductRoute(Resource):
+    def get(self):
+        all_objects = Product.query.all()
+        output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
+        return {
+                'data': output,
+                'success': True
+            }, 200

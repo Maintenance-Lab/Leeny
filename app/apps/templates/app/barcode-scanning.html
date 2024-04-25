@@ -3,7 +3,7 @@
 <body>
 
 
-<input name="barcodeInput" id="barcodeInputField" value="" />
+<input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''"  />
 <div id="displayText"></div>
 
 
@@ -11,7 +11,7 @@
     console.log("HELLO");
     var barcode = '';
     var typingTimer; // Timer identifier
-    var doneTypingInterval = 10; // Time in milliseconds (1 second)
+    var doneTypingInterval = 50; // Time in milliseconds (1 second)
 
     // autofocus the input field
     document.getElementById("barcodeInputField").focus();
@@ -19,6 +19,7 @@
     document.getElementById("barcodeInputField").addEventListener('input', function() {
         // Clear the previous timer
         clearTimeout(typingTimer);
+        // clear input field after sending barcode
 
         // Get barcode from input field
         barcode = document.getElementById("barcodeInputField").value;
@@ -47,10 +48,15 @@
 
             // Update the HTML with the updated string received from the API
             document.getElementById("displayText").innerHTML = data.data;
+
+            // Clear the input field after processing
+            document.getElementById("barcodeInputField").value = "";
         })
 
         .catch(error => console.error('Error:', error));
         }, doneTypingInterval);
     });
+
+
 
 </script>

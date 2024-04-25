@@ -20,6 +20,10 @@ from datetime import datetime
 def index():
     return render_template('app/index.html', segment='index', API_GENERATOR=len(API_GENERATOR))
 
+@blueprint.route('/barcode-scanning')
+def barcode_scanning():
+    return render_template('app/barcode-scanning.html', API_GENERATOR=len(API_GENERATOR))
+
 @blueprint.route('/start')
 def start():
     return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
@@ -30,7 +34,31 @@ def borrow():
 
 @blueprint.route('/item/<int:id>')
 def item(id):
-    return render_template('app/item.html', API_GENERATOR=len(API_GENERATOR))
+    api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
+    response = requests.get(url=api_url, timeout=1)
+    response.raise_for_status()
+
+    result = response.json()
+    print(result)
+
+    return render_template('app/item.html', data=result)
+
+@blueprint.route('/new_item/')
+@blueprint.route('/item/<int:id>/edit')
+def new_item(id = None):
+    result = None
+    try:
+        api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
+        response = requests.get(url=api_url, timeout=1)
+        response.raise_for_status()
+
+        result = response.json()
+        
+    except:
+        pass
+
+    return render_template('app/new-item.html', data=result)
+
 
 @blueprint.route('/<template>')
 # @login_required
@@ -43,16 +71,16 @@ def route_template(template):
             print('yup:', api_url)
             response = requests.get(url=api_url, timeout=1)
             response.raise_for_status()
-            
+
             # Convert timestamp to datetime for created_at and updated_at
             result = response.json()
             for item in result['data']:
                 if 'created_at_ts' in item and 'updated_at_ts' in item:
                         item['created_at_dt'] = datetime.fromtimestamp(item['created_at_ts']).strftime('%Y-%m-%d %H:%M')
                         item['created_at_dt'] = datetime.fromtimestamp(item['updated_at_ts']).strftime('%Y-%m-%d %H:%M')
-            
+
             return render_template("app/" + template, data=result)
-            
+
         except requests.exceptions.HTTPError as error:
             status_code = error.response.status_code
         except requests.exceptions.ConnectionError:

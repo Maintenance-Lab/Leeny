@@ -11,52 +11,49 @@
         <div class="col-xl-5 col-lg-6 text-center"> <img class="w-100 border-radius-lg shadow-lg mx-auto"
                 src="https://images.unsplash.com/photo-1616627781431-23b776aad6b2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1884&amp;q=80"
                 alt="chair">
-        </div>
+        </div>  
         <div class="col-lg-5 mx-auto">
-            <h3 class="mt-lg-0 mt-4">Minimal Bar Stool</h3>
+            <h3 class="mt-lg-0 mt-4">{{ data['data'][0].model }}</h3>
             <div class="d-flex align-items-center gap-3">
                 <div>
                     <label class="mb-0 mt-3 mx-0">Available stock</label> <br>
-                    <h7>2/4</h7> <br> 
+                    <h7>{{ data['data'][0].quantity }}</h7> <br> 
                 </div>
                 <div>
                     <label class="mb-0 mt-3 mx-0">Purchase price</label><br>
-                    <h7>$1,419</h7> <br> 
+                    <h7>${{ data['data'][0].price_when_bought }}</h7> <br> 
                 </div>
-                <div>
+                <!-- <div>
                     <label class="mb-0 mt-3 mx-0">Date registered</label><br>
                     <h7>24-01-2023</h7> <br> 
-                </div>
+                </div> -->
                 
             </div>
 
             <label class="mt-4 mx-0">Description</label>
             <p>
-                The most beautiful curves of this swivel stool adds an elegant touch to any environment.
-                Memory swivel seat returns to original seat position.
-                Comfortable integrated layered chair seat cushion design.
-                Fully assembled! No assembly required.
+                {{ data['data'][0].description }}
             </p>
 
             <div class="container d-flex gap-3 p-0">
                 <div class="w-50" style="word-wrap:break-word">
                     <label class="mt-2 mx-0 ">Purchased at</label>
-                    <p><a>example.com</a></p>
+                    <p><a href="{{ data['data'][0].url }}">{{ data['data'][0].url }}</a></p>
                 </div>
                 <div class="w-50 " style="word-wrap:break-word">
                     <label class="mt-2 mx-0 ">Documents</label>
-                    <p><a>example.com</a></p>
+                    <p><a href="{{ data['data'][0].url }}">{{ data['data'][0].url }}</a></p>
                 </div>
             </div>
             
-            <div class="row mt-4 px-2">
+            <!-- <div class="row mt-4 px-2">
                 <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
                     <option selected>Open select menu</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>
                   </select>
-            </div>
+            </div> -->
 
         </div>
     </div>

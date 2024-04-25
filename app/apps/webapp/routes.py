@@ -30,7 +30,31 @@ def borrow():
 
 @blueprint.route('/item/<int:id>')
 def item(id):
-    return render_template('app/item.html', API_GENERATOR=len(API_GENERATOR))
+    api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
+    response = requests.get(url=api_url, timeout=1)
+    response.raise_for_status()
+
+    result = response.json()
+    print(result)
+
+    return render_template('app/item.html', data=result)
+
+@blueprint.route('/new_item/')
+@blueprint.route('/item/<int:id>/edit')
+def new_item(id = None):
+    result = None
+    try:
+        api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
+        response = requests.get(url=api_url, timeout=1)
+        response.raise_for_status()
+
+        result = response.json()
+        
+    except:
+        pass
+
+    return render_template('app/new-item.html', data=result)
+
 
 @blueprint.route('/<template>')
 # @login_required

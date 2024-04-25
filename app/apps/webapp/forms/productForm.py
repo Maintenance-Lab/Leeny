@@ -9,6 +9,7 @@ class ProductForm(FlaskForm):
     price_when_bought = IntegerField('Price when bought', validators=[DataRequired()])
     description = TextAreaField('Description')
     EAN = StringField('EAN')
+    url = StringField('url')
     manufacturer_id = IntegerField('Manufacturer ID', validators=[DataRequired()])
     category_id = IntegerField('Category ID', validators=[DataRequired()])
     vendor_id = IntegerField('Vendor ID', validators=[DataRequired()])

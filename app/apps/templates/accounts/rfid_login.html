@@ -115,7 +115,7 @@
       .then(response => response.json())
       .then(data => {
         if (document.getElementById('uid').value == '') {
-          document.getElementById('uid').value = data.uid_1 || ''; // Update text field
+          document.getElementById('uid').value = data.uid || ''; // Update text field
         }
   
         if (document.getElementById('uid').value != '') {
@@ -143,14 +143,12 @@ document.getElementsByTagName('form')[0].onsubmit = (e) => {
   const formData = new FormData(e.target)
   const username = formData.get('username');
   const password = formData.get('password');
-  const uid      = formData.get('uid');
 
   fetch('/login/jwt/',{
       method: 'POST',
       body: JSON.stringify({
           username: username,
           password: password,
-          uid:      uid
       }),
       headers: {
           'Content-Type': 'application/json'

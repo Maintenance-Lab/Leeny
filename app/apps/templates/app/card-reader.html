@@ -14,9 +14,11 @@
                     <div class="">
                       <img src="https://static.thenounproject.com/png/74445-200.png" alt="">
                     </div>
-                  </td>
+                </td>
             </tr>
-            <h6> {{ data.uid }}</h6>
+            <h6 name="uid" id="uid" placeholder="UID"> 
+              <!-- <input name="uid" id="uid" placeholder="UID"> -->
+            </h6>
         </div>
     </div>
 
@@ -25,8 +27,65 @@
 
 <!-- Specific JS goes HERE --> 
 {% block javascripts %}
+<script>
+var interval_id = setInterval(fetchUID, 1000);
+function fetchUID() {
+  fetch('/get_uid')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('uid').innerHTML = data.uid
 
-  <script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
+      if (data.uid !== null) {
+        clearInterval(interval_id); // Stop fetching
+      }
+    })
+    .catch(error => console.error('Error fetching UID:', error));
+}
+
+// Save aKey in localStorage 
+// const asyncLocalStorage = {
+//       setItem: function (key, value) {
+//           return Promise.resolve().then(function () {
+//               localStorage.setItem(key, value);
+//           });
+//       }
+//   }
+
+// Login hook  
+// document.getElementById('uid') = (e) => {
+// document.getElementsByTagName('form')[0].onsubmit = (e) => {
+
+//   e.preventDefault();
+  
+//   const formData = new FormData(e.target)
+//   const username = formData.get('username');
+//   const password = formData.get('password');
+
+//   fetch('/login/jwt/',{
+//       method: 'POST',
+//       body: JSON.stringify({
+//           username: username,
+//           password: password,
+//       }),
+//       headers: {
+//           'Content-Type': 'application/json'
+//       }
+//   })
+//       .then((response) => response.json())
+//       .then((res) => {
+
+//         //console.log('Token: ' + res.data); 
+
+//         // store token in localStorage
+//         asyncLocalStorage.setItem('token',res.data).then(result => {e.target.submit()})
+
+//       })
+//       .catch((err) => {console.log(err)})   
+// }
+
+</script>
+
+  <!-- <script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
   <script>
     var ctx = document.getElementById("chart-bars").getContext("2d");
 
@@ -196,6 +255,6 @@
         },
       },
     });
-  </script>
+  </script> -->
 
 {% endblock javascripts %}

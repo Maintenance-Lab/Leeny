@@ -123,7 +123,7 @@
         .then(response => response.json())
         .then(data => {
           if (document.getElementById('uid_1').value == '') {
-            document.getElementById('uid_1').value = data.uid_1 || ''; // Update text field
+            document.getElementById('uid_1').value = data.uid || ''; // Update text field
           }
 
           if (document.getElementById('uid_1').value != '') {

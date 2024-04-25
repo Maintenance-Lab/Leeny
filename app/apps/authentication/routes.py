@@ -3,14 +3,13 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask.json import jsonify
 import time
 from datetime import datetime
 
 from flask_restx import Resource, Api
 
 import flask
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, jsonify
 from flask_login import (
     current_user,
     login_user,
@@ -48,26 +47,31 @@ def login_github():
 def get_uid():
     # read uid from card
     scanner = Scanner()
-    uid_1 = None
+    uid = None
     if scanner.ser.is_open is False:
         # print("Serial port is closed. Opening serial port...")
         scanner.open_serial()
     # print("SCAN ROUND:")
     picca_res = scanner.piccactivate()
     if picca_res.startswith(b'50'):
-        uid_1 = scanner.response_parse(picca_res)
+        uid = scanner.response_parse(picca_res)
         # print(f"\nUID: {uid}\n")
         scanner.set_led()
         scanner.set_buzzer()
     # print("END SCAN ROUND:\n")
-    if uid_1:
+    if uid:
         # print("UID found. Exiting...")
         pass
     time.sleep(0.3)
     # close serial
     scanner.ser.close()
 
-    return jsonify({'uid_1': uid_1.decode('utf-8') if uid_1 else None})
+    test = jsonify({'uid': uid.decode('utf-8') if uid else None})
+
+    print(test.get_json()['uid'])
+
+
+    return jsonify({'uid': uid.decode('utf-8') if uid else None})
 
 @blueprint.route('/rfid_login', methods=['GET', 'POST'])
 def rfid_login():
@@ -303,17 +307,15 @@ class JWTLogin(Resource):
                        "message": str(e)
                    }, 500
 
+@blueprint.route('/card_reader')
+def card_reader():
+    return render_template('app/card-reader.html')
 
 @blueprint.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('authentication_blueprint.login')) 
 
-@blueprint.route('/card_reader/')
-def card_reader():
-
-    data = {'uid': 123} # hier data invoegen
-    return render_template('app/card-reader.html', data=data)
 
 # Errors
 

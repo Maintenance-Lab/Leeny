@@ -170,6 +170,12 @@ def logout():
     logout_user()
     return redirect(url_for('authentication_blueprint.login')) 
 
+@blueprint.route('/card_reader/')
+def card_reader():
+
+    data = {'uid': 123} # hier data invoegen
+    return render_template('app/card-reader.html', data=data)
+
 # Errors
 
 @login_manager.unauthorized_handler

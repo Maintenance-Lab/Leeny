@@ -9,6 +9,7 @@
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
+            <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''"  />
             <tr class="container px-0 w-100">
                 <td class="col-7">
                     <div class="">
@@ -72,8 +73,7 @@
               <div class="d-flex px-2 py-1">
               <div class="d-flex flex-column justify-content-center">
 
-                  <h6 class="mb-0 text-sm text-wrap">Apple MacBook Air M1 2022 </h6>
-                  <!-- <h6 class="mb-0 text-sm text-wrap" id="first-item"></h6> -->
+                  <h6 class="mb-0 text-sm text-wrap" id="item"></h6>
 
               </div>
               </div>
@@ -87,6 +87,64 @@
 
         </tr> `
     }
+
+    console.log("HELLO");
+
+    var barcode = '';
+    var typingTimer; // Timer identifier
+    var doneTypingInterval = 50; // Time in milliseconds (1 second)
+
+    // autofocus the input field
+    document.getElementById("barcodeInputField").focus();
+
+    document.getElementById("barcodeInputField").addEventListener('input', function() {
+        console.log("barcode geregistreerd")
+        // Clear the previous timer
+        clearTimeout(typingTimer);
+        // clear input field after sending barcode
+
+        // Get barcode from input field
+        barcode = document.getElementById("barcodeInputField").value;
+
+        // Set a new timer to send the barcode after a certain amount of time
+        typingTimer = setTimeout(function() {
+            console.log("Deze barcode sturen: ", barcode);
+
+          // Send the barcode to the server
+          fetch('api/borrow', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ barcode: barcode })
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Response was not ok');
+              }
+              return response.json();
+          })
+          // Parse the JSON from the response
+          .then(data => {
+              console.log('Response from server:', data);
+
+              // Update the HTML with the updated string received from the API
+              addTableRow();
+              document.getElementById("item").innerHTML = data.data;
+
+              // // Clear the input field after processing
+              // document.getElementById("barcodeInputField").value = "";
+          })
+
+        . catch(error => console.error('Error:', error));
+
+        }, doneTypingInterval);
+    });
+
+
+
+
+
 
 
 

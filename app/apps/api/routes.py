@@ -39,6 +39,22 @@ class BarcodeScanningRoute(Resource):
         }, 200
 
 
+@api.route('/borrow', methods=['POST'])
+class Borrow(Resource):
+    def post(self):
+        # Get the barcode data from the request
+        data = request.get_json()
+        barcode = data['barcode']
+
+        # Process the barcode data to generate different data
+        updated_string = f"Barcode: {barcode}"
+
+        return {
+            'data': updated_string,
+            'success': True
+        }, 200
+
+
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):
     def get(self):

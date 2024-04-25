@@ -54,7 +54,8 @@
 
                     <label>UID</label>
                     <div class="mb-3">
-                      {{ form.uid(placeholder="Card UID", class="form-control") }}
+                        <input class='form-control' type="text" name="uid" id="uid" placeholder="UID">
+                        <!-- {{ form.uid(placeholder="Card uid", class="form-control") }} -->
                     </div>
 
                     <div class="text-center">
@@ -106,6 +107,24 @@
 {% block javascripts %}
 
 <script>
+  // Fetch UID every 1 second
+  var interval_id = setInterval(fetchUID, 1000);
+
+  function fetchUID() {
+    fetch('/get_uid')
+      .then(response => response.json())
+      .then(data => {
+        if (document.getElementById('uid').value == '') {
+          document.getElementById('uid').value = data.uid_1 || ''; // Update text field
+        }
+  
+        if (document.getElementById('uid').value != '') {
+          clearInterval(interval_id); // Stop fetching
+        }
+      })
+      .catch(error => console.error('Error fetching UID:', error));
+  }
+
 
   // Save aKey in localStorage 
   const asyncLocalStorage = {

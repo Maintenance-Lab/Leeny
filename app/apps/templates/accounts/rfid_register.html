@@ -65,7 +65,7 @@
 
                 {% else %}
 
-                  <form role="form text-left" method="post" action="">
+                  <form role="form text-left" method="post" action="/rfid_register" id="register-form">
 
                     {{ form.hidden_tag() }}
 
@@ -83,7 +83,8 @@
                       </div>
                       <label>Optional: scan your card</label>
                       <div class="mb-3">
-                        {{ form.uid_1(placeholder="Card uid", class="form-control") }}
+                        <input class='form-control' type="text" name="uid_1" id="uid_1" placeholder="UID">
+                        <!-- {{ form.uid_1(placeholder="Card uid", class="form-control") }} -->
                       </div>
 
                       <div class="text-center">
@@ -112,4 +113,25 @@
   {% endblock content %}
 
   <!-- Specific JS goes HERE --> 
-  {% block javascripts %}{% endblock javascripts %}
+  {% block javascripts %}
+  <script>
+    // Fetch UID every 1 second
+    var interval_id = setInterval(fetchUID, 1000);
+
+    function fetchUID() {
+      fetch('/get_uid')
+        .then(response => response.json())
+        .then(data => {
+          if (document.getElementById('uid_1').value == '') {
+            document.getElementById('uid_1').value = data.uid_1 || ''; // Update text field
+          }
+
+          if (document.getElementById('uid_1').value != '') {
+            clearInterval(interval_id); // Stop fetching
+          }
+        })
+        .catch(error => console.error('Error fetching UID:', error));
+    }
+
+  </script>
+  {% endblock javascripts %}

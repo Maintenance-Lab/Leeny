@@ -3,7 +3,8 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-import json
+from flask.json import jsonify
+import time
 from datetime import datetime
 
 from flask_restx import Resource, Api
@@ -21,7 +22,7 @@ from flask_dance.contrib.github import github
 from apps import db, login_manager
 from apps.authentication import blueprint
 from apps.authentication.forms import *
-from apps.authentication.models import Users
+from apps.authentication.models import Users, Scanner
 
 from apps.authentication.util import verify_pass, generate_token
 
@@ -43,6 +44,31 @@ def login_github():
     res = github.get("/user")
     return redirect(url_for('webapp_blueprint.index'))
 
+@blueprint.route('/get_uid', methods=['GET'])
+def get_uid():
+    # read uid from card
+    scanner = Scanner()
+    uid_1 = None
+    if scanner.ser.is_open is False:
+        # print("Serial port is closed. Opening serial port...")
+        scanner.open_serial()
+    # print("SCAN ROUND:")
+    picca_res = scanner.piccactivate()
+    if picca_res.startswith(b'50'):
+        uid_1 = scanner.response_parse(picca_res)
+        # print(f"\nUID: {uid}\n")
+        scanner.set_led()
+        scanner.set_buzzer()
+    # print("END SCAN ROUND:\n")
+    if uid_1:
+        # print("UID found. Exiting...")
+        pass
+    time.sleep(0.3)
+    # close serial
+    scanner.ser.close()
+
+    return jsonify({'uid_1': uid_1.decode('utf-8') if uid_1 else None})
+
 @blueprint.route('/rfid_login', methods=['GET', 'POST'])
 def rfid_login():
     login_form = RfidLoginForm(request.form)
@@ -53,8 +79,7 @@ def rfid_login():
         username = request.form['username']
         uid = request.form['uid']
         password = request.form['password']
-        # password = request.form.get('password', None)
-
+  
         # Locate user
         if uid:
             try:
@@ -98,11 +123,11 @@ def rfid_register():
     if 'register' in request.form:
 
         username = request.form['username']
-        # uid1 = request.from.get('uid', None)
         email = request.form['email']
         # password = request.form['password']
         uid_1 = request.form['uid_1'] or None
-        print('UID:', uid_1)
+        # print('UID:', uid_1)
+
 
         # Check usename exists
         user = Users.query.filter_by(username=username).first()
@@ -111,7 +136,7 @@ def rfid_register():
                                    msg='Username already registered',
                                    success=False,
                                    form=create_account_form)
-        
+
         # Check email exists
         user = Users.query.filter_by(email=email).first()
         if user:
@@ -119,9 +144,20 @@ def rfid_register():
                                    msg='Email already registered',
                                    success=False,
                                    form=create_account_form)
-        
+
         # Check uid exists
-        user = Users.query.filter_by(uid_1=uid_1).first()
+        if uid_1:
+            try:
+                user = Users.query.filter_by(uid_1=uid_1).first()
+            except Exception as e1:
+                try:
+                    user = Users.query.filter_by(uid_2=uid_1).first()
+                except Exception as e2:
+                    try:
+                        user = Users.query.filter_by(uid_3=uid_1).first()
+                    except Exception as e3:
+                        print('Already user found for this card:', e1, e2, e3)
+
         if user and uid_1:
             return render_template('accounts/rfid_register.html',
                                    msg='Card already registered',

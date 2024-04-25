@@ -1,0 +1,279 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Borrow {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
+        <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
+            <h3 class="mb-2">Scan your items</h3>
+            <tr class="container px-0 w-100">
+                <td class="col-7">
+                    <div class="">
+                      <img src="https://static.thenounproject.com/png/74445-200.png" alt="">
+                    </div>
+                  </td>
+            </tr>
+        </div>
+        <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
+            <div class="card text-left">
+                <div class="table-responsive p-0 " style="max-height: 450px;">
+                    <table class="table align-items-center mb-0 p-3">
+                    <tbody>
+                        <tr class="container px-0">
+                        <td class="col-7">
+                            <div class="d-flex px-2 py-1">
+                            <div class="d-flex flex-column justify-content-center">
+                                <!-- <h6 class="mb-0 text-sm text-wrap">Apple MacBook Air M1 2022 </h6> -->
+                                <h6 class="mb-0 text-sm text-wrap" id="first-item"></h6>
+                            </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="col-3 input-group">
+                                <input type="text" class="form-control p-1" placeholder="Quantity" onfocus="focused(this)" onfocusout="defocused(this)">
+                            </div>
+                        </td>
+                        <td class="align-middle col-2">
+                            <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete item">
+                            Delete
+                            </a>
+                        </td>
+                        </tr>
+                        <tr class="container px-0">
+                            <td class="col-7">
+                                <div class="d-flex px-2 py-1">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm text-wrap">2WD dubbeldekker robot chassis</h6>
+                                </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="col-3 input-group">
+                                    <input type="text" class="form-control p-1" placeholder="Quantity" onfocus="focused(this)" onfocusout="defocused(this)">
+                                </div>
+                            </td>
+                            <td class="align-middle col-2">
+                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete item">
+                                Delete
+                                </a>
+                            </td>
+                        </tr>
+                        <tr class="container px-0">
+                            <td class="col-7">
+                                <div class="d-flex px-2 py-1">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 text-sm text-wrap">Raspberry Pi 4 Model B 1GB</h6>
+                                </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="col-3 input-group">
+                                    <input type="text" class="form-control p-1" placeholder="Quantity" onfocus="focused(this)" onfocusout="defocused(this)">
+                                </div>
+                            </td>
+                            <td class="align-middle col-2">
+                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete item">
+                                Delete
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4">Continue</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a type="button" class="btn btn-outline-danger opacity-25 w-25 mt-2 mb-4 btn-sm" href="/dashboard">Cancel</a>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+  <script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
+
+  <!-- Script importen die barcodes verkrijgt -->
+  <script src="app/apps/scripts/barcode.js"></script>
+
+  <script>
+    var ctx = document.getElementById("chart-bars").getContext("2d");
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+          label: "Sales",
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 4,
+          borderSkipped: false,
+          backgroundColor: "#fff",
+          data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
+          maxBarThickness: 6
+        }, ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+            },
+            ticks: {
+              suggestedMin: 0,
+              suggestedMax: 500,
+              beginAtZero: true,
+              padding: 15,
+              font: {
+                size: 14,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+              color: "#fff"
+            },
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false
+            },
+            ticks: {
+              display: false
+            },
+          },
+        },
+      },
+    });
+
+
+    var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
+    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+    new Chart(ctx2, {
+      type: "line",
+      data: {
+        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: "Mobile apps",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#cb0c9f",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+            maxBarThickness: 6
+
+          },
+          {
+            label: "Websites",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#575f9a",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
+            maxBarThickness: 6
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              padding: 10,
+              color: '#b2b9bf',
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              color: '#b2b9bf',
+              padding: 20,
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+        },
+      },
+    });
+  </script>
+
+{% endblock javascripts %}

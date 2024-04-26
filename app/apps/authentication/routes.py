@@ -9,7 +9,7 @@ from datetime import datetime
 from flask_restx import Resource, Api
 
 import flask
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, flash
 from flask_login import (
     current_user,
     login_user,
@@ -46,8 +46,7 @@ def login_github():
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm(request.form)
-
-    if flask.request.method == 'POST':
+    if flask.request.method == 'POST':  
 
         # read form data
         username = request.form['username']
@@ -61,17 +60,16 @@ def login():
         # Check the password
         if user and verify_pass(password, user.password):
             login_user(user)
+            flash({'text':'123', 'location': 'index', 'user': username}, 'Timer')
             return redirect(url_for('authentication_blueprint.route_default'))
 
-        # Something (user or pass) is not ok
-        return render_template('accounts/login.html',
-                               msg='Wrong user or password',
-                               form=login_form)
+        else:
+            # Something (user or pass) is not ok
+            return render_template('accounts/login.html',
+                                msg='Wrong user or password',
+                                form=login_form)
 
-    if current_user.is_authenticated:
-        return redirect(url_for('webapp_blueprint.index'))
-    else:
-        return render_template('accounts/login.html',
+    return render_template('accounts/login.html',
                                form=login_form) 
 
 

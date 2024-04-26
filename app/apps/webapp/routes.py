@@ -24,13 +24,17 @@ def index():
 def barcode_scanning():
     return render_template('app/barcode-scanning.html', API_GENERATOR=len(API_GENERATOR))
 
-@blueprint.route('/start')
+@blueprint.route('/start', methods=["GET", "POST"])
 def start():
+    if request.method == "POST":
+        flash({'text':'123'}, 'Login')
     return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
 
-@blueprint.route('/borrow')
+@blueprint.route('/borrow', methods=["GET","POST"])
 def borrow():
-    return render_template('app/borrow.html', API_GENERATOR=len(API_GENERATOR))
+    if request.method == "POST":
+        flash({'text':'123'}, 'cancel')
+    return render_template('app/borrow.html')
 
 
 @blueprint.route('/home')
@@ -44,8 +48,6 @@ def item(id):
     response.raise_for_status()
 
     result = response.json()
-    print(result)
-
     return render_template('app/item.html', data=result)
 
 @blueprint.route('/new_item/')

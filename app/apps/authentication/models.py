@@ -21,6 +21,12 @@ class Users(db.Model, UserMixin):
     username      = db.Column(db.String(64), unique=True)
     email         = db.Column(db.String(64), unique=True)
     password      = db.Column(db.LargeBinary)
+    uid_1         = db.Column(db.String(64), nullable=True)
+    uid_2         = db.Column(db.String(64), nullable=True)
+    uid_3         = db.Column(db.String(64), nullable=True)
+    study         = db.Column(db.String(64), nullable=True)
+    faculty       = db.Column(db.String(64), nullable=True)
+    role          = db.Column(db.String(16), nullable=True)
 
     oauth_github  = db.Column(db.String(100), nullable=True)
 

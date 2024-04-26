@@ -1,0 +1,82 @@
+<!-- Begin alerts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% with messages = get_flashed_messages(with_categories=true) %}               
+{% if messages %}
+{% for category, message in messages %}
+
+    {% if category == 'cancel' %}
+        <script>
+        var swal_options = {"title": "Success!", 
+                            "text": "{{ message.text }}", 
+                            "icon": "message.category"
+                        
+                            };
+        Swal.fire({
+
+                title:swal_options.title,
+                // success , error , warning ,info
+
+                text: swal_options.text,  
+                // Custom message flashed from your flask routes
+
+                icon: swal_options.icon,
+                // success , error , warning ,info
+        });
+        </script>
+        {% endif %}
+
+        {% if category == 'Login' %}
+        <script>
+            Swal.fire({
+            title: "Scan your card",
+            text: "",
+            imageUrl: "https://static.thenounproject.com/png/74445-200.png",
+            imageWidth: 300,
+            imageHeight: 300,
+            imageAlt: "Custom image",
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: "Go back",
+            });
+        </script>
+        {% endif %}
+
+        {% if category == 'Timer' %}
+            <script>
+            let timerInterval;
+                Swal.fire({
+                title: "Welcome <b>{{message.user}}</b>",
+                html: "Succesfully logged in!",
+                timer: 200,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("c");
+                    timerInterval = setInterval(() => {
+                    timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+                }).then(function (result) {
+                if (result.dismiss === swal.DismissReason.timer) {
+                    window.location.href = "/{{message.location}}";
+                }
+                });
+            </script>
+        {% endif %}
+
+
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+ <!-- End alerts -->
+
+<script>
+if ( window.history.replaceState ) {
+    window.history.replaceState( null, null, window.location.href );
+}
+</script>
+

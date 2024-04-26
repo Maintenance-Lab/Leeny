@@ -54,8 +54,8 @@
 
                     <label>UID</label>
                     <div class="mb-3">
-                        <input class='form-control' type="text" name="uid" id="uid" placeholder="UID">
-                        <!-- {{ form.uid(placeholder="Card uid", class="form-control") }} -->
+                        <!-- <input class='form-control' type="text" name="uid" id="uid" placeholder="UID"> -->
+                        {{ form.uid(placeholder="Card UID", class="form-control", id="uid") }}
                     </div>
 
                     <div class="text-center">
@@ -114,11 +114,9 @@
     fetch('/get_uid')
       .then(response => response.json())
       .then(data => {
-        if (document.getElementById('uid').value == '') {
-          document.getElementById('uid').value = data.uid || ''; // Update text field
-        }
-  
-        if (document.getElementById('uid').value != '') {
+        document.getElementById('uid').value = data.uid
+
+        if (data.uid !== null) {
           clearInterval(interval_id); // Stop fetching
         }
       })
@@ -126,45 +124,54 @@
   }
 
 
-  // Save aKey in localStorage 
-  const asyncLocalStorage = {
-      setItem: function (key, value) {
-          return Promise.resolve().then(function () {
-              localStorage.setItem(key, value);
-          });
-      }
-  }
+
+
+// TODO: IF USED, ALSO NEEDED:
+// - FIX /login/jwt/ IN authentication/routes.py TO SUPPORT UID
+// - USE THE TOKEN TO LOG IN
+// *************************************************************
+
+// // Save aKey in localStorage 
+// const asyncLocalStorage = {
+//     setItem: function (key, value) {
+//         return Promise.resolve().then(function () {
+//             localStorage.setItem(key, value);
+//         });
+//     }
+// }
 
 // Login hook  
-document.getElementsByTagName('form')[0].onsubmit = (e) => {
+// document.getElementsByTagName('form')[0].onsubmit = (e) => {
 
-  e.preventDefault();
+//   e.preventDefault();
   
-  const formData = new FormData(e.target)
-  const username = formData.get('username');
-  const password = formData.get('password');
+//   const formData = new FormData(e.target)
+//   const username = formData.get('username');
+//   const password = formData.get('password');
+//   const uid      = formData.get('uid');
 
-  fetch('/login/jwt/',{
-      method: 'POST',
-      body: JSON.stringify({
-          username: username,
-          password: password,
-      }),
-      headers: {
-          'Content-Type': 'application/json'
-      }
-  })
-      .then((response) => response.json())
-      .then((res) => {
+//   fetch('/login/jwt/',{
+//       method: 'POST',
+//       body: JSON.stringify({
+//           username: username,
+//           password: password,
+//           uid:      uid
+//       }),
+//       headers: {
+//           'Content-Type': 'application/json'
+//       }
+//   })
+//   .then((response) => response.json())
+//       .then((res) => {
 
-        //console.log('Token: ' + res.data); 
+//         //console.log('Token: ' + res.data); 
 
-        // store token in localStorage
-        asyncLocalStorage.setItem('token',res.data).then(result => {e.target.submit()})
+//         // store token in localStorage
+//         asyncLocalStorage.setItem('token',res.data).then(result => {e.target.submit()})
 
-      })
-      .catch((err) => {console.log(err)})   
-}
+//       })
+//       .catch((err) => {console.log(err)})   
+// }
 
 </script>
 

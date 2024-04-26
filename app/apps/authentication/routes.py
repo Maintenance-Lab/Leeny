@@ -66,11 +66,6 @@ def get_uid():
     # close serial
     scanner.ser.close()
 
-    test = jsonify({'uid': uid.decode('utf-8') if uid else None})
-
-    print(test.get_json()['uid'])
-
-
     return jsonify({'uid': uid.decode('utf-8') if uid else None})
 
 @blueprint.route('/rfid_login', methods=['GET', 'POST'])
@@ -81,22 +76,27 @@ def rfid_login():
 
         # read form data
         username = request.form['username']
-        uid = request.form['uid']
+        uid = request.form['uid'] or None
         password = request.form['password']
   
         # Locate user
         if uid:
+            print('uid', uid)
             try:
                 user = Users.query.filter_by(uid_1=uid).first()
             except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
                 try:
                     user = Users.query.filter_by(uid_2=uid).first()
                 except Exception as e2:
-                    try:
-                        user = Users.query.filter_by(uid_3=uid).first()
-                    except Exception as e3:
-                        print('No user found for this card:', e1, e2, e3)
-                        user = None
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
+
         else:
             print('No card used, trying username')
             user = Users.query.filter_by(username=username).first()
@@ -105,13 +105,28 @@ def rfid_login():
         if user and password and verify_pass(password, user.password):
             login_user(user)
             return redirect(url_for('authentication_blueprint.route_default'))
+        # Check if user is found but no password is provided
         elif user and not password:
-            login_user(user)
-            return redirect(url_for('authentication_blueprint.route_default'))
+            return render_template('accounts/rfid_login.html',
+                               msg='No password provided',
+                               form=login_form)
+        # Check if uid is provided but no user is found
+        elif uid and user is None:
+            return render_template('accounts/rfid_login.html',
+                               msg='No user found for this card',
+                               form=login_form)
+        # Check if username is provided but no user is found
+        elif username and not user:
+            return render_template('accounts/rfid_login.html',
+                                 msg='No user found with this name',
+                                 form=login_form)
+        print(username, uid, password, user)
+        #     login_user(user)
+        #     return redirect(url_for('authentication_blueprint.route_default'))
 
-        # Something (user or pass) is not ok
+        # Edge cases
         return render_template('accounts/rfid_login.html',
-                               msg='Wrong user or password',
+                               msg='Wrong user or password *** edge case ***',
                                form=login_form)
 
     if current_user.is_authenticated:
@@ -128,10 +143,7 @@ def rfid_register():
 
         username = request.form['username']
         email = request.form['email']
-        # password = request.form['password']
         uid_1 = request.form['uid_1'] or None
-        # print('UID:', uid_1)
-
 
         # Check usename exists
         user = Users.query.filter_by(username=username).first()
@@ -151,18 +163,22 @@ def rfid_register():
 
         # Check uid exists
         if uid_1:
+            print('uid', uid_1)
             try:
                 user = Users.query.filter_by(uid_1=uid_1).first()
             except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
                 try:
                     user = Users.query.filter_by(uid_2=uid_1).first()
                 except Exception as e2:
-                    try:
-                        user = Users.query.filter_by(uid_3=uid_1).first()
-                    except Exception as e3:
-                        print('Already user found for this card:', e1, e2, e3)
-
-        if user and uid_1:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid_1).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
+        if user is None and uid_1:
             return render_template('accounts/rfid_register.html',
                                    msg='Card already registered',
                                    success=False,
@@ -309,7 +325,58 @@ class JWTLogin(Resource):
 
 @blueprint.route('/card_reader')
 def card_reader():
-    return render_template('app/card-reader.html')
+    login_form = RfidLoginForm(request.form)
+
+    if request.method == 'POST':
+
+        # read form data
+        # username = request.form['username'] or None
+        uid = request.form['uid'] or None
+        # password = request.form['password'] or None
+
+        # Locate user
+        if uid:
+            print('uid', uid)
+            try:
+                user = Users.query.filter_by(uid_1=uid).first()
+                print('user1', user)
+            except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_2=uid).first()
+                    print('user2', user)
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                    print('user23', user)
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+
+        else:
+            print('No card in form')
+
+        # Check if uid is provided but no user is found
+        if uid and user is None:
+            return redirect(url_for('authentication_blueprint.rfid_register'), 
+                            msg='No user found for this card, use formal login', form=login_form)
+            # return render_template('accounts/rfid_login.html',
+            #                    msg='No user found for this card',
+            #                    form=login_form)
+
+        # Edge cases
+        return render_template('accounts/rfid_login.html',
+                               msg='Wrong user or password *** edge case ***',
+                               form=login_form)
+
+    if current_user.is_authenticated:
+        return redirect(url_for('webapp_blueprint.index'))
+    else:
+        return render_template('app/card-reader.html',
+                               form=login_form)
+
 
 @blueprint.route('/logout')
 def logout():

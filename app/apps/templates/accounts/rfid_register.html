@@ -83,8 +83,8 @@
                       </div>
                       <label>Optional: scan your card</label>
                       <div class="mb-3">
-                        <input class='form-control' type="text" name="uid_1" id="uid_1" placeholder="UID">
-                        <!-- {{ form.uid_1(placeholder="Card uid", class="form-control") }} -->
+                        <!-- <input class='form-control' type="text" name="uid_1" id="uid_1" placeholder="Card UID"> -->
+                        {{ form.uid_1(placeholder="Card UID", class="form-control", id="uid_1") }}
                       </div>
 
                       <div class="text-center">
@@ -122,11 +122,9 @@
       fetch('/get_uid')
         .then(response => response.json())
         .then(data => {
-          if (document.getElementById('uid_1').value == '') {
-            document.getElementById('uid_1').value = data.uid || ''; // Update text field
-          }
+          document.getElementById('uid_1').value = data.uid
 
-          if (document.getElementById('uid_1').value != '') {
+          if (data.uid !== null) {
             clearInterval(interval_id); // Stop fetching
           }
         })

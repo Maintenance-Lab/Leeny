@@ -75,32 +75,86 @@
     const tableBody = document.querySelector('tbody');
     var addedBarcodes = {};
 
-    // Function to add a new table row for an item
-    function addTableRow(barcode) {
-        var quantity = addedBarcodes[barcode] || 1;
-        tableBody.innerHTML += `
-            <tr>
-                <td class="col-7">
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm text-wrap item-name">${item_name}</h6>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="col-3 input-group">
-                        <input type="number" class="form-control p-1" min="1" data-barcode="${barcode}" id="${barcode}" value="${quantity}" onfocus="focused(this)" onfocusout="defocused(this)">
-                    </div>
-                </td>
-                <td class="align-middle col-2">
-                    <a href="javascript:;" class="text-secondary font-weight-bold text-xs" onclick="deleteRow(this)" data-toggle="tooltip" data-original-title="Delete item">
-                        Delete
-                    </a>
-                </td>
-            </tr>`;
+    function createElement(tag, classes = [], attributes = {}, content = '') {
+        const element = document.createElement(tag);
+        if (classes.length) element.classList.add(...classes);
+        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+        if (content) element.textContent = content;
+        return element;
     }
 
+    function addTableRow(barcode) {
+        var quantity = addedBarcodes[barcode] || 1; // Get the current quantity or default to 1
+
+        const row = createElement('tr');
+        const nameCell = createElement('td', ['col-7']);
+        const nameDiv = createElement('div', ['d-flex', 'px-2', 'py-1']);
+        const nameColumn = createElement('div', ['d-flex', 'flex-column', 'justify-content-center']);
+        const itemName = createElement('h6', ['mb-0', 'text-sm', 'text-wrap', 'item-name'], {}, item_name);
+
+        nameColumn.appendChild(itemName);
+        nameDiv.appendChild(nameColumn);
+        nameCell.appendChild(nameDiv);
+        row.appendChild(nameCell);
+
+        const quantityCell = createElement('td');
+        const quantityDiv = createElement('div', ['col-3', 'input-group']);
+        const quantityInput = createElement('input', ['form-control', 'p-1'], {
+            type: 'number',
+            min: '1',
+            'data-barcode': barcode,
+            id: barcode,
+            value: quantity
+        });
+        quantityInput.addEventListener('focus', focused);
+        quantityInput.addEventListener('focusout', defocused);
+        quantityDiv.appendChild(quantityInput);
+        quantityCell.appendChild(quantityDiv);
+        row.appendChild(quantityCell);
+
+        const deleteCell = createElement('td', ['align-middle', 'col-2']);
+        const deleteLink = createElement('a', ['text-secondary', 'font-weight-bold', 'text-xs'], {
+            href: 'javascript:;',
+            'data-toggle': 'tooltip',
+            'data-original-title': 'Delete item'
+        }, 'Delete');
+        deleteLink.addEventListener('click', () => deleteRow(deleteLink));
+        deleteCell.appendChild(deleteLink);
+        row.appendChild(deleteCell);
+
+        tableBody.appendChild(row);
+
+        addedBarcodes[barcode] = quantity;
+    }
+
+
+
+    // function addTableRow(barcode) {
+    //     tableBody.innerHTML += `
+    //         <tr>
+    //             <td class="col-7">
+    //                 <div class="d-flex px-2 py-1">
+    //                     <div class="d-flex flex-column justify-content-center">
+    //                         <h6 class="mb-0 text-sm text-wrap item-name">${item_name}</h6>
+    //                     </div>
+    //                 </div>
+    //             </td>
+    //             <td>
+    //                 <div class="col-3 input-group">
+    //                     <input type="number" class="form-control p-1" min="1" data-barcode="${barcode}" id="${barcode}" value="1" onfocus="focused(this)" onfocusout="defocused(this)">
+    //                 </div>
+    //             </td>
+    //             <td class="align-middle col-2">
+    //                 <a href="javascript:;" class="text-secondary font-weight-bold text-xs" onclick="deleteRow(this)" data-toggle="tooltip" data-original-title="Delete item">
+    //                     Delete
+    //                 </a>
+    //             </td>
+    //         </tr>`;
+    // }
+
+
     var barcode = '';
+    var all_products = {};
     var item_name = '';
     var typingTimer;
     var doneTypingInterval = 50;
@@ -115,9 +169,10 @@
 
     // change value in dict if quantity is manually changed
     document.addEventListener('input', function(event) {
+        // only if quantity of product is not higher than max quantity
         if (event.target.tagName === 'INPUT') {
             var barcode = event.target.getAttribute('data-barcode');
-            addedBarcodes[barcode] = parseInt(event.target.value);
+                addedBarcodes[barcode] = parseInt(event.target.value);
         }
     });
 
@@ -151,26 +206,39 @@
             })
             .then(data => {
                 console.log('Response from server:', data);
-                item_name = data.data;
 
-                // Check if barcode already exists on the screen
-                if (barcode in addedBarcodes) {
-                    // Increment quantity for existing barcode
-                    incrementQuantity(barcode);
-                    console.log("alleen incrementen")
-                } else {
-                    // Add the new barcode to the array and create a new table row
-                    console.log("nieuwe barcode toevoegen: ", barcode)
-                    addedBarcodes[barcode] = 1;
-                    addTableRow(barcode);
-                    document.getElementById(`${barcode}`).value = 1;
+                message = data.message;
+                if (message == "Product found") {
+                    // when barcode found
+                    item_name = data.name;
+                    item_quantity = data.quantity;
+
+
+
+                    // Check if barcode already exists on the screen
+                    if (barcode in addedBarcodes) {
+                        // Increment quantity for existing barcode
+                        incrementQuantity(barcode);
+                        console.log("alleen incrementen")
+                    } else {
+                        // Add the new barcode to the array and create a new table row
+                        console.log("nieuwe barcode toevoegen: ", barcode)
+                        addedBarcodes[barcode] = 1;
+                        addTableRow(barcode);
+                    }
+
+                    console.log("added barcodes 2: ", addedBarcodes);
+
+                    // Clear the input field after processing
+                    document.getElementById("barcodeInputField").value = "";
+                }
+                else {
+                    // when barcode not found
+                    console.log("Barcode not found");
                 }
 
-                // var item_name = data.data;
-                console.log("added barcodes 2: ", addedBarcodes);
 
-                // Clear the input field after processing
-                document.getElementById("barcodeInputField").value = "";
+
             })
             .catch(error => console.error('Error:', error));
         }, doneTypingInterval);

@@ -46,11 +46,29 @@ class Borrow(Resource):
         data = request.get_json()
         barcode = data['barcode']
 
-        # Process the barcode data to generate different data
-        updated_string = f"Barcode: {barcode}"
+        # # Query the database for the product based on barcode
+        # product = Product.query.filter_by(barcode=barcode).first()
+
+        # if product is not None:
+        #     # Product found
+        #     output = {
+        #         'item_name': product.name,
+        #         'item_quantity': product.quantity,
+        #         'message': f'Product with barcode {barcode} recognized',
+        #         'success': True
+        #     }
+        # else:
+        #     # Product not found
+        #     output = {
+        #         'message': f'Product with barcode {barcode} not found',
+        #         'success': False
+        #     }
 
         return {
-            'data': updated_string,
+            'message': 'Product found',
+            'barcode': barcode,
+            'quantity': 3,
+            'name': 'Product Name',
             'success': True
         }, 200
 
@@ -104,8 +122,8 @@ class VendorRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-    
-@api.route('/item/<int:id>', methods=['GET']) 
+
+@api.route('/item/<int:id>', methods=['GET'])
 class ItemRoute(Resource):
     def get(self, id):
         all_objects = Product.query.filter(Product.id == id)

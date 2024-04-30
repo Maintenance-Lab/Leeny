@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
-from flask import current_app, flash, render_template, request
+from flask import current_app, flash, render_template, request, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 import http
@@ -26,9 +26,12 @@ def barcode_scanning():
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
     if request.method == "POST":
         flash({'text':'123'}, 'Login')
+        # Login scanner activeren
     return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
+
 
 @blueprint.route('/borrow', methods=["GET","POST"])
 def borrow():

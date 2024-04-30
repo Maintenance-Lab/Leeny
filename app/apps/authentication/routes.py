@@ -9,7 +9,7 @@ from datetime import datetime
 from flask_restx import Resource, Api
 
 import flask
-from flask import render_template, redirect, request, url_for, flash
+from flask import render_template, redirect, request, url_for, flash, session
 from flask_login import (
     current_user,
     login_user,
@@ -30,7 +30,7 @@ api = Api(blueprint)
 
 @blueprint.route('/')
 def route_default():
-    return redirect(url_for('authentication_blueprint.login'))
+    return redirect(url_for('webapp_blueprint.start'))
 
 # Login & Registration
 
@@ -49,24 +49,24 @@ def login():
     if flask.request.method == 'POST':  
 
         # read form data
-        username = request.form['username']
-        password = request.form['password']
+        uid_1 = request.form['uid_1']
 
-        #return 'Login: ' + username + ' / ' + password
+        #return 'Login: ' + fullname + ' / ' + password
 
         # Locate user
-        user = Users.query.filter_by(username=username).first()
+        user = Users.query.filter_by(uid_1=uid_1).first()
 
         # Check the password
-        if user and verify_pass(password, user.password):
+        # if user and verify_pass(password, user.password):
+        if user:
             login_user(user)
-            flash({'text':'123', 'location': 'index', 'user': username}, 'Timer')
+            flash({'text':'123', 'location': 'index', 'user': uid_1}, 'Timer')
             return redirect(url_for('authentication_blueprint.route_default'))
 
         else:
             # Something (user or pass) is not ok
             return render_template('accounts/login.html',
-                                msg='Wrong user or password',
+                                msg='User not registered',
                                 form=login_form)
 
     return render_template('accounts/login.html',
@@ -76,16 +76,18 @@ def login():
 @blueprint.route('/register', methods=['GET', 'POST'])
 def register():
     create_account_form = CreateAccountForm(request.form)
-    if 'register' in request.form:
 
-        username = request.form['username']
+    if 'step2' in request.form:
+
+        fullname = request.form['fullname']
         email = request.form['email']
 
+
         # Check usename exists
-        user = Users.query.filter_by(username=username).first()
+        user = Users.query.filter_by(fullname=fullname).first()
         if user:
             return render_template('accounts/register.html',
-                                   msg='Username already registered',
+                                   msg='Your account is already registered',
                                    success=False,
                                    form=create_account_form)
 
@@ -93,25 +95,51 @@ def register():
         user = Users.query.filter_by(email=email).first()
         if user:
             return render_template('accounts/register.html',
-                                   msg='Email already registered',
+                                   msg='This email is already registered',
                                    success=False,
                                    form=create_account_form)
 
-        # else we can create the user
-        user = Users(**request.form)
+        session['fullname'] = fullname
+        session['email'] = email
+
+        return render_template('accounts/register.html',
+                               form=create_account_form,
+                               step=2)
+
+    if 'step3' in request.form:
+        study = request.form['study']
+        faculty = request.form['faculty']
+
+        session['study'] = study
+        session['faculty'] = faculty
+        flash({'text':'123'}, 'Login')
+        # Register card scanner activeren
+
+        return render_template('accounts/register.html',
+                               form=create_account_form,
+                               step=3)
+    if 'finalize' in request.form:
+        uid_1 = request.form['uid_1']
+
+        user = Users(
+            fullname =session['fullname'],
+            email = session['email'],
+            study = session['study'],
+            faculty = session['faculty'],
+            uid_1 = uid_1)
+
         db.session.add(user)
         db.session.commit()
 
-        # Delete user from session
         logout_user()
+        [session.pop(key) for key in list(session.keys()) if key != '_flashes']
 
-        return render_template('accounts/register.html',
-                               msg='User created successfully.',
-                               success=True,
-                               form=create_account_form)
+        flash({'category':'success', 'title': 'Account registered!', 'text': 'You can now log in using your card.'}, 'General')
+        return redirect('/start')
+
 
     else:
-        return render_template('accounts/register.html', form=create_account_form)
+        return render_template('accounts/register.html', form=create_account_form, step=1, session=session)
 
 @api.route('/login/jwt/', methods=['POST'])
 class JWTLogin(Resource):
@@ -124,13 +152,14 @@ class JWTLogin(Resource):
 
             if not data:
                 return {
-                           'message': 'username or password is missing',
+                           'message': 'fullname or password is missing',
                            "data": None,
                            'success': False
                        }, 400
             # validate input
-            user = Users.query.filter_by(username=data.get('username')).first()
-            if user and verify_pass(data.get('password'), user.password):
+            user = Users.query.filter_by(fullname=data.get('fullname')).first()
+            # if user and verify_pass(data.get('password'), user.password):
+            if user:
                 try:
 
                     # Empty or null Token
@@ -152,7 +181,7 @@ class JWTLogin(Resource):
                                "message": str(e)
                            }, 500
             return {
-                       'message': 'username or password is wrong',
+                       'message': 'fullname or password is wrong',
                        'success': False
                    }, 403
         except Exception as e:

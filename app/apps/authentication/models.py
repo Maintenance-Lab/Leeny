@@ -18,15 +18,14 @@ class Users(db.Model, UserMixin):
     __tablename__ = 'Users'
 
     id            = db.Column(db.Integer, primary_key=True)
-    username      = db.Column(db.String(64), unique=True)
+    fullname      = db.Column(db.String(64), unique=True)
     email         = db.Column(db.String(64), unique=True)
-    password      = db.Column(db.LargeBinary)
     uid_1         = db.Column(db.String(64), nullable=True)
     uid_2         = db.Column(db.String(64), nullable=True)
     uid_3         = db.Column(db.String(64), nullable=True)
     study         = db.Column(db.String(64), nullable=True)
     faculty       = db.Column(db.String(64), nullable=True)
-    role          = db.Column(db.String(16), nullable=True)
+    role          = db.Column(db.String(16), nullable=True, default='student')
 
     oauth_github  = db.Column(db.String(100), nullable=True)
 
@@ -50,7 +49,7 @@ class Users(db.Model, UserMixin):
             setattr(self, property, value)
 
     def __repr__(self):
-        return str(self.username)
+        return str(self.fullname)
 
 
 @login_manager.user_loader
@@ -60,8 +59,8 @@ def user_loader(id):
 
 @login_manager.request_loader
 def request_loader(request):
-    username = request.form.get('username')
-    user = Users.query.filter_by(username=username).first()
+    fullname = request.form.get('fullname')
+    user = Users.query.filter_by(fullname=fullname).first()
     return user if user else None
 
 class OAuth(OAuthConsumerMixin, db.Model):

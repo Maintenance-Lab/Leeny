@@ -8,7 +8,7 @@
         <script>
         var swal_options = {"title": "Success!", 
                             "text": "{{ message.text }}", 
-                            "icon": "message.category"
+                            "icon": "{{message.category}}"
                         
                             };
         Swal.fire({
@@ -66,8 +66,25 @@
                 });
             </script>
         {% endif %}
-
-
+        {% if category == 'General' %}
+        <script>
+            var swal_options = {"title": "{{ message.title }}", 
+                                "text": "{{ message.text }}", 
+                                "icon": "{{message.category}}"
+                                };
+            Swal.fire({
+    
+                    title:swal_options.title,
+                    // success , error , warning ,info
+    
+                    text: swal_options.text,  
+                    // Custom message flashed from your flask routes
+    
+                    icon: swal_options.icon,
+                    // success , error , warning ,info
+            });
+            </script>
+        {% endif %}
 {% endfor %}
 {% endif %}
 {% endwith %}

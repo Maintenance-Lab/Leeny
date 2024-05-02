@@ -6,7 +6,7 @@ from apps.authentication.decorators import token_required
 from apps.authentication.models import Users
 from apps.webapp.models import *
 from apps.webapp.forms import *
-from flask import request, jsonify, Response
+from flask import request, jsonify, Response, session
 from flask_restx import Api, Resource
 from werkzeug.datastructures import MultiDict
 
@@ -49,11 +49,24 @@ class ProductRoute(Resource):
                 'success': True
             }, 200
 
-@api.route('/borrowing/', methods=['GET'])
+@api.route('/inventory/', methods=['GET'])
 class BorrowRoute(Resource):
     def get(self):
         all_objects = Product.query.all()
         output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
+        print(output)
+        return {
+                'data': output,
+                'success': True
+            }, 200
+    
+@api.route('/return/', methods=['GET'])
+class ReturnRoute(Resource):    
+    def get(self):
+        user_id = request.args.get('user_id')
+        all_objects = Borrowed.query.filter_by(user_id=user_id)
+        output = [{**BorrowForm(obj=obj).data} for obj in all_objects]
+        print(output)
         return {
                 'data': output,
                 'success': True

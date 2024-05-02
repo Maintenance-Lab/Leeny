@@ -59,8 +59,8 @@ def user_loader(id):
 
 @login_manager.request_loader
 def request_loader(request):
-    fullname = request.form.get('fullname')
-    user = Users.query.filter_by(fullname=fullname).first()
+    uid_1 = request.form.get('uid_1')
+    user = Users.query.filter_by(uid_1=uid_1).first()
     return user if user else None
 
 class OAuth(OAuthConsumerMixin, db.Model):

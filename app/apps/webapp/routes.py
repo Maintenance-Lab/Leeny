@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 @blueprint.route('/index')
-@login_required
+# @login_required
 def index():
     return render_template('app/index.html', segment='index', API_GENERATOR=len(API_GENERATOR))
 
@@ -34,6 +34,7 @@ def start():
 
 
 @blueprint.route('/borrow', methods=["GET","POST"])
+# @login_required
 def borrow():
     if request.method == "POST":
         flash({'text':'123'}, 'cancel')
@@ -41,8 +42,34 @@ def borrow():
 
 
 @blueprint.route('/home')
+# @login_required
 def home():
-    return render_template('app/home.html')
+    return render_template('app/home.html', segment='home')
+
+@blueprint.route('/inventory')
+# @login_required
+def inventory():
+    api_url = urljoin(current_app.config["API_ENDPOINT"], f"inventory")
+    response = requests.get(url=api_url)
+    response.raise_for_status()
+
+    result = response.json()
+
+    # Add pagination
+    return render_template('app/inventory.html', data=result, segment='inventory')
+
+@blueprint.route('/return')
+# @login_required
+def returns():
+    api_url = urljoin(current_app.config["API_ENDPOINT"], f"return")
+    response = requests.get(url=api_url, params={'user_id': session['_user_id']})
+    response.raise_for_status()
+
+    result = response.json()
+
+    # Add pagination
+    return render_template('app/return.html', data=result, segment='return')
+
 
 @blueprint.route('/item/<int:id>')
 def item(id):
@@ -51,10 +78,11 @@ def item(id):
     response.raise_for_status()
 
     result = response.json()
-    return render_template('app/item.html', data=result)
+    return render_template('app/item.html', data=result, segment='inventory')
 
 @blueprint.route('/new_item/')
 @blueprint.route('/item/<int:id>/edit')
+# @login_required
 def new_item(id = None):
     result = None
     try:
@@ -67,7 +95,7 @@ def new_item(id = None):
     except:
         pass
 
-    return render_template('app/new-item.html', data=result)
+    return render_template('app/new-item.html', data=result, segment='inventory')
 
 
 @blueprint.route('/<template>')

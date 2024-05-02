@@ -60,8 +60,9 @@ def login():
         # if user and verify_pass(password, user.password):
         if user:
             login_user(user)
-            flash({'text':'123', 'location': 'index', 'user': uid_1}, 'Timer')
-            return redirect(url_for('authentication_blueprint.route_default'))
+            flash({'text':'123', 'location': 'index', 'user': user.fullname}, 'Timer')
+            return render_template('accounts/login.html',
+                               form=login_form) 
 
         else:
             # Something (user or pass) is not ok
@@ -157,7 +158,8 @@ class JWTLogin(Resource):
                            'success': False
                        }, 400
             # validate input
-            user = Users.query.filter_by(fullname=data.get('fullname')).first()
+            
+            user = Users.query.filter_by(uid_1=data.get('uid_1')).first()
             # if user and verify_pass(data.get('password'), user.password):
             if user:
                 try:
@@ -195,6 +197,7 @@ class JWTLogin(Resource):
 @blueprint.route('/logout')
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for('authentication_blueprint.login')) 
 
 @blueprint.route('/card_reader/')

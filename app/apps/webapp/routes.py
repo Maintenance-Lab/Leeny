@@ -14,6 +14,8 @@ from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
 
+from apps.webapp.models import *
+from apps.webapp.forms import *
 
 @blueprint.route('/index')
 # @login_required
@@ -49,26 +51,14 @@ def home():
 @blueprint.route('/inventory')
 # @login_required
 def inventory():
-    api_url = urljoin(current_app.config["API_ENDPOINT"], f"inventory")
-    response = requests.get(url=api_url)
-    response.raise_for_status()
-
-    result = response.json()
-
     # Add pagination
-    return render_template('app/inventory.html', data=result, segment='inventory')
+    return render_template('app/inventory.html', segment='inventory')
 
 @blueprint.route('/return')
 # @login_required
 def returns():
-    api_url = urljoin(current_app.config["API_ENDPOINT"], f"return")
-    response = requests.get(url=api_url, params={'user_id': session['_user_id']})
-    response.raise_for_status()
-
-    result = response.json()
-
     # Add pagination
-    return render_template('app/return.html', data=result, segment='return')
+    return render_template('app/return.html', segment='return')
 
 
 @blueprint.route('/item/<int:id>')
@@ -151,3 +141,38 @@ def get_segment(request):
 
     except:
         return None
+    
+### HTMX Routes
+
+@blueprint.route('/inventory/search')
+def inventory_search():
+    q = request.args.get("q")
+    
+    all_objects = Product.query \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
+    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
+
+    # Legacy code; moet nog vervangen worden met voorbeeld zoals in /inventory/borrowed
+    data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \
+                       'name': obj.manufacturer.name if obj.manufacturer else None} \
+                        for obj in all_objects]}
+
+    return render_template('app/inventory-results.html', data=data)
+
+@blueprint.route('/inventory/borrowed')
+def inventory_borrowed():
+    user_id = request.args.get('user_id')
+
+    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
+    
+    all_objects = Borrowed.query \
+    .filter(Borrowed.user_id == 1) \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .join(Manufacturer, Product.id == Manufacturer.id) \
+    .with_entities(*select_columns)
+
+    
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+    print(data)
+
+    return render_template('app/inventory-results.html', data=data)

@@ -24,30 +24,9 @@
                     <th class="text-secondary opacity-7"></th>
                   </tr>
                 </thead>
-                <tbody>
-                  {% for item in data['data'] %}
-                  <tr>
-                    <td style="padding-left: 24px;">
-                      <h6 class="mb-0 text-sm">{{item.title}}</h6>
-                    </td>
-                    <td>
-                      <p class="text-xs font-weight-bold mb-0">{{item.manufacturer_id}}</p>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                      {% if item.quantity > 0 %}
-                      <span class="badge badge-sm bg-gradient-success">{{item.quantity}}</span>
-                      {% else %}
-                      <span class="badge badge-sm bg-gradient-danger">{{item.quantity}}</span>
-                      {% endif %}
-                    </td>
-
-                    <td class="align-middle">
-                      <a href="/item/{{item.id}}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                        View
-                      </a>
-                    </td>
-                  </tr>
-                  {% endfor %}
+                <span hx-get="/inventory/borrowed" hx-trigger="load" hx-target="#results">
+                <tbody id="results">
+                  
                 </tbody>
               </table>
             </div>

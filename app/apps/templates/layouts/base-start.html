@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" href="{{ config.ASSETS_ROOT }}/img/favicon.png">
 
   <title>
-    Leeny - {% block title %}{% endblock %} | AppSeed
+    Leeny - {% block title %}{% endblock %}
   </title>
 
   <!--     Fonts and icons     -->
@@ -41,6 +41,7 @@
   <!-- Specific CSS goes HERE -->
   {% block stylesheets %}{% endblock stylesheets %}  
 
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 <body class="g-sidenav-show  bg-gray-100">
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
@@ -54,7 +55,7 @@
   {% include "includes/sweetalerts.html" %}
 
   <!-- Specific JS goes HERE --> 
-  {% block javascripts %}{% endblock javascripts %}  
+  {% block javascripts %}{% endblock javascripts %} 
 
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>  

@@ -35,9 +35,9 @@ def github_logged_in(blueprint, token):
     if info.ok:
 
         account_info = info.json()
-        username     = account_info["login"]
+        fullname     = account_info["login"]
 
-        query = Users.query.filter_by(oauth_github=username)
+        query = Users.query.filter_by(oauth_github=fullname)
         try:
 
             user = query.one()
@@ -47,8 +47,8 @@ def github_logged_in(blueprint, token):
 
             # Save to db
             user              = Users()
-            user.username     = '(gh)' + username
-            user.oauth_github = username
+            user.fullname     = '(gh)' + fullname
+            user.oauth_github = fullname
 
             # Save current user
             db.session.add(user)

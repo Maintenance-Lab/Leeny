@@ -8,15 +8,17 @@ from urllib.parse import urljoin
 import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
-from flask import current_app, flash, render_template, request
+from flask import current_app, flash, render_template, request, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
 
+from apps.webapp.models import *
+from apps.webapp.forms import *
 
 @blueprint.route('/index')
-@login_required
+# @login_required
 def index():
     return render_template('app/index.html', segment='index', API_GENERATOR=len(API_GENERATOR))
 
@@ -24,17 +26,67 @@ def index():
 def barcode_scanning():
     return render_template('app/barcode-scanning.html', API_GENERATOR=len(API_GENERATOR))
 
-@blueprint.route('/start')
+@blueprint.route('/start', methods=["GET", "POST"])
 def start():
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+    if request.method == "POST":
+        flash({'text':'123'}, 'Login')
+        # Login scanner activeren
     return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
 
-@blueprint.route('/borrow')
+
+@blueprint.route('/borrow', methods=["GET","POST"])
+# @login_required
 def borrow():
-    return render_template('app/borrow.html', API_GENERATOR=len(API_GENERATOR))
+    if request.method == "POST":
+        flash({'text':'123'}, 'cancel')
+    return render_template('app/borrow.html')
+
+
+@blueprint.route('/home')
+# @login_required
+def home():
+    return render_template('app/home.html', segment='home')
+
+@blueprint.route('/inventory')
+# @login_required
+def inventory():
+    # Add pagination
+    return render_template('app/inventory.html', segment='inventory')
+
+@blueprint.route('/return')
+# @login_required
+def returns():
+    # Add pagination
+    return render_template('app/return.html', segment='return')
+
 
 @blueprint.route('/item/<int:id>')
 def item(id):
-    return render_template('app/item.html', API_GENERATOR=len(API_GENERATOR))
+    api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
+    response = requests.get(url=api_url, timeout=1)
+    response.raise_for_status()
+
+    result = response.json()
+    return render_template('app/item.html', data=result, segment='inventory')
+
+@blueprint.route('/new_item/')
+@blueprint.route('/item/<int:id>/edit')
+# @login_required
+def new_item(id = None):
+    result = None
+    try:
+        api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
+        response = requests.get(url=api_url, timeout=1)
+        response.raise_for_status()
+
+        result = response.json()
+        
+    except:
+        pass
+
+    return render_template('app/new-item.html', data=result, segment='inventory')
+
 
 @blueprint.route('/<template>')
 # @login_required
@@ -89,3 +141,38 @@ def get_segment(request):
 
     except:
         return None
+    
+### HTMX Routes
+
+@blueprint.route('/inventory/search')
+def inventory_search():
+    q = request.args.get("q")
+    
+    all_objects = Product.query \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
+    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
+
+    # Legacy code; moet nog vervangen worden met voorbeeld zoals in /inventory/borrowed
+    data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \
+                       'name': obj.manufacturer.name if obj.manufacturer else None} \
+                        for obj in all_objects]}
+
+    return render_template('app/inventory-results.html', data=data)
+
+@blueprint.route('/inventory/borrowed')
+def inventory_borrowed():
+    user_id = request.args.get('user_id')
+
+    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
+    
+    all_objects = Borrowed.query \
+    .filter(Borrowed.user_id == 1) \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .join(Manufacturer, Product.id == Manufacturer.id) \
+    .with_entities(*select_columns)
+
+    
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+    print(data)
+
+    return render_template('app/inventory-results.html', data=data)

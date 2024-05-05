@@ -22,7 +22,7 @@
   <link rel="icon" type="image/png" href="{{ config.ASSETS_ROOT }}/img/favicon.png">
 
   <title>
-    Soft UI Dashboard - {% block title %}{% endblock %} | AppSeed
+    Leeny - {% block title %}{% endblock %}
   </title>
 
   <!--     Fonts and icons     -->
@@ -41,10 +41,12 @@
   <!-- Specific CSS goes HERE -->
   {% block stylesheets %}{% endblock stylesheets %}  
 
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 <body class="g-sidenav-show  bg-gray-100">
   
   {% include "includes/sidebar.html" %} 
+  {% include "includes/sweetalerts.html" %}
 
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
 
@@ -53,9 +55,6 @@
     {% block content %}{% endblock content %}
 
   </main>
-
-  <!-- APP Configurator -->
-  {% include "includes/fixed-plugin.html" %} 
 
   <!-- Core JS Files -->
   {% include "includes/scripts.html" %}

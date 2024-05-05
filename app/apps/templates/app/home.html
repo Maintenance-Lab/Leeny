@@ -1,0 +1,64 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+  Home
+{% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid py-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-4">
+          <div class="card-header pb-0">
+            <h4>Products</h4>
+          </div>
+
+          <div class="card-body px-0 pt-0 pb-2">
+            <div class="table-responsive p-0">
+              <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
+                <div class="dataTable-container">
+                  <table class="table table-flush dataTable-table" id="products-list">
+                    <thead class="thead-light">
+                      <tr>
+                        <th data-sortable="" style="width: 12.4605%;">
+                          <a href="#" class="dataTable-sorter">Article number</a>
+                        </th>
+                        <th data-sortable="" style="width: 32.0683%;">
+                          <a href="#" class="dataTable-sorter">Product</a>
+                        </th>
+                        <th data-sortable="" style="width: 9.61417%;">
+                          <a href="#" class="dataTable-sorter">Quantity</a>
+                        </th>
+                        <th data-sortable="" style="width: 14.4213%;">
+                          <a href="#" class="dataTable-sorter">Status</a>
+                        </th>
+                        <th style="width: 12.5237%;">
+                          <a href="#" class="dataTable-sorter">EAN</a>
+                        </th>
+                        <th class="d-none d-xxl-table-cell" style="width: 10.2467%;">
+                          <a href="#" class="dataTable-sorter">Description</a>
+                        </th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include 'includes/footer.html' %}
+  </div>
+{% endblock %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+{% endblock %}

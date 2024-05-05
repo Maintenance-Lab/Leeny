@@ -6,7 +6,7 @@ from apps.authentication.decorators import token_required
 from apps.authentication.models import Users
 from apps.webapp.models import *
 from apps.webapp.forms import *
-from flask import request, jsonify, Response
+from flask import request, jsonify, Response, session
 from flask_restx import Api, Resource
 from werkzeug.datastructures import MultiDict
 
@@ -65,11 +65,24 @@ class ProductRoute(Resource):
                 'success': True
             }, 200
 
-@api.route('/borrowing/', methods=['GET'])
+@api.route('/inventory/', methods=['GET'])
 class BorrowRoute(Resource):
     def get(self):
         all_objects = Product.query.all()
         output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
+        print(output)
+        return {
+                'data': output,
+                'success': True
+            }, 200
+    
+@api.route('/return/', methods=['GET'])
+class ReturnRoute(Resource):    
+    def get(self):
+        user_id = request.args.get('user_id')
+        all_objects = Borrowed.query.filter_by(user_id=user_id)
+        output = [{**BorrowForm(obj=obj).data} for obj in all_objects]
+        print(output)
         return {
                 'data': output,
                 'success': True
@@ -100,6 +113,27 @@ class VendorRoute(Resource):
     def get(self):
         all_objects = Vendor.query.all()
         output = [{'id': obj.id, **VendorForm(obj=obj).data} for obj in all_objects]
+        return {
+                'data': output,
+                'success': True
+            }, 200
+    
+@api.route('/item/<int:id>', methods=['GET']) 
+class ItemRoute(Resource):
+    def get(self, id):
+        all_objects = Product.query.filter(Product.id == id)
+        output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
+        return {
+                'data': output,
+                'success': True
+            }, 200
+    
+    
+@api.route('/home/', methods=['GET'])
+class ProductRoute(Resource):
+    def get(self):
+        all_objects = Product.query.all()
+        output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
         return {
                 'data': output,
                 'success': True

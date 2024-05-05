@@ -57,32 +57,59 @@
   }
 
     const tableBody = document.querySelector('tbody');
+    var addedBarcodes = {};
 
-    // adds new tablerow
-    function addTableRow() {
-      tableBody.innerHTML += `
-        <tr>
-
-          <td class="col-7">
-              <div class="d-flex px-2 py-1">
-              <div class="d-flex flex-column justify-content-center">
-
-                  <h6 class="mb-0 text-sm text-wrap item-name"></h6>
-
-              </div>
-              </div>
-          </td>
-
-          <td class="align-middle col-2">
-              <a href="javascript:;" class="text-secondary font-weight-bold text-xs" onclick="deleteRow(this)" data-toggle="tooltip" data-original-title="Delete item">
-              Delete
-              </a>
-          </td>
-
-        </tr> `
+    function createElement(tag, classes = [], attributes = {}, content = '') {
+        const element = document.createElement(tag);
+        if (classes.length) element.classList.add(...classes);
+        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+        if (content) element.textContent = content;
+        return element;
     }
 
-    console.log("HELLO");
+    function addTableRow(barcode) {
+        var quantity = addedBarcodes[barcode] || 1; // Get the current quantity or default to 1
+
+        const row = createElement('tr');
+        const nameCell = createElement('td', ['col-7']);
+        const nameDiv = createElement('div', ['d-flex', 'px-2', 'py-1']);
+        const nameColumn = createElement('div', ['d-flex', 'flex-column', 'justify-content-center']);
+        const itemName = createElement('h6', ['mb-0', 'text-sm', 'text-wrap', 'item-name'], {}, item_name);
+
+        nameColumn.appendChild(itemName);
+        nameDiv.appendChild(nameColumn);
+        nameCell.appendChild(nameDiv);
+        row.appendChild(nameCell);
+
+        const quantityCell = createElement('td');
+        const quantityDiv = createElement('div', ['col-3', 'input-group']);
+        const quantityInput = createElement('input', ['form-control', 'p-1'], {
+            type: 'number',
+            min: '1',
+            'data-barcode': barcode,
+            id: barcode,
+            value: quantity
+        });
+        quantityInput.addEventListener('focus', focused);
+        quantityInput.addEventListener('focusout', defocused);
+        quantityDiv.appendChild(quantityInput);
+        quantityCell.appendChild(quantityDiv);
+        row.appendChild(quantityCell);
+
+        const deleteCell = createElement('td', ['align-middle', 'col-2']);
+        const deleteLink = createElement('a', ['text-secondary', 'font-weight-bold', 'text-xs'], {
+            href: 'javascript:;',
+            'data-toggle': 'tooltip',
+            'data-original-title': 'Delete item'
+        }, 'Delete');
+        deleteLink.addEventListener('click', () => deleteRow(deleteLink));
+        deleteCell.appendChild(deleteLink);
+        row.appendChild(deleteCell);
+
+        tableBody.appendChild(row);
+
+        addedBarcodes[barcode] = quantity;
+    }
 
     var barcode = '';
     var typingTimer; // Timer identifier

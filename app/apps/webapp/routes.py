@@ -13,6 +13,7 @@ from flask_login import login_required
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
+from flask_restx import Resource
 
 from apps.webapp.models import *
 from apps.webapp.forms import *
@@ -37,9 +38,17 @@ def start():
 
 @blueprint.route('/borrow', methods=["GET","POST"])
 # @login_required
-def borrow():
+def post():
     if request.method == "POST":
-        flash({'text':'123'}, 'cancel')
+        # Check if post is from continue button
+        if 'continue' in request.form:
+            # data = request.data
+            # print("DATA", data)
+            print("-------------------------------------------", request.get_json())
+            # test_data = request.form.get('testData')
+            # print("TEST DATA BLALABALJnL", test_data)
+        else:
+            flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
 
@@ -81,7 +90,7 @@ def new_item(id = None):
         response.raise_for_status()
 
         result = response.json()
-        
+
     except:
         pass
 
@@ -141,13 +150,13 @@ def get_segment(request):
 
     except:
         return None
-    
+
 ### HTMX Routes
 
 @blueprint.route('/inventory/search')
 def inventory_search():
     q = request.args.get("q")
-    
+
     all_objects = Product.query \
     .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
@@ -164,14 +173,14 @@ def inventory_borrowed():
     user_id = request.args.get('user_id')
 
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
-    
+
     all_objects = Borrowed.query \
     .filter(Borrowed.user_id == 1) \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
     .with_entities(*select_columns)
 
-    
+
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     print(data)
 

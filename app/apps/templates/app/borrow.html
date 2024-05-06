@@ -26,9 +26,11 @@
                     <tbody></tbody>
 
                     </table>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4" id="continue">Continue</button>
-                    </div>
+                    <form method="POST">
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-dark w-50 mt-2 mb-4" id="continue" name="continue">Continue</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="text-center mt-3">
@@ -50,6 +52,9 @@
 <script src="app/apps/scripts/barcode.js"></script>
 
 <script>
+    const tableBody = document.querySelector('tbody');
+    var addedBarcodes = {};
+
     function deleteRow(link) {
         // Find the closest row to the clicked link
         var row = link.closest('tr');
@@ -64,16 +69,16 @@
          // Get the current value of the quantity input for the corresponding barcode
         var quantityInput = document.getElementById(`${barcode}`);
         var currentQuantity = addedBarcodes[barcode];
-        console.log("currentQuantity: ", currentQuantity);
 
-        // Increment the quantity
-        quantityInput.value = currentQuantity + 1;
-        addedBarcodes[barcode] = currentQuantity + 1;
+        console.log("currentQuantity: ", currentQuantity);
+        if (currentQuantity < item_quantity) {
+
+            // Increment the quantity
+            quantityInput.value = currentQuantity + 1;
+            addedBarcodes[barcode] = currentQuantity + 1;
+        }
 
     }
-
-    const tableBody = document.querySelector('tbody');
-    var addedBarcodes = {};
 
     function createElement(tag, classes = [], attributes = {}, content = '') {
         const element = document.createElement(tag);
@@ -102,6 +107,7 @@
         const quantityInput = createElement('input', ['form-control', 'p-1'], {
             type: 'number',
             min: '1',
+            max: item_quantity,
             'data-barcode': barcode,
             id: barcode,
             value: quantity
@@ -126,32 +132,6 @@
 
         addedBarcodes[barcode] = quantity;
     }
-
-
-
-    // function addTableRow(barcode) {
-    //     tableBody.innerHTML += `
-    //         <tr>
-    //             <td class="col-7">
-    //                 <div class="d-flex px-2 py-1">
-    //                     <div class="d-flex flex-column justify-content-center">
-    //                         <h6 class="mb-0 text-sm text-wrap item-name">${item_name}</h6>
-    //                     </div>
-    //                 </div>
-    //             </td>
-    //             <td>
-    //                 <div class="col-3 input-group">
-    //                     <input type="number" class="form-control p-1" min="1" data-barcode="${barcode}" id="${barcode}" value="1" onfocus="focused(this)" onfocusout="defocused(this)">
-    //                 </div>
-    //             </td>
-    //             <td class="align-middle col-2">
-    //                 <a href="javascript:;" class="text-secondary font-weight-bold text-xs" onclick="deleteRow(this)" data-toggle="tooltip" data-original-title="Delete item">
-    //                     Delete
-    //                 </a>
-    //             </td>
-    //         </tr>`;
-    // }
-
 
     var barcode = '';
     var all_products = {};
@@ -212,19 +192,20 @@
                     // when barcode found
                     item_name = data.name;
                     item_quantity = data.quantity;
+                    console.log("item_quantity: ", item_quantity);
 
-
-
-                    // Check if barcode already exists on the screen
-                    if (barcode in addedBarcodes) {
-                        // Increment quantity for existing barcode
-                        incrementQuantity(barcode);
-                        console.log("alleen incrementen")
-                    } else {
-                        // Add the new barcode to the array and create a new table row
-                        console.log("nieuwe barcode toevoegen: ", barcode)
-                        addedBarcodes[barcode] = 1;
-                        addTableRow(barcode);
+                    if (item_quantity != 0) {
+                        // Check if barcode already exists on the screen
+                        if (barcode in addedBarcodes) {
+                            // Increment quantity for existing barcode
+                            incrementQuantity(barcode);
+                            console.log("alleen incrementen")
+                        } else {
+                            // Add the new barcode to the array and create a new table row
+                            console.log("nieuwe barcode toevoegen: ", barcode)
+                            addedBarcodes[barcode] = 1;
+                            addTableRow(barcode);
+                        }
                     }
 
                     console.log("added barcodes 2: ", addedBarcodes);
@@ -237,11 +218,39 @@
                     console.log("Barcode not found");
                 }
 
-
-
             })
             .catch(error => console.error('Error:', error));
         }, doneTypingInterval);
+    });
+
+
+
+    document.getElementById("continue").addEventListener('click', function() {
+        console.log("continue clicked");
+        console.log("added barcodes 3: ", addedBarcodes);
+
+        // Send to blueprint in routes.py in webapp
+        fetch('api/borrow2', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            // send last version of addedBarcodes to server
+           body: JSON.stringify({ addedBarcodes: addedBarcodes })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response from server:', data);
+            // Add this line to inspect the structure of the data object
+            console.log('Data structure:', typeof data, data);
+        })
+        .catch(error => console.error('Error:', error));
     });
 
 

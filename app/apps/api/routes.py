@@ -6,9 +6,10 @@ from apps.authentication.decorators import token_required
 from apps.authentication.models import Users
 from apps.webapp.models import *
 from apps.webapp.forms import *
-from flask import request, jsonify, Response, session
+from flask import request, jsonify, Response, session, flash
 from flask_restx import Api, Resource
 from werkzeug.datastructures import MultiDict
+
 
 api = Api(blueprint)
 
@@ -38,6 +39,12 @@ class BarcodeScanningRoute(Resource):
             'success': True
         }, 200
 
+@api.route('/borrow2', methods=['POST'])
+class Borrow2(Resource):
+    def post(self):
+        data = request.get_json()['addedBarcodes']
+        # staat in dict als {'letterlijke barcode': quantity}
+
 
 @api.route('/borrow', methods=['POST'])
 class Borrow(Resource):
@@ -49,29 +56,40 @@ class Borrow(Resource):
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
         title = product.title
+        quantity = product.quantity
 
         if product is not None:
             # Product found
             output = {
-                'item_name': product.title,
-                'item_quantity': product.quantity,
-                'message': f'Product with barcode {barcode} recognized',
+                'barcode': barcode,
+                'name': title,
+                'quantity': quantity,
+                'message': f'Product found',
                 'success': True
-            }
+        }
         else:
             # Product not found
             output = {
-                'message': f'Product with barcode {barcode} not found',
+                'barcode': barcode,
+                'name': title,
+                'quantity': quantity,
+                'message': f'Product not found',
                 'success': False
-            }
+        }
 
-        return {
-            'message': 'Product found',
-            'barcode': barcode,
-            'quantity': 3,
-            'name': product.title,
-            'success': True
-        }, 200
+        return output, 200
+
+
+
+
+
+        # return {
+        #     'message': 'Product found',
+        #     'barcode': barcode,
+        #     'quantity': 3,
+        #     'name': title,
+        #     'success': True
+        # }, 200
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):

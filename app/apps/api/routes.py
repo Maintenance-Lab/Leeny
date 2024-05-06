@@ -46,14 +46,32 @@ class Borrow(Resource):
         data = request.get_json()
         barcode = data['barcode']
 
-        # Process the barcode data to generate different data
-        updated_string = f"Barcode: {barcode}"
+        # Query the database for the product based on barcode
+        product = Product.query.filter_by(barcode=barcode).first()
+        title = product.title
+
+        if product is not None:
+            # Product found
+            output = {
+                'item_name': product.title,
+                'item_quantity': product.quantity,
+                'message': f'Product with barcode {barcode} recognized',
+                'success': True
+            }
+        else:
+            # Product not found
+            output = {
+                'message': f'Product with barcode {barcode} not found',
+                'success': False
+            }
 
         return {
-            'data': updated_string,
+            'message': 'Product found',
+            'barcode': barcode,
+            'quantity': 3,
+            'name': product.title,
             'success': True
         }, 200
-
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):
@@ -75,9 +93,9 @@ class BorrowRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-    
+
 @api.route('/return/', methods=['GET'])
-class ReturnRoute(Resource):    
+class ReturnRoute(Resource):
     def get(self):
         user_id = request.args.get('user_id')
         all_objects = Borrowed.query.filter_by(user_id=user_id)
@@ -117,8 +135,8 @@ class VendorRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-    
-@api.route('/item/<int:id>', methods=['GET']) 
+
+@api.route('/item/<int:id>', methods=['GET'])
 class ItemRoute(Resource):
     def get(self, id):
         all_objects = Product.query.filter(Product.id == id)
@@ -127,8 +145,8 @@ class ItemRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-    
-    
+
+
 @api.route('/home/', methods=['GET'])
 class ProductRoute(Resource):
     def get(self):

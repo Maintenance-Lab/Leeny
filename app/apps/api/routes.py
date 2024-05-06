@@ -71,25 +71,12 @@ class Borrow(Resource):
             # Product not found
             output = {
                 'barcode': barcode,
-                'name': title,
-                'quantity': quantity,
                 'message': f'Product not found',
                 'success': False
         }
 
         return output, 200
 
-
-
-
-
-        # return {
-        #     'message': 'Product found',
-        #     'barcode': barcode,
-        #     'quantity': 3,
-        #     'name': title,
-        #     'success': True
-        # }, 200
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):

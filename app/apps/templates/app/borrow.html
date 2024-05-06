@@ -2,14 +2,13 @@
 
 {% block title %} Borrow {% endblock title %}
 
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
-
 {% block content %}
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
-            <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''" />
+            <div class="visually-hidden">
+                <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''" />
+            </div>
             <tr class="container px-0 w-100">
                 <td class="col-7">
                     <div class="">
@@ -43,17 +42,12 @@
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE -->
 {% block javascripts %}
-
-<script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
-
-<!-- Script importen die barcodes verkrijgt -->
-<script src="app/apps/scripts/barcode.js"></script>
-
 <script>
     const tableBody = document.querySelector('tbody');
     var addedBarcodes = {};
+
+    document.getElementById("continue").disabled = true;
 
     function deleteRow(link) {
         // Find the closest row to the clicked link
@@ -63,6 +57,12 @@
         // Get the barcode of the item to be deleted
         var barcode = row.querySelector('input').getAttribute('data-barcode');
         delete addedBarcodes[barcode];
+
+        console.log("BARCODES NA VERWIJDEREN", Object.keys(addedBarcodes))
+        if (Object.keys(addedBarcodes) == 'null')
+        {
+            document.getElementById("continue").disabled = true;
+        }
     }
 
     function incrementQuantity(barcode) {
@@ -89,6 +89,10 @@
     }
 
     function addTableRow(barcode) {
+        if (addedBarcodes != {}) {
+            document.getElementById("continue").disabled = false;
+        }
+
         var quantity = addedBarcodes[barcode] || 1; // Get the current quantity or default to 1
 
         const row = createElement('tr');

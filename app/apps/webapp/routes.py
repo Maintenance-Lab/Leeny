@@ -47,9 +47,24 @@ def start():
 # @login_required
 def borrow():
     if request.method == "POST":
-        flash({'text':'123'}, 'cancel')
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
+@blueprint.route('/borrow/confirm')
+def borrow_confirm():
+    if session.get('data') == False:
+        try:
+            data = request.args.get('data')
+            session['data'] = data
+        except:
+            flash({'text':'123'}, 'cancel')
+            # Nog aanpassen naar error message
+    
+    # for item in session['data']:
+
+
+    return render_template('app/borrow-confirm.html', data=data)
 
 @blueprint.route('/home')
 # @login_required
@@ -61,6 +76,12 @@ def home():
 def inventory():
     # Add pagination
     return render_template('app/inventory.html', segment='inventory')
+
+@blueprint.route('/orders')
+# @login_required
+def orders():
+    # Add pagination
+    return render_template('app/orders.html', segment='orders')
 
 @blueprint.route('/return')
 # @login_required
@@ -198,6 +219,33 @@ def inventory_borrowed():
 
     
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+    
+    return render_template('app/inventory-results.html', data=data)
+
+
+from datetime import datetime, timedelta
+
+@blueprint.route('/orders/search')
+def orders_search():
+    q = request.args.get("q")
+    select_columns = [Ordered.id, Ordered.title, Ordered.quantity, Ordered.url, Ordered.created_at_ts, Users.fullname, Ordered.status]
+    all_objects = Ordered.query \
+    .filter(Ordered.title.contains(q) | Ordered.url.contains(q) | Users.fullname.contains(q)) \
+    .join(Order, Ordered.order_id == Order.ordered_id, isouter = True) \
+    .join(Users, Users.id == Order.user_id, isouter = True) \
+    .with_entities(*select_columns)
+        
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     print(data)
 
-    return render_template('app/inventory-results.html', data=data)
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
+        now = datetime.now().date()
+        if (timestamp - now) <= timedelta(days=2) and timestamp != now:
+            item['created_at_ts'] = 'Yesterday'
+        elif timestamp == now:
+            item['created_at_ts'] = 'Today'
+        else:
+            item['created_at_ts'] = timestamp
+
+    return render_template('app/orders-results.html', data=data)

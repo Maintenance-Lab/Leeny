@@ -1,7 +1,7 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-  Home
+  Orders
 {% endblock %}
 
 <!-- Specific CSS goes HERE -->
@@ -12,11 +12,17 @@
 {% block content %}
   <div class="container-fluid py-4">
     <div class="row">
+        <div class="d-flex align-items-center justify-content-between">
+            <h1>Orders</h1>
+            <div class="d-flex gap-3">
+              <a class="btn btn-dark m-0" href="/borrow">Start an order</a>     
+              <div>
+                <input type="text" class="input form-control" placeholder="Search..." name="q" hx-get="/orders/search" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
+              </div>
+            </div>
+          </div>
       <div class="col-12">
         <div class="card mb-4">
-          <div class="card-header pb-0">
-            <h4>Products</h4>
-          </div>
           <div class="card-body px-0 pt-0 pb-2">
             <div class="table-responsive p-0">
               <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
@@ -24,26 +30,29 @@
                   <table class="table table-flush dataTable-table" id="products-list">
                     <thead class="thead-light">
                       <tr>
-                        <th data-sortable="" style="width: 12.4605%;">
-                          <a href="#" class="dataTable-sorter">Article number</a>
+                        <th data-sortable="" style="width: 7.4605%;">
+                          <a href="#" class="dataTable-sorter">Order Id</a>
+                        </th>
+                        <th data-sortable="" style="width: 10.4213%;">
+                            <a href="#" class="dataTable-sorter">Date</a>
                         </th>
                         <th data-sortable="" style="width: 32.0683%;">
                           <a href="#" class="dataTable-sorter">Product</a>
                         </th>
                         <th data-sortable="" style="width: 9.61417%;">
-                          <a href="#" class="dataTable-sorter">Quantity</a>
-                        </th>
-                        <th data-sortable="" style="width: 14.4213%;">
-                          <a href="#" class="dataTable-sorter">Status</a>
+                          <a href="#" class="dataTable-sorter">By</a>
                         </th>
                         <th style="width: 12.5237%;">
-                          <a href="#" class="dataTable-sorter">EAN</a>
+                          <a href="#" class="dataTable-sorter">Quantity</a>
                         </th>
-                        <th class="d-none d-xxl-table-cell" style="width: 10.2467%;">
-                          <a href="#" class="dataTable-sorter">Description</a>
+                        <th style="width: 12.5237%;">
+                            <a href="#" class="dataTable-sorter">status</a>
                         </th>
                       </tr>
                     </thead>
+                    <tbody id="results">
+
+                    </tbody>
                   </table>
                 </div>
               </div>

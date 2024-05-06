@@ -11,11 +11,21 @@ class Ordered(db.Model):
 
     # Foreign keys
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id'))
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
+    
 
     # Properties
-    ordered = db.Column(db.Integer, nullable=False, default=0)
-    delivered = db.Column(db.Integer, nullable=False, default=0)
+    title = db.Column(db.String(255), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    url = db.Column(db.String(255))
+    price_when_bought = db.Column(db.Float, nullable=False)
+    projects = db.Column(db.String(255), nullable=False)
+    students = db.Column(db.String(255))
+    status = db.Column(db.Integer, default=1)
+
 
     # Timestamps
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))

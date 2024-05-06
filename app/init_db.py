@@ -5,7 +5,7 @@ import subprocess
 
 from apps import create_app, db
 from apps.config import config_dict
-from apps.webapp.models import Manufacturer, Product, ProductCategory, Vendor, Ordered, Borrowed
+from apps.webapp.models import Manufacturer, Product, ProductCategory, Vendor, Ordered, Borrowed, Order, Category
 
 def create_and_return_app(config_mode):
     app_config = config_dict[config_mode.capitalize()]
@@ -127,16 +127,17 @@ def insert_dummy_data():
         ]
         
         ordered = [
-            Ordered(product_id=2, vendor_id=3, ordered=True, delivered=False),
-            Ordered(product_id=3, vendor_id=4, ordered=True, delivered=True),
-            Ordered(product_id=4, vendor_id=5, ordered=True, delivered=False),
-            Ordered(product_id=1, vendor_id=6, ordered=True, delivered=False),
-            Ordered(product_id=2, vendor_id=7, ordered=True, delivered=False),
-            Ordered(product_id=3, vendor_id=8, ordered=True, delivered=True),
-            Ordered(product_id=4, vendor_id=9, ordered=True, delivered=False),
-            Ordered(product_id=1, vendor_id=10, ordered=True, delivered=False),
-            Ordered(product_id=2, vendor_id=3, ordered=False, delivered=False),
-            Ordered(product_id=3, vendor_id=5, ordered=False, delivered=False),
+        Ordered(title='Macbook Pro M1 2022', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
+        Ordered(title='iPhone 13 Pro', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
+        Ordered(title='Sony PlayStation 5', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4')
+        ]
+
+        order = [
+        Order(user_id=2, ordered_id=1),
+        Order(user_id=1, ordered_id=2),
+        Order(user_id=3, ordered_id=3),
+        Order(user_id=1, ordered_id=4)
         ]
 
         db.session.bulk_save_objects(vendors)
@@ -145,6 +146,7 @@ def insert_dummy_data():
         db.session.bulk_save_objects(products)
         db.session.bulk_save_objects(ordered)
         db.session.bulk_save_objects(borrowed)
+        db.session.bulk_save_objects(order)
         db.session.commit()
         print('Dummy data inserted')
 

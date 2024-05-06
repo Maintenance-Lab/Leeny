@@ -161,12 +161,12 @@ def inventory_search():
 
 @blueprint.route('/inventory/borrowed')
 def inventory_borrowed():
-    user_id = request.args.get('user_id')
+    user_id = session['_user_id']
 
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
     
     all_objects = Borrowed.query \
-    .filter(Borrowed.user_id == 1) \
+    .filter(Borrowed.user_id == user_id) \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
     .with_entities(*select_columns)

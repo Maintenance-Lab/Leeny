@@ -8,14 +8,22 @@ from urllib.parse import urljoin
 import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
-from flask import current_app, flash, render_template, request, session
+from flask import current_app, flash, render_template, redirect, url_for, request, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
-
+from apps.authentication.forms import CreateAccountForm
+from apps.authentication.models import Users
+from flask_login import current_user
+from apps import db, login_manager
 from apps.webapp.models import *
+from apps.authentication.models import *
 from apps.webapp.forms import *
+# staat nog niet goed ivm verplaatsing ivm api traag
+from apps.api.forms import *
+from sqlalchemy import update
+
 
 @blueprint.route('/index')
 # @login_required
@@ -59,6 +67,23 @@ def inventory():
 def returns():
     # Add pagination
     return render_template('app/return.html', segment='return')
+
+@blueprint.route('/settings' , methods=["GET","POST"])
+# @login_required
+def settings():
+    create_account_form = CreateAccountForm(request.form)
+    all_objects = Users.query.filter_by(id=session['_user_id'])
+    data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
+    if request.method == "POST":
+        test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname']))
+        test2 = Users.query.filter_by(id=session['_user_id']).update(dict(email=request.form['email']))
+        test3 = Users.query.filter_by(id=session['_user_id']).update(dict(study=request.form['study']))
+        test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
+        test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
+        db.session.commit()
+        flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
+        return redirect(url_for('webapp_blueprint.settings'))
+    return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
 
 @blueprint.route('/item/<int:id>')

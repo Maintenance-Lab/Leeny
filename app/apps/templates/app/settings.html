@@ -1,0 +1,79 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+  Home
+{% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <h1>Settings</h1>
+        <div class="col-12">
+            <div class="card mb-4">
+              <div class="card-body px-4 pt-4 pb-3">
+                <form method="POST" action="settings">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Full Name</label>
+                                {{ form.fullname(class="form-control", value=data.data[0].fullname ) }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Email</label>
+                                {{ form.email(class="form-control", value=data.data[0].email ) }}
+                                <!-- <input type="email" placeholder="Email" class="form-control" value="{{ data.data[0].email }}"> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Study</label>
+                                <div class="input-group">
+                                    <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
+                                    {{ form.study(class="form-control", value=data.data[0].study ) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-2">
+                                <label>Faculty</label>
+                                <div class="input-group mb-2">
+                                    <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
+                                    {{ form.faculty(class="form-control", value=data.data[0].faculty ) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Role</label>
+                                <div class="input-group mb-2">
+                                    <!-- <input class="form-control" type="text" placeholder="Success" value="{{ data.data[0].role }}" disabled/> -->
+                                    {{ form.role(class="form-control", value=data.data[0].role )  }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center col-md-8">
+                        <button type="submit" name="update_profile" class="btn bg-gradient-dark my-4 mb-2">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+{% endblock %}

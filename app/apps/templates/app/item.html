@@ -1,11 +1,12 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Item {% endblock title %}
+{% block title %} {% print(data['data'][0].title)%} {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
+
 <div class="card-body mt-5">
     <div class="row">
         <div class="col-xl-5 col-lg-6 text-center"> <img class="w-100 border-radius-lg shadow-lg mx-auto"
@@ -13,7 +14,7 @@
                 alt="chair">
         </div>  
         <div class="col-lg-5 mx-auto">
-            <h3 class="mt-lg-0 mt-4">{{ data['data'][0].model }}</h3>
+            <h3 class="mt-lg-0 mt-4">{{ data['data'][0].title }}</h3>
             <div class="d-flex align-items-center gap-3">
                 <div>
                     <label class="mb-0 mt-3 mx-0">Available stock</label> <br>
@@ -42,9 +43,16 @@
                 </div>
                 <div class="w-50 " style="word-wrap:break-word">
                     <label class="mt-2 mx-0 ">Documents</label>
-                    <p><a href="{{ data['data'][0].url }}">{{ data['data'][0].url }}</a></p>
+                    <p><a href="{{ data['data'][0].url }}">{{ data['data'][0].documentation }}</a></p>
                 </div>
             </div>
+
+            {% if data['data'][0].notes %}
+                 <div class="w-50 " style="word-wrap:break-word">
+                    <label class="mt-2 mx-0 ">Notes</label>
+                    <p>{{ data['data'][0].notes }}</p>
+                </div> 
+                {% endif %}
             
             <!-- <div class="row mt-4 px-2">
                 <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">

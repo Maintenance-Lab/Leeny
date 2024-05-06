@@ -12,4 +12,4 @@ ModelForm = model_form_factory(Form)
 class UsersForm(ModelForm):
     class Meta:
         model = Users
-        exclude = ['password', 'oauth_github', 'api_token', 'api_token_ts']
+        exclude = ['oauth_github', 'api_token', 'api_token_ts']

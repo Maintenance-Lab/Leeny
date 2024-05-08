@@ -7,10 +7,10 @@
         <p class="text-xs font-weight-bold mb-0">{{item.name}}</p>
     </td>
     <td class="align-middle text-center text-sm">
-        {% if item.quantity > 0 %}
-        <span class="badge badge-sm bg-gradient-success">{{item.quantity}}</span>
+        {% if (item.quantity_total - item.quantity_borrowed) > 0 %}
+        <span class="badge badge-sm bg-gradient-success">{{item.quantity_total - item.quantity_borrowed}}</span>
         {% else %}
-        <span class="badge badge-sm bg-gradient-danger">{{item.quantity}}</span>
+        <span class="badge badge-sm bg-gradient-danger">{{item.quantity_total - item.quantity_borrowed}}</span>
         {% endif %}
     </td>
 

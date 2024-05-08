@@ -1,38 +1,52 @@
 {% for item in data['data'] %}
 <tr>
     <td style="padding-left: 24px;">
-        <h6 class="mb-0 text-sm">#{{item.id}}</h6>
+        #{{item.id}}
     </td>
-    <td>
-        <p class="text-xs font-weight-bold mb-0">{{ item.created_at_ts }}</p>
+    <td class="text-xs font-weight-bold mb-0">
+        {{ item.created_at_ts }}
     </td>
-    <td>
-        <p class="text-xs font-weight-bold mb-0">{{item.title}}</p>
+    <td class="text-xs font-weight-bold mb-0">
+        {{item.title}}
     </td>
-    <td>
-        <p class="text-xs font-weight-bold mb-0">{{item.fullname}}</p>
+    <td class="text-xs font-weight-bold mb-0">
+        {{item.fullname}}
     </td>
-    <td>
-        <p class="text-xs font-weight-bold mb-0">{{item.quantity}}</p>
+    <td class="text-xs font-weight-bold mb-0">
+        {{item.quantity}}
     </td>
     
-    <td>
+    <td class="text-xs font-weight-bold mb-0">
         {% if item.status == 1 %}
-        <p class="text-xs font-weight-bold mb-0">Waiting for approval</p>
+        Waiting for approval
         {% endif %}
         {% if item.status == 2 %}
-        <p class="text-xs font-weight-bold mb-0">In transit</p>
+        In transit
         {% endif %}
         {% if item.status == 3 %}
-        <p class="text-xs font-weight-bold mb-0">Delivered</p>
+        Delivered
         {% endif %}
         {% if item.status == 4 %}
-        <p class="text-xs font-weight-bold mb-0">Finished</p>
+        Finished
         {% endif %}
         {% if item.status == -1 %}
-        <p class="text-xs font-weight-bold mb-0">Cancelled</p>
+        Cancelled
         {% endif %}
     </td>
     
 </tr>
 {% endfor %}
+
+<script>
+    new DataTable('#products-list', {
+      scrollX: false,
+      autoWidth: true,
+      lengthChange: false,
+      compact: true,
+      oLanguage: {
+        "sSearch": ""},
+      info: false,
+      infoEmpty: false
+      });
+</script>
+

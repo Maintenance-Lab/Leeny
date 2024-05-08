@@ -13,13 +13,14 @@ class Product(db.Model):
     # Properties
     title = db.Column(db.String(255), nullable=False)
     barcode = db.Column(db.String(255), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
     price_when_bought = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
     url = db.Column(db.String(255))
     documentation = db.Column(db.String(255))
     notes = db.Column(db.String(10000))
-    quantity_unavailable = db.Column(db.Integer)
+    quantity_unavailable = db.Column(db.Integer, default=0)
+    quantity_total = db.Column(db.Integer)
+    quantity_borrowed = db.Column(db.Integer, default=0)
 
     # Timestamps
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))

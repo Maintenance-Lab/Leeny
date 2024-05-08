@@ -225,18 +225,15 @@ def inventory_borrowed():
 
 from datetime import datetime, timedelta
 
-@blueprint.route('/orders/search')
-def orders_search():
-    q = request.args.get("q")
+@blueprint.route('/orders/load')
+def orders_load():
     select_columns = [Ordered.id, Ordered.title, Ordered.quantity, Ordered.url, Ordered.created_at_ts, Users.fullname, Ordered.status]
     all_objects = Ordered.query \
-    .filter(Ordered.title.contains(q) | Ordered.url.contains(q) | Users.fullname.contains(q)) \
     .join(Order, Ordered.order_id == Order.ordered_id, isouter = True) \
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
         
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
-    print(data)
 
     for item in data['data']:
         timestamp = datetime.fromtimestamp(item['created_at_ts']).date()

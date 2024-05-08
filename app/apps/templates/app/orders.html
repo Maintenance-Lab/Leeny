@@ -16,37 +16,35 @@
             <h1>Orders</h1>
             <div class="d-flex gap-3">
               <a class="btn btn-dark m-0" href="/borrow">Start an order</a>     
-              <div>
-                <input type="text" class="input form-control" placeholder="Search..." name="q" hx-get="/orders/search" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
-              </div>
+              <span hx-get="/orders/load" hx-trigger="load" hx-target="#results">
             </div>
           </div>
       <div class="col-12">
-        <div class="card mb-4">
+        <div class=" mb-4">
           <div class="card-body px-0 pt-0 pb-2">
-            <div class="table-responsive p-0">
-              <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
+            <div class="p-0">
+              <div class="dataTable-wrapper dataTable-loading">
                 <div class="dataTable-container">
                   <table class="table table-flush dataTable-table" id="products-list">
                     <thead class="thead-light">
                       <tr>
-                        <th data-sortable="" style="width: 7.4605%;">
-                          <a href="#" class="dataTable-sorter">Order Id</a>
+                        <th>
+                          Order Id
                         </th>
-                        <th data-sortable="" style="width: 10.4213%;">
-                            <a href="#" class="dataTable-sorter">Date</a>
+                        <th>
+                          Date
                         </th>
-                        <th data-sortable="" style="width: 32.0683%;">
-                          <a href="#" class="dataTable-sorter">Product</a>
+                        <th>
+                          Product
                         </th>
-                        <th data-sortable="" style="width: 9.61417%;">
-                          <a href="#" class="dataTable-sorter">By</a>
+                        <th>
+                          By
                         </th>
-                        <th style="width: 12.5237%;">
-                          <a href="#" class="dataTable-sorter">Quantity</a>
+                        <th>
+                          Quantity
                         </th>
-                        <th style="width: 12.5237%;">
-                            <a href="#" class="dataTable-sorter">status</a>
+                        <th>
+                          Status
                         </th>
                       </tr>
                     </thead>
@@ -57,7 +55,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -67,5 +64,4 @@
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
-
 {% endblock %}

@@ -274,6 +274,7 @@ def register():
     else:
         return render_template('accounts/register.html', form=create_account_form)
 
+
 @api.route('/login/jwt/', methods=['POST'])
 class JWTLogin(Resource):
     def post(self):
@@ -323,11 +324,14 @@ class JWTLogin(Resource):
                        "message": str(e)
                    }, 500
 
-@blueprint.route('/card_reader')
+
+@blueprint.route('/card_reader', methods=['GET', 'POST'])
 def card_reader():
+    print('card_reader')
     login_form = RfidLoginForm(request.form)
 
     if request.method == 'POST':
+        print("post")
 
         # read form data
         # username = request.form['username'] or None
@@ -360,11 +364,12 @@ def card_reader():
 
         # Check if uid is provided but no user is found
         if uid and user is None:
-            return redirect(url_for('authentication_blueprint.rfid_register'), 
-                            msg='No user found for this card, use formal login', form=login_form)
-            # return render_template('accounts/rfid_login.html',
-            #                    msg='No user found for this card',
-            #                    form=login_form)
+            # return redirect(url_for('authentication_blueprint.rfid_register'), 
+            #                 msg='No user found for this card, use formal login', form=login_form)
+            return render_template('accounts/rfid_login.html',
+                               msg='No user found for this card',
+                               form=login_form)
+            # return redirect(url_for('authentication_blueprint.rfid_register'))
 
         # Edge cases
         return render_template('accounts/rfid_login.html',
@@ -374,7 +379,7 @@ def card_reader():
     if current_user.is_authenticated:
         return redirect(url_for('webapp_blueprint.index'))
     else:
-        return render_template('app/card-reader.html',
+        return render_template('app/card_reader.html',
                                form=login_form)
 
 

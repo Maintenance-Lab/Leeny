@@ -1,0 +1,24 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Borrow {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<!-- [macbook, raspberry, pc] -->
+{% for item in data['data'] %}
+  <input class="form-control datepicker" placeholder="Please select date" type="text" onfocus="focused(this)" onfocusout="defocused(this)">
+{% endfor %}
+{% endblock content %}
+
+
+{% block javascripts %}
+<script>
+    if (document.querySelector('.datepicker')) {
+      flatpickr('.datepicker', {
+        mode: "single"
+      });
+    }
+  </script>
+{% endblock javascripts %}

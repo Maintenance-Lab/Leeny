@@ -35,8 +35,10 @@
             <div class="text-center mt-3">
                 <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/dashboard">Cancel</a>
             </div>
+            <form method="POST" class="text-center mt-3">
+                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Cancel</button>
+            </form>
         </div>
-
     </div>
 
 
@@ -180,9 +182,27 @@
         barcode = document.getElementById("barcodeInputField").value;
 
         // Set a new timer to handle barcode input after a certain amount of time
+        // Set a new timer to handle barcode input after a certain amount of time
         typingTimer = setTimeout(function() {
             console.log("Sending this barcode: ", barcode);
+            console.log("Sending this barcode: ", barcode);
 
+            // Send the barcode to the server
+            fetch('api/borrow', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ barcode: barcode })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response from server:', data);
             // Send the barcode to the server
             fetch('api/borrow', {
                 method: 'POST',

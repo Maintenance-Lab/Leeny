@@ -5,7 +5,7 @@ import subprocess
 
 from apps import create_app, db
 from apps.config import config_dict
-from apps.webapp.models import Manufacturer, Product, ProductCategory, Vendor, Ordered, Borrowed
+from apps.webapp.models import Manufacturer, Product, ProductCategory, Vendor, Ordered, Borrowed, Order, Category
 
 def create_and_return_app(config_mode):
     app_config = config_dict[config_mode.capitalize()]
@@ -101,10 +101,10 @@ def insert_dummy_data():
         ]
 
         products = [
-            Product(id=1, title='Macbook Pro M1 2022', barcode='099555050509', quantity=1, price_when_bought=2000.0, description='The MacBook Pro M1 2022 is a powerful laptop designed for professionals. It features the latest M1 chip from Apple, providing blazing-fast performance and incredible battery life. With its sleek design and stunning Retina display, this laptop is perfect for all your productivity needs.', url='https://apple.com/macbook-pro-m1-2022', documentation='https://example.com/products/A001', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=1, category_id=2, vendor_id=3),
-            Product(id=2, title='iPhone 14 Pro', barcode='051111407592', quantity=10, price_when_bought=1200.0, description='The iPhone 14 Pro is the latest flagship smartphone from Apple. It features a stunning Super Retina XDR display, powerful A16 chip, and advanced camera system. With 5G connectivity and iOS 16, this phone delivers the ultimate mobile experience.', url='https://apple.com/iphone-14-pro', documentation='https://example.com/products/A002', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=1, category_id=1, vendor_id=3),
-            Product(id=3, title='Samsung Galaxy Tab S8', barcode='787099257798', quantity=0, price_when_bought=800.0, description='The Samsung Galaxy Tab S8 is a premium Android tablet with a stunning AMOLED display and powerful Snapdragon processor. With S Pen support and DeX mode, this tablet is perfect for work or play.', url='https://samsung.com/galaxy-tab-s8', documentation='https://example.com/products/A003', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=2, category_id=3, vendor_id=4),
-            Product(id=4, title='Dell XPS 15 2023', barcode='076950450479', quantity=4, price_when_bought=1800.0, description='The Dell XPS 15 2023 is a high-performance laptop with a stunning InfinityEdge display and powerful Intel processor. With up to 32GB of RAM and NVIDIA graphics, this laptop is perfect for creative professionals.', url='https://dell.com/xps-15-2023', documentation='https://example.com/products/A004', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=3, category_id=2, vendor_id=5),
+            Product(id=1, title='Macbook Pro M1 2022', barcode='6273468236492649', quantity=10, price_when_bought=2000.0, description='The MacBook Pro M1 2022 is a powerful laptop designed for professionals. It features the latest M1 chip from Apple, providing blazing-fast performance and incredible battery life. With its sleek design and stunning Retina display, this laptop is perfect for all your productivity needs.', url='https://apple.com/macbook-pro-m1-2022', documentation='https://example.com/products/A001', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=1, category_id=2, vendor_id=3),
+            Product(id=2, title='iPhone 14 Pro', barcode='8745632198765432', quantity=20, price_when_bought=1200.0, description='The iPhone 14 Pro is the latest flagship smartphone from Apple. It features a stunning Super Retina XDR display, powerful A16 chip, and advanced camera system. With 5G connectivity and iOS 16, this phone delivers the ultimate mobile experience.', url='https://apple.com/iphone-14-pro', documentation='https://example.com/products/A002', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=1, category_id=1, vendor_id=3),
+            Product(id=3, title='Samsung Galaxy Tab S8', barcode='3698745123654789', quantity=150, price_when_bought=800.0, description='The Samsung Galaxy Tab S8 is a premium Android tablet with a stunning AMOLED display and powerful Snapdragon processor. With S Pen support and DeX mode, this tablet is perfect for work or play.', url='https://samsung.com/galaxy-tab-s8', documentation='https://example.com/products/A003', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=2, category_id=3, vendor_id=4),
+            Product(id=4, title='Dell XPS 15 2023', barcode='9517534682938745', quantity=0, price_when_bought=1800.0, description='The Dell XPS 15 2023 is a high-performance laptop with a stunning InfinityEdge display and powerful Intel processor. With up to 32GB of RAM and NVIDIA graphics, this laptop is perfect for creative professionals.', url='https://dell.com/xps-15-2023', documentation='https://example.com/products/A004', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=3, category_id=2, vendor_id=5),
             Product(id=5, title='Sony Alpha A7 IV', barcode='7854123698541236', quantity=8, price_when_bought=2500.0, description='The Sony Alpha A7 IV is a full-frame mirrorless camera with 33MP resolution and 4K video recording. With advanced autofocus and image stabilization, this camera delivers stunning results in any situation.', url='https://sony.com/alpha-a7-iv', documentation='https://example.com/products/A005', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=4, category_id=4, vendor_id=6),
             Product(id=6, title='Microsoft Surface Pro 8', barcode='6325874196325874', quantity=18, price_when_bought=1500.0, description='The Microsoft Surface Pro 8 is a versatile 2-in-1 laptop with a detachable keyboard and pen support. With the latest Intel processor and Windows 11, this device is perfect for productivity on the go.', url='https://microsoft.com/surface-pro-8', documentation='https://example.com/products/A006', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=5, category_id=2, vendor_id=7),
             Product(id=7, title='LG OLED C1 65" 4K TV', barcode='3698741258963214', quantity=5, price_when_bought=3000.0, description='The LG OLED C1 65" 4K TV offers stunning picture quality with OLED technology and 4K resolution. With support for Dolby Vision and Dolby Atmos, this TV delivers an immersive viewing experience.', url='https://lg.com/oled-c1-65', documentation='https://example.com/products/A007', notes='This is a note about the product.', quantity_unavailable=0, manufacturer_id=6, category_id=5, vendor_id=8),
@@ -127,16 +127,25 @@ def insert_dummy_data():
         ]
 
         ordered = [
-            Ordered(product_id=2, vendor_id=3, ordered=True, delivered=False),
-            Ordered(product_id=3, vendor_id=4, ordered=True, delivered=True),
-            Ordered(product_id=4, vendor_id=5, ordered=True, delivered=False),
-            Ordered(product_id=1, vendor_id=6, ordered=True, delivered=False),
-            Ordered(product_id=2, vendor_id=7, ordered=True, delivered=False),
-            Ordered(product_id=3, vendor_id=8, ordered=True, delivered=True),
-            Ordered(product_id=4, vendor_id=9, ordered=True, delivered=False),
-            Ordered(product_id=1, vendor_id=10, ordered=True, delivered=False),
-            Ordered(product_id=2, vendor_id=3, ordered=False, delivered=False),
-            Ordered(product_id=3, vendor_id=5, ordered=False, delivered=False),
+        Ordered(title='Macbook Pro M1 2022', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
+        Ordered(title='iPhone 13 Pro', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
+        Ordered(title='Sony PlayStation 5', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4'),
+        Ordered(title='Macbook Pro M1 20221', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
+        Ordered(title='iPhone 13 Pro1', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra1', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
+        Ordered(title='Sony PlayStation 51', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4'),
+        Ordered(title='Macbook Pro M1 20222', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
+        Ordered(title='iPhone 13 Pro2', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra2', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
+        Ordered(title='Sony PlayStation 52', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4')
+        ]
+
+        order = [
+        Order(user_id=2, ordered_id=1),
+        Order(user_id=1, ordered_id=2),
+        Order(user_id=3, ordered_id=3),
+        Order(user_id=1, ordered_id=4)
         ]
 
         db.session.bulk_save_objects(vendors)
@@ -145,6 +154,7 @@ def insert_dummy_data():
         db.session.bulk_save_objects(products)
         db.session.bulk_save_objects(ordered)
         db.session.bulk_save_objects(borrowed)
+        db.session.bulk_save_objects(order)
         db.session.commit()
         print('Dummy data inserted')
 

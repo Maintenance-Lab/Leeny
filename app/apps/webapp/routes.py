@@ -8,15 +8,23 @@ from urllib.parse import urljoin
 import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
-from flask import current_app, flash, render_template, request, session
+from flask import current_app, flash, render_template, redirect, url_for, request, session
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
-from flask_restx import Resource
+from apps.authentication.forms import CreateAccountForm
+from apps.authentication.models import Users
+from flask_login import current_user
+from apps import db, login_managerfrom flask_restx import Resource
 
 from apps.webapp.models import *
+from apps.authentication.models import *
 from apps.webapp.forms import *
+# staat nog niet goed ivm verplaatsing ivm api traag
+from apps.api.forms import *
+from sqlalchemy import update
+
 
 @blueprint.route('/index')
 # @login_required
@@ -51,6 +59,20 @@ def post():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
+@blueprint.route('/borrow/confirm')
+def borrow_confirm():
+    if session.get('data') == False:
+        try:
+            data = request.args.get('data')
+            session['data'] = data
+        except:
+            flash({'text':'123'}, 'cancel')
+            # Nog aanpassen naar error message
+
+    # for item in session['data']:
+
+
+    return render_template('app/borrow-confirm.html', data=data)
 
 @blueprint.route('/home')
 # @login_required
@@ -63,11 +85,34 @@ def inventory():
     # Add pagination
     return render_template('app/inventory.html', segment='inventory')
 
+@blueprint.route('/orders')
+# @login_required
+def orders():
+    # Add pagination
+    return render_template('app/orders.html', segment='orders')
+
 @blueprint.route('/return')
 # @login_required
 def returns():
     # Add pagination
     return render_template('app/return.html', segment='return')
+
+@blueprint.route('/settings' , methods=["GET","POST"])
+# @login_required
+def settings():
+    create_account_form = CreateAccountForm(request.form)
+    all_objects = Users.query.filter_by(id=session['_user_id'])
+    data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
+    if request.method == "POST":
+        test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname']))
+        test2 = Users.query.filter_by(id=session['_user_id']).update(dict(email=request.form['email']))
+        test3 = Users.query.filter_by(id=session['_user_id']).update(dict(study=request.form['study']))
+        test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
+        test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
+        db.session.commit()
+        flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
+        return redirect(url_for('webapp_blueprint.settings'))
+    return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
 
 @blueprint.route('/item/<int:id>')
@@ -170,18 +215,42 @@ def inventory_search():
 
 @blueprint.route('/inventory/borrowed')
 def inventory_borrowed():
-    user_id = request.args.get('user_id')
+    user_id = session['_user_id']
 
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
 
     all_objects = Borrowed.query \
-    .filter(Borrowed.user_id == 1) \
+    .filter(Borrowed.user_id == user_id) \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
     .with_entities(*select_columns)
 
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
-    print(data)
 
     return render_template('app/inventory-results.html', data=data)
+
+
+from datetime import datetime, timedelta
+
+@blueprint.route('/orders/load')
+def orders_load():
+    select_columns = [Ordered.id, Ordered.title, Ordered.quantity, Ordered.url, Ordered.created_at_ts, Users.fullname, Ordered.status]
+    all_objects = Ordered.query \
+    .join(Order, Ordered.order_id == Order.ordered_id, isouter = True) \
+    .join(Users, Users.id == Order.user_id, isouter = True) \
+    .with_entities(*select_columns)
+
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
+        now = datetime.now().date()
+        if (timestamp - now) <= timedelta(days=2) and timestamp != now:
+            item['created_at_ts'] = 'Yesterday'
+        elif timestamp == now:
+            item['created_at_ts'] = 'Today'
+        else:
+            item['created_at_ts'] = timestamp
+
+    return render_template('app/orders-results.html', data=data)

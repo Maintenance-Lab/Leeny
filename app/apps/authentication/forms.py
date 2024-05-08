@@ -32,3 +32,6 @@ class CreateAccountForm(FlaskForm):
     uid_1 = StringField('Card 1',
                              id='card_create',
                              validators=[])
+    role = StringField('Role',
+                             id='role_create',
+                             validators=[])

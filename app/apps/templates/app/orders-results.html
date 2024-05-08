@@ -1,0 +1,52 @@
+{% for item in data['data'] %}
+<tr>
+    <td style="padding-left: 24px;">
+        #{{item.id}}
+    </td>
+    <td class="text-xs font-weight-bold mb-0">
+        {{ item.created_at_ts }}
+    </td>
+    <td class="text-xs font-weight-bold mb-0">
+        {{item.title}}
+    </td>
+    <td class="text-xs font-weight-bold mb-0">
+        {{item.fullname}}
+    </td>
+    <td class="text-xs font-weight-bold mb-0">
+        {{item.quantity}}
+    </td>
+    
+    <td class="text-xs font-weight-bold mb-0">
+        {% if item.status == 1 %}
+        Waiting for approval
+        {% endif %}
+        {% if item.status == 2 %}
+        In transit
+        {% endif %}
+        {% if item.status == 3 %}
+        Delivered
+        {% endif %}
+        {% if item.status == 4 %}
+        Finished
+        {% endif %}
+        {% if item.status == -1 %}
+        Cancelled
+        {% endif %}
+    </td>
+    
+</tr>
+{% endfor %}
+
+<script>
+    new DataTable('#products-list', {
+      scrollX: false,
+      autoWidth: true,
+      lengthChange: false,
+      compact: true,
+      oLanguage: {
+        "sSearch": ""},
+      info: false,
+      infoEmpty: false
+      });
+</script>
+

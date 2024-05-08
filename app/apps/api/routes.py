@@ -174,6 +174,8 @@ class VendorRoute(Resource):
             }, 200
 
 @api.route('/item/<int:id>', methods=['GET'])
+
+@api.route('/item/<int:id>', methods=['GET'])
 class ItemRoute(Resource):
     def get(self, id):
         all_objects = Product.query.filter(Product.id == id)

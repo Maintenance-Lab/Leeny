@@ -24,12 +24,6 @@ from apps.webapp.forms import *
 from apps.api.forms import *
 from sqlalchemy import update
 
-
-@blueprint.route('/index')
-# @login_required
-def index():
-    return render_template('app/index.html', segment='index', API_GENERATOR=len(API_GENERATOR))
-
 @blueprint.route('/barcode-scanning')
 def barcode_scanning():
     return render_template('app/barcode-scanning.html', API_GENERATOR=len(API_GENERATOR))
@@ -160,7 +154,7 @@ def get_segment(request):
         segment = request.path.split('/')[-1]
 
         if segment == '':
-            segment = 'index'
+            segment = 'home'
 
         return segment
 

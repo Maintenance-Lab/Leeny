@@ -60,7 +60,7 @@ def login():
         # if user and verify_pass(password, user.password):
         if user:
             login_user(user)
-            flash({'text':'123', 'location': 'index', 'user': user.fullname}, 'Timer')
+            flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/login.html',
                                form=login_form) 
 

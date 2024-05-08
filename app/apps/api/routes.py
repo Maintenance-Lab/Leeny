@@ -78,6 +78,38 @@ class Borrow(Resource):
         return output, 200
 
 
+@api.route('/borrow_rfid', methods=['POST'])
+class Borrow(Resource):
+    def post(self):
+        # Get rfid data from the request
+        data = request.get_json()
+        uid = data['uid']
+
+        # Query the database for the product based on barcode
+        product = Product.query.filter_by(uid=uid).first()
+        title = product.title
+        quantity = product.quantity
+
+        if product is not None:
+            # Product found
+            output = {
+                'uid': uid,
+                'name': title,
+                'quantity': quantity,
+                'message': f'Product found',
+                'success': True
+        }
+        else:
+            # Product not found
+            output = {
+                'uid': uid,
+                'message': f'Product not found',
+                'success': False
+        }
+
+        return output, 200
+
+
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):
     def get(self):

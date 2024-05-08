@@ -6,9 +6,18 @@
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
-            <div class="visually-hidden">
-                <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''" />
-            </div>
+            <!-- <div class="visually-hidden">
+                <input name="rfidInput" id="rfidInputField" value="" onfocus="this.value=''" />
+            </div> -->
+
+            <form role="form text-left" method="post" action="" id="uid_form">
+                {{ form.hidden_tag() }}
+                <h6>
+                    {{ form.uid(placeholder="Card UID", class="form-control", id='uid') }}
+                </h6>
+            </form>
+
+
             <tr class="container px-0 w-100">
                 <td class="col-7">
                     <div class="">
@@ -42,6 +51,7 @@
 
 {% endblock content %}
 
+
 {% block javascripts %}
 <script>
     function deleteRow(link) {
@@ -50,26 +60,26 @@
         row.remove();
 
         // Get the barcode of the item to be deleted
-        var barcode = row.querySelector('input').getAttribute('data-barcode');
-        delete addedBarcodes[barcode];
+        var uid = row.querySelector('input').getAttribute('data-rfid');
+        delete addedUIDs[uid];
 
         // Disable the continue button if there are no items scanned
-        if (Object.keys(addedBarcodes) == 'null') {
+        if (Object.keys(addedUIDs) == 'null') {
             document.getElementById("continue").disabled = true;
         }
     }
 
-    function incrementQuantity(barcode, addedBarcodes) {
-         // Get the current value of the quantity input for the corresponding barcode
-        var quantityInput = document.getElementById(`${barcode}`);
-        var currentQuantity = addedBarcodes[barcode];
+    function incrementQuantity(uid, addedUIDs) {
+         // Get the current value of the quantity input for the corresponding uid
+        var quantityInput = document.getElementById(`${uid}`);
+        var currentQuantity = addedUIDs[uid];
 
         console.log("currentQuantity: ", currentQuantity);
         if (currentQuantity < item_quantity) {
 
             // Increment the quantity
             quantityInput.value = currentQuantity + 1;
-            addedBarcodes[barcode] = currentQuantity + 1;
+            addedUIDs[uid] = currentQuantity + 1;
         }
     }
 
@@ -88,14 +98,14 @@
         return element;
     }
 
-    function addTableRow(barcode, item_name, item_quantity) {
+    function addTableRow(uid, item_name, item_quantity) {
         // If item is scanned, enable continue button
-        if (addedBarcodes != {}) {
+        if (addedUIDs != {}) {
             document.getElementById("continue").disabled = false;
         }
 
         // Get the current quantity or default to 1
-        var quantity = addedBarcodes[barcode] || 1;
+        var quantity = addedUIDs[uid] || 1;
 
         // Create a new table row with the item name, quantity input and delete link
         const row = createElement('tr');
@@ -115,8 +125,8 @@
             type: 'number',
             min: '1',
             max: item_quantity,
-            'data-barcode': barcode,
-            id: barcode,
+            'data-rfid': uid,
+            id: uid,
             value: quantity
         });
 
@@ -138,120 +148,113 @@
 
         tableBody.appendChild(row);
 
-        addedBarcodes[barcode] = quantity;
+        addedUIDs[uid] = quantity;
     }
 
-    const tableBody = document.querySelector('tbody');
 
+    const tableBody = document.querySelector('tbody');
 
     // Disable continue button on loading page, when no items are scanned
     document.getElementById("continue").disabled = true;
 
     // autofocus input field on loading page
-    document.getElementById("barcodeInputField").focus();
+    document.getElementById("uid_form").focus();
 
     // autofocus input field on every click everywhere on the page
     document.addEventListener('click', function() {
-        document.getElementById("barcodeInputField").focus();
+        document.getElementById("uid_form").focus();
     });
 
-    var barcode = '';
+    var uid = '';
     var item_name = '';
-    var addedBarcodes = {};
+    var addedUIDs = {};
 
     var typingTimer;
     var doneTypingInterval = 50;
 
     // Change value in dict if quantity is manually changed
     document.addEventListener('input', function(event) {
-        // only if quantity of product is not higher than max quantity
+        // Only if quantity of product is not higher than max quantity
         if (event.target.tagName === 'INPUT') {
-            var barcode = event.target.getAttribute('data-barcode');
-                addedBarcodes[barcode] = parseInt(event.target.value);
+            var uid = event.target.getAttribute('data-rfid');
+                addedUIDs[uid] = parseInt(event.target.value);
         }
     });
 
-    // Whenever a barcode is scanned
-    document.getElementById("barcodeInputField").addEventListener('input', function() {
-        // Clear the previous timer
-        clearTimeout(typingTimer);
 
-        // Get barcode from input field
-        barcode = document.getElementById("barcodeInputField").value;
-
-        // Set a new timer to handle barcode input after a certain amount of time
-        typingTimer = setTimeout(function() {
-            console.log("Sending this barcode: ", barcode);
-
-            // Send the barcode to the server
-            fetch('api/borrow', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ barcode: barcode })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Response was not ok');
-                }
-                return response.json();
-            })
+    // Get uid
+    var interval_id = setInterval(fetchUID, 1000);
+    function fetchUID() {
+        fetch('/get_uid')
+            .then(response => response.json())
             .then(data => {
-                console.log('Response from server:', data);
+            // document.getElementById('uid').innerHTML = data.uid
+            document.getElementById('uid').value = data.uid
+            current_uid = data.uid
 
-                message = data.message;
-                if (message == "Product found") {
-                    // When barcode found in database, get name and quantity
-                    item_name = data.name;
-                    item_quantity = data.quantity;
-
-                    if (item_quantity != 0) {
-                        // Check if barcode already exists on the screen
-                        if (barcode in addedBarcodes) {
-                            // Increment quantity for existing barcode
-                            incrementQuantity(barcode, addedBarcodes);
-                        } else {
-                            // Add new barcode to screen and dictionary
-                            addedBarcodes[barcode] = 1;
-                            addTableRow(barcode, item_name, item_quantity);
-                        }
-                    }
-
-                    // Clear the input field after processing
-                    document.getElementById("barcodeInputField").value = "";
-                }
-                else {
-                    // When barcode not found
-                    console.log("Barcode not found");
-                }
+            if (data.uid !== null) {
+                clearInterval(interval_id); // Stop fetching
+                console.log('UID: ' + data.uid);
+                // document.getElementsByTagName('form')[0].submit();
+            }
             })
-            .catch(error => console.error('Error:', error));
-        }, doneTypingInterval);
-    });
+            .catch(error => console.error('Error fetching UID:', error))
+    }
+
+    // Send uid to server
+    fetch('api/borrow_rfid', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ uid: uid })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response from server:', data);
+
+        message = data.message;
+        if (message == "Product found") {
+            // When barcode found in database, get name and quantity
+            item_name = data.name;
+            item_quantity = data.quantity;
+
+            if (item_quantity != 0) {
+                // Check if uid already exists on the screen
+                if (uid in addedUIDs) {
+                    // Increment quantity for existing barcode
+                    incrementQuantity(uid, addedUIDs);
+                } else {
+                    // Add new uid to screen and dictionary
+                    addedUIDs[uid] = 1;
+                    addTableRow(uid, item_name, item_quantity);
+                }
+            }
+        }
+        else {
+            // When uid not found
+            console.log("Uid not found");
+        }
+    })
+    .catch(error => console.error('Error:', error));
 
     document.getElementById("continue").addEventListener('click', function() {
         console.log("continue clicked");
-        console.log("added barcodes 3: ", addedBarcodes);
+        console.log("added uids 3: ", addedUIDs);
 
-        // Send to blueprint in routes.py in webapp
-        fetch('api/borrow2', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-
-            // Send last version of addedBarcodes to server
-           body: JSON.stringify({ addedBarcodes: addedBarcodes })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-        .catch(error => console.error('Error:', error));
+        // Submit form
+        document.getElementsByTagName('form')[0].submit();
     });
 </script>
 
 {% endblock javascripts %}
+
+
+
+
+

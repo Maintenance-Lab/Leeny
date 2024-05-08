@@ -236,7 +236,7 @@ def login():
         # if user is found, log in:
         if user:
             login_user(user)
-            flash({'text':'123', 'location': 'index', 'user': user.fullname}, 'Timer')
+            flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/login.html',
                                form=login_form)
 

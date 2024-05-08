@@ -21,13 +21,13 @@
                         <div class="col-md-4">
                             <div class="form-group mb-2">
                                 <label>Full Name</label>
-                                {{ form.fullname(class="form-control", value=data.data[0].fullname ) }}
+                                {{ form.fullname(class="form-control", value=data.data[0].fullname) }}
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group mb-2">
                                 <label>Email</label>
-                                {{ form.email(class="form-control", value=data.data[0].email ) }}
+                                {{ form.email(class="form-control", value=data.data[0].email) }}
                                 <!-- <input type="email" placeholder="Email" class="form-control" value="{{ data.data[0].email }}"> -->
                             </div>
                         </div>
@@ -38,7 +38,7 @@
                                 <label>Study</label>
                                 <div class="input-group">
                                     <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
-                                    {{ form.study(class="form-control", value=data.data[0].study ) }}
+                                    {{ form.study(class="form-control", value=data.data[0].study) }}
                                 </div>
                             </div>
                         </div>
@@ -47,7 +47,7 @@
                                 <label>Faculty</label>
                                 <div class="input-group mb-2">
                                     <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
-                                    {{ form.faculty(class="form-control", value=data.data[0].faculty ) }}
+                                    {{ form.faculty(class="form-control", value=data.data[0].faculty) }}
                                 </div>
                             </div>
                         </div>
@@ -56,9 +56,9 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Role</label>
-                                <div class="input-group mb-2">
+                                <div class="input-group mb-2 disabled">
                                     <!-- <input class="form-control" type="text" placeholder="Success" value="{{ data.data[0].role }}" disabled/> -->
-                                    {{ form.role(class="form-control", value=data.data[0].role )  }}
+                                    {{ form.role(class="form-control", value=data.data[0].role, disabled=True) }}
                                 </div>
                             </div>
                         </div>

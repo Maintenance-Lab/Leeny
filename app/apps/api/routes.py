@@ -9,6 +9,8 @@ from apps.webapp.forms import *
 from flask import request, jsonify, Response, session, flash
 from flask_restx import Api, Resource
 from werkzeug.datastructures import MultiDict
+from apps import db
+from datetime import datetime
 
 
 api = Api(blueprint)
@@ -43,7 +45,35 @@ class BarcodeScanningRoute(Resource):
 class Borrow2(Resource):
     def post(self):
         data = request.get_json()['addedBarcodes']
-        # staat in dict als {'letterlijke barcode': quantity}
+
+        print("DATA", data)
+
+        for items in data.items():
+            print("barcode: ", items[0], "quantity: ", items[1])
+            barcode = items[0]
+            quantity = items[1]
+
+            # If barcode is an int
+            if barcode.isdigit():
+                print("Barcode is an int")
+                # Add 1 to quantity borrowed
+                product = Product.query.filter_by(barcode=barcode).first()
+                product.quantity_borrowed += quantity
+
+                # Add borrow entry to borrowed table
+                user_id = session['_user_id']
+                borrow = 'hoi'
+                # Borrowed(user_id=user_id,
+                #                   product_id=product.id,
+                #                   quantity=quantity,
+                #                   estimated_return_date=int(datetime.now().timestamp() + 604800)
+                #                   )
+                print("ADD TO TABLE: ", borrow)
+                db.session.add(borrow)
+
+        # Save changes to database
+        print("COMMITING CHANGES -------------------------------")
+        db.session.commit()
 
 
 @api.route('/borrow', methods=['POST'])
@@ -55,10 +85,15 @@ class Borrow(Resource):
 
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
-        title = product.title
-        quantity = product.quantity
 
         if product is not None:
+            title = product.title
+            quantity_total = product.quantity_total
+            quantity_unavailable = product.quantity_unavailable
+            quantity_borrowed = product.quantity_borrowed
+
+            quantity = quantity_total - quantity_unavailable - quantity_borrowed
+
             # Product found
             output = {
                 'barcode': barcode,

@@ -16,7 +16,8 @@ from datetime import datetime
 from apps.authentication.forms import CreateAccountForm
 from apps.authentication.models import Users
 from flask_login import current_user
-from apps import db, login_managerfrom flask_restx import Resource
+from apps import db, login_manager
+from flask_restx import Resource
 
 from apps.webapp.models import *
 from apps.authentication.models import *
@@ -50,12 +51,39 @@ def post():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            # data = request.data
+            # data = request.get_json()['addedBarcodes']
             # print("DATA", data)
-            print("-------------------------------------------", request.get_json())
-            # test_data = request.form.get('testData')
-            # print("TEST DATA BLALABALJnL", test_data)
-        else:
+
+            # for items in data.items():
+            #     print("barcode: ", items[0], "quantity: ", items[1])
+            #     barcode = items[0]
+            #     quantity = items[1]
+
+            #     # If barcode is an int
+            #     if barcode.isdigit():
+            #         print("Barcode is an int")
+            #         # Add 1 to quantity borrowed
+            #         product = Product.query.filter_by(barcode=barcode).first()
+            #         product.quantity_borrowed += quantity
+
+            #         # Add borrow entry to borrowed table
+            #         user_id = session['_user_id']
+            #         borrow = Borrowed(user_id=user_id,
+            #                         product_id=product.id,
+            #                         quantity=quantity,
+            #                         estimated_return_date=int(datetime.now().timestamp() + 604800)
+            #                         )
+            #         print("ADD TO TABLE")
+            #         db.session.add(borrow)
+
+            # # Save changes to database
+            # print("COMMITING CHANGES -------------------------------")
+            # db.session.commit()
+
+            # return  redirect('/return')
+            pass
+
+        if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 

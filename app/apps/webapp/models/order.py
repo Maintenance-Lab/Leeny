@@ -12,6 +12,8 @@ class Order(db.Model):
     # Foreign keys
     ordered_id = db.Column(db.Integer, db.ForeignKey('ordered.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+    project = db.Column(db.String(255))
+    students = db.Column(db.String(255))
 
     # Timestamps
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))

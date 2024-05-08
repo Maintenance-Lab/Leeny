@@ -23,6 +23,8 @@ from apps.webapp.forms import *
 # staat nog niet goed ivm verplaatsing ivm api traag
 from apps.api.forms import *
 from sqlalchemy import update
+from sqlalchemy.inspection import inspect
+
 
 
 @blueprint.route('/index')
@@ -133,6 +135,39 @@ def new_item(id = None):
 
     return render_template('app/new-item.html', data=result, segment='inventory')
 
+@blueprint.route('/orders/<int:order_id>')
+def order_info(order_id = None):
+
+    select_columns = [column.name for column in inspect(Ordered).c]
+    all_objects = Ordered.query.filter(Ordered.order_id == order_id).all()
+    result = []
+
+    for obj in all_objects:
+        obj_dict = {}
+        for column in obj.__table__.columns.keys():
+            obj_dict[column] = getattr(obj, column)
+        result.append(obj_dict)
+
+    result_order = []
+    order_object = Order.query.filter(Order.ordered_id == order_id).first()
+    for obj in [order_object]:
+        obj_dict = {}
+        for column in obj.__table__.columns.keys():
+            obj_dict[column] = getattr(obj, column)
+        result_order.append(obj_dict)
+
+    data = {'data': result,'order_data':result_order[0]}
+    
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
+        item['created_at_ts'] = timestamp
+
+    data['order_data']['created_at_ts'] = datetime.fromtimestamp(data['order_data']['created_at_ts']).date()
+
+    print(data)
+
+    return render_template('app/order-info.html', data=data, segment='orders')
+
 
 @blueprint.route('/<template>')
 # @login_required
@@ -220,16 +255,15 @@ def inventory_borrowed():
     
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     
-    return render_template('app/inventory-results.html', data=data)
+    return render_template('app/borrowed-results.html', data=data)
 
 
 from datetime import datetime, timedelta
 
 @blueprint.route('/orders/load')
 def orders_load():
-    select_columns = [Ordered.id, Ordered.title, Ordered.quantity, Ordered.url, Ordered.created_at_ts, Users.fullname, Ordered.status]
-    all_objects = Ordered.query \
-    .join(Order, Ordered.order_id == Order.ordered_id, isouter = True) \
+    select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project]
+    all_objects = Order.query \
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
         
@@ -238,7 +272,7 @@ def orders_load():
     for item in data['data']:
         timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
         now = datetime.now().date()
-        if (timestamp - now) <= timedelta(days=2) and timestamp != now:
+        if (timestamp - now) <= timedelta(days=1) and timestamp != now:
             item['created_at_ts'] = 'Yesterday'
         elif timestamp == now:
             item['created_at_ts'] = 'Today'

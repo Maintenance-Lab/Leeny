@@ -127,25 +127,25 @@ def insert_dummy_data():
         ]
         
         ordered = [
-        Ordered(title='Macbook Pro M1 2022', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
-        Ordered(title='iPhone 13 Pro', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
-        Ordered(title='Samsung Galaxy S22 Ultra', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
-        Ordered(title='Sony PlayStation 5', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4'),
-        Ordered(title='Macbook Pro M1 20221', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
-        Ordered(title='iPhone 13 Pro1', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
-        Ordered(title='Samsung Galaxy S22 Ultra1', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
-        Ordered(title='Sony PlayStation 51', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4'),
-        Ordered(title='Macbook Pro M1 20222', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, projects='', students='', order_id='1'),
-        Ordered(title='iPhone 13 Pro2', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, projects='', students='', order_id='2'),
-        Ordered(title='Samsung Galaxy S22 Ultra2', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, projects='', students='', order_id='3'),
-        Ordered(title='Sony PlayStation 52', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, projects='', students='', order_id='4')
+        Ordered(title='Macbook Pro M1 2022', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, order_id='1', status=2),
+        Ordered(title='iPhone 13 Pro', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, order_id='3', status=3),
+        Ordered(title='Sony PlayStation 5', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, order_id='4'),
+        Ordered(title='Macbook Pro M1 20221', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, order_id='1'),
+        Ordered(title='iPhone 13 Pro1', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra1', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, order_id='3'),
+        Ordered(title='Sony PlayStation 51', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, order_id='4'),
+        Ordered(title='Macbook Pro M1 20222', quantity=1, url='https://apple.com/macbook-pro-m1-2022', price_when_bought=2000.0, order_id='1', status=2),
+        Ordered(title='iPhone 13 Pro2', quantity=1, url='https://apple.com/iphone-13-pro', price_when_bought=1200.0, order_id='2'),
+        Ordered(title='Samsung Galaxy S22 Ultra2', quantity=1, url='https://samsung.com/galaxy-s22-ultra', price_when_bought=1500.0, order_id='3', status=-1),
+        Ordered(title='Sony PlayStation 52', quantity=1, url='https://sony.com/playstation-5', price_when_bought=500.0, order_id='4', status=3)
         ]
 
         order = [
-        Order(user_id=2, ordered_id=1),
-        Order(user_id=1, ordered_id=2),
-        Order(user_id=3, ordered_id=3),
-        Order(user_id=1, ordered_id=4)
+        Order(user_id=2, ordered_id=1, project="Uitleensysteem", students=""),
+        Order(user_id=1, ordered_id=2, project="Vriezer", students=""),
+        Order(user_id=3, ordered_id=3, project="Digital Twin", students=""),
+        Order(user_id=1, ordered_id=4, project="Vriezer", students="")
         ]
 
         db.session.bulk_save_objects(vendors)
@@ -169,7 +169,7 @@ def log_database():
     with app.app_context():
         print(f"{'Model':<15}{'Count':>10}")
         print('-' * 25)
-        for model in [Vendor, ProductCategory, Manufacturer, Product, Ordered, Borrowed]:
+        for model in [Vendor, ProductCategory, Manufacturer, Product, Ordered, Borrowed, Order]:
             count = model.query.count()
             print(f"{model.__name__:<15}{count:>10}")
 

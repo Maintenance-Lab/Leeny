@@ -38,6 +38,26 @@
             showCancelButton: true,
             cancelButtonText: "Go back",
             });
+
+            var interval_id = setInterval(fetchUID, 1000);
+            function fetchUID() {
+            fetch('/get_uid')
+                .then(response => response.json())
+                .then(data => {
+                // document.getElementById('uid').innerHTML = data.uid
+                document.getElementById('uid_1').value = data.uid
+                console.log('UID: ' + data.uid);
+
+                if (data.uid !== null) {
+                    clearInterval(interval_id); // Stop fetching
+                    // document.getElementsById('uid_form').submit();
+                    // document.getElementsByTagName('form')[0].submit();
+                    document.getElementById('finalize_button').click();
+                }
+                })
+                .catch(error => console.error('Error fetching UID:', error))
+                // .then(result => {document.getElementsByTagName('form').target.submit()});
+            }
         </script>
         {% endif %}
 

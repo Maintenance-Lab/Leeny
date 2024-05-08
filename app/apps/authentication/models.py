@@ -32,9 +32,11 @@ class Users(db.Model, UserMixin):
     faculty       = db.Column(db.String(64), nullable=True)
     role          = db.Column(db.String(16), nullable=True, default='student')
 
-    uid_1         = db.Column(db.String(64), unique=True, nullable=True)
-    uid_2         = db.Column(db.String(64), unique=True, nullable=True)
-    uid_3         = db.Column(db.String(64), unique=True, nullable=True)
+    # uid_1         = db.Column(db.String(64), unique=True, nullable=True)
+    # uid_2         = db.Column(db.String(64), unique=True, nullable=True)
+    # uid_3         = db.Column(db.String(64), unique=True, nullable=True)
+
+    password      = db.Column(db.String(128), nullable=True)
 
     oauth_github  = db.Column(db.String(100), nullable=True)
 

@@ -9,7 +9,7 @@ from datetime import datetime
 from flask_restx import Resource, Api
 
 import flask
-from flask import render_template, redirect, request, url_for, flash, session
+from flask import render_template, redirect, request, url_for, flash, session, jsonify
 from flask_login import (
     current_user,
     login_user,
@@ -75,11 +75,11 @@ def rfid_login():
     if request.method == 'POST':
 
         # read form data
-        username = request.form['username']
+        fullname = request.form['fullname']
         uid = request.form['uid'] or None
         password = request.form['password']
 
-        # Locate user
+        # Check if uid exists
         if uid:
             print('uid', uid)
             try:
@@ -99,7 +99,7 @@ def rfid_login():
 
         else:
             print('No card used, trying username')
-            user = Users.query.filter_by(username=username).first()
+            user = Users.query.filter_by(fullname=fullname).first()
 
         # Check the password
         if user and password and verify_pass(password, user.password):
@@ -116,13 +116,17 @@ def rfid_login():
                                msg='No user found for this card',
                                form=login_form)
         # Check if username is provided but no user is found
-        elif username and not user:
+        elif fullname and not user:
             return render_template('accounts/rfid_login.html',
                                  msg='No user found with this name',
                                  form=login_form)
-        print(username, uid, password, user)
-        #     login_user(user)
-        #     return redirect(url_for('authentication_blueprint.route_default'))
+
+        # Authenticated user
+        if user:
+            login_user(user)
+            flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
+            return render_template('accounts/login.html',
+                               form=login_form)
 
         # Edge cases
         return render_template('accounts/rfid_login.html',
@@ -141,15 +145,15 @@ def rfid_register():
     create_account_form = RfidCreateAccountForm(request.form)
     if 'register' in request.form:
 
-        username = request.form['username']
+        fullname = request.form['fullname']
         email = request.form['email']
         uid_1 = request.form['uid_1'] or None
 
         # Check usename exists
-        user = Users.query.filter_by(username=username).first()
+        user = Users.query.filter_by(fullname=fullname).first()
         if user:
             return render_template('accounts/rfid_register.html',
-                                   msg='Username already registered',
+                                   msg='Name already registered',
                                    success=False,
                                    form=create_account_form)
 
@@ -161,9 +165,8 @@ def rfid_register():
                                    success=False,
                                    form=create_account_form)
 
-        # Check uid exists
+        # Check if uid exists
         if uid_1:
-            print('uid', uid_1)
             try:
                 user = Users.query.filter_by(uid_1=uid_1).first()
             except Exception as e1:
@@ -178,7 +181,8 @@ def rfid_register():
                     user = Users.query.filter_by(uid_3=uid_1).first()
                 except Exception as e3:
                     print('Error when card scanning:', e3)
-        if user is None and uid_1:
+        # Card already registered
+        if user and uid_1:
             return render_template('accounts/rfid_register.html',
                                    msg='Card already registered',
                                    success=False,
@@ -213,10 +217,23 @@ def login():
         #return 'Login: ' + fullname + ' / ' + password
 
         # Locate user
-        user = Users.query.filter_by(uid_1=uid_1).first()
+        if uid_1:
+            try:
+                user = Users.query.filter_by(uid_1=uid_1).first()
+            except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_2=uid_1).first()
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid_1).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
 
-        # Check the password
-        # if user and verify_pass(password, user.password):
+        # if user is found, log in:
         if user:
             login_user(user)
             flash({'text':'123', 'location': 'index', 'user': user.fullname}, 'Timer')
@@ -280,6 +297,30 @@ def register():
                                step=3)
     if 'finalize' in request.form:
         uid_1 = request.form['uid_1']
+
+        # Check if uid exists
+        if uid_1:
+            try:
+                user = Users.query.filter_by(uid_1=uid_1).first()
+            except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_2=uid_1).first()
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid_1).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
+        # Card already registered
+        if user and uid_1:
+            flash({'category':'error', 'title': 'Card already registered!', 'text': 'Use a different card.'}, 'General')
+            return render_template('accounts/register.html',
+                                   success=False,
+                                   form=create_account_form,
+                                   step=1)
 
         user = Users(
             fullname =session['fullname'],
@@ -356,11 +397,9 @@ class JWTLogin(Resource):
 
 @blueprint.route('/card_reader', methods=['GET', 'POST'])
 def card_reader():
-    print('card_reader')
     login_form = RfidLoginForm(request.form)
 
     if request.method == 'POST':
-        print("post")
 
         # read form data
         # username = request.form['username'] or None
@@ -369,10 +408,8 @@ def card_reader():
 
         # Locate user
         if uid:
-            print('uid', uid)
             try:
                 user = Users.query.filter_by(uid_1=uid).first()
-                print('user1', user)
             except Exception as e1:
                 print('Error when card scanning:', e1)
             if user is None:
@@ -399,6 +436,12 @@ def card_reader():
                                msg='No user found for this card',
                                form=login_form)
             # return redirect(url_for('authentication_blueprint.rfid_register'))
+        
+        if user:
+            login_user(user)
+            flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
+            return render_template('accounts/rfid_login.html',
+                               form=login_form)
 
         # Edge cases
         return render_template('accounts/rfid_login.html',

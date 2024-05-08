@@ -14,8 +14,8 @@ class RfidLoginForm(FlaskForm):
     uid = StringField('Rfid_uid',
                       id='rfid_uid_login',
                       validators=[Optional()])
-    username = StringField('Username',
-                           id='rfid_username_login',
+    fullname = StringField('Fullname',
+                           id='rfid_fullname_login',
                            validators=[Optional()])
     password = PasswordField('Password',
                              id='rfid_pwd_login',
@@ -38,8 +38,8 @@ class RfidLoginForm(FlaskForm):
 
 
 class RfidCreateAccountForm(FlaskForm):
-    username = StringField('Username',
-                           id='rfid_username_create',
+    fullname = StringField('Fullname',
+                           id='rfid_fullname_create',
                            validators=[DataRequired()])
     email = StringField('Email',
                         id='rfid_email_create',

@@ -1,86 +1,13 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
-
-import sys
-import serial
 import time
-import glob
+# pip install pyserial
+import serial
+import struct
 import binascii
-from datetime import datetime
-from flask_login import UserMixin
-
-from sqlalchemy.orm import relationship
-from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
-
-from apps import db, login_manager
-
-from apps.authentication.util import hash_pass
-
-class Users(db.Model, UserMixin):
-
-    __tablename__ = 'Users'
-
-    id            = db.Column(db.Integer, primary_key=True)
-    fullname      = db.Column(db.String(64), unique=True)
-    email         = db.Column(db.String(64), unique=True)
-    uid_1         = db.Column(db.String(64), nullable=True)
-    uid_2         = db.Column(db.String(64), nullable=True)
-    uid_3         = db.Column(db.String(64), nullable=True)
-    study         = db.Column(db.String(64), nullable=True)
-    faculty       = db.Column(db.String(64), nullable=True)
-    role          = db.Column(db.String(16), nullable=True, default='student')
-
-    # uid_1         = db.Column(db.String(64), unique=True, nullable=True)
-    # uid_2         = db.Column(db.String(64), unique=True, nullable=True)
-    # uid_3         = db.Column(db.String(64), unique=True, nullable=True)
-
-    password      = db.Column(db.String(128), nullable=True)
-
-    oauth_github  = db.Column(db.String(100), nullable=True)
-
-    api_token     = db.Column(db.String(100))
-    api_token_ts  = db.Column(db.Integer)    
-    created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))
-    updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))
-
-    def __init__(self, **kwargs):
-        for property, value in kwargs.items():
-            # depending on whether value is an iterable or not, we must
-            # unpack it's value (when **kwargs is request.form, some values
-            # will be a 1-element list)
-            if hasattr(value, '__iter__') and not isinstance(value, str):
-                # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
-                value = value[0]
-
-            if property == 'password':
-                value = hash_pass(value)  # we need bytes here (not plain str)
-
-            setattr(self, property, value)
-
-    def __repr__(self):
-        return str(self.fullname)
+import sys
+import glob
 
 
-@login_manager.user_loader
-def user_loader(id):
-    return Users.query.filter_by(id=id).first()
-
-
-@login_manager.request_loader
-def request_loader(request):
-    uid_1 = request.form.get('uid_1')
-    user = Users.query.filter_by(uid_1=uid_1).first()
-    return user if user else None
-
-
-class OAuth(OAuthConsumerMixin, db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey("Users.id", ondelete="cascade"), nullable=False)
-    user = db.relationship(Users)
-
-
-# RFID Scanner class
+# Scanner class
 class Scanner:
     def __init__(self):
         self.port = self.serial_ports()[0]
@@ -240,4 +167,37 @@ class Scanner:
 
         except Exception as e:
             print(f"Error: {e}")
-    
+
+
+def main():
+    uid = None
+    scanner = Scanner()
+
+    print("START SCANNING:\n")
+    while True:
+        if scanner.ser.is_open is False:
+            # print("Serial port is closed. Opening serial port...")
+            scanner.open_serial()
+
+        print("SCAN ROUND:")
+        picca_res = scanner.piccactivate()
+        if picca_res.startswith(b'50'):
+            uid = scanner.response_parse(picca_res)
+            print(f"\nUID: {uid}\n")
+
+            scanner.set_led()
+            scanner.set_buzzer()
+        print("END SCAN ROUND:\n")
+
+        if uid:
+            print("UID found. Exiting...")
+            break
+
+        time.sleep(0.3)
+
+    # close serial
+    scanner.ser.close()
+
+
+if __name__ == "__main__":
+    main()

@@ -9,11 +9,11 @@ import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
 from flask import current_app, flash, render_template, redirect, url_for, request, session
-from flask_login import login_required
+from flask_login import login_required, login_user
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
-from apps.authentication.forms import CreateAccountForm
+from apps.authentication.forms import CreateAccountForm, LoginForm
 from apps.authentication.models import Users
 from flask_login import current_user
 from apps import db, login_manager
@@ -38,11 +38,50 @@ def barcode_scanning():
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
-    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+    login_form = LoginForm(request.form)
+
     if request.method == "POST":
-        flash({'text':'123'}, 'Login')
-        # Login scanner activeren
-    return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
+        if 'finalize' in request.form:
+            # read form data
+            uid_1 = request.form['uid_1']
+
+            # Check if uid exists
+            if uid_1:
+                try:
+                    user = Users.query.filter_by(uid_1=uid_1).first()
+                except Exception as e1:
+                    print('Error when card scanning:', e1)
+                if user is None:
+                    try:
+                        user = Users.query.filter_by(uid_2=uid_1).first()
+                    except Exception as e2:
+                        print('Error when card scanning:', e2)
+                if user is None:
+                    try:
+                        user = Users.query.filter_by(uid_3=uid_1).first()
+                    except Exception as e3:
+                        print('Error when card scanning:', e3)
+            
+            if user:
+                login_user(user)
+                flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
+                return render_template('app/start.html',
+                                    form=login_form)
+            
+            # Edge cases
+            return render_template('accounts/rfid_login.html',
+                                msg='Wrong user or password *** edge case ***',
+                                form=login_form)
+        else:
+            flash({'text':'123'}, 'Login')
+            return render_template('app/start.html',
+                                   form=login_form)
+
+    if current_user.is_authenticated:
+        return redirect(url_for('webapp_blueprint.index'))
+    else:
+        return render_template('app/start.html',
+                               form=login_form)
 
 
 @blueprint.route('/borrow', methods=["GET","POST"])

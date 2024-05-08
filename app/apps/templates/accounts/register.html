@@ -1,42 +1,23 @@
 {% extends 'layouts/base-fullscreen.html' %}
 
-{% block title %} Sign UP {% endblock title %}
+{% block title %} Register {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
 
-  <div class="container position-sticky z-index-sticky top-1">
-    <div class="row">
-      <div class="col-12">
+  <main class="main-content">
 
-        {% include "includes/navigation-fullscreen.html" %}
-
-      </div>
-    </div>
-  </div>
-
-  <main class="main-content  mt-0">
-
-    <section class="min-vh-100 mb-8">
-      <div class="page-header align-items-start min-vh-50 pt-5 pb-11 m-3 border-radius-lg" style="background-image: url('{{ config.ASSETS_ROOT }}/img/curved-images/curved14.jpg');">
-        <span class="mask bg-gradient-dark opacity-6"></span>
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-lg-5 text-center mx-auto">
-              <h1 class="text-white mb-2 mt-5">Welcome!</h1>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="container">
-        <div class="row mt-lg-n10 mt-md-n11 mt-n10">
+    <section class="min-vh-100">
+      
+      <div class="container mt-7">
+        <div class="row">
           <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
             <div class="card z-index-0">
 
               <div class="card-header text-center pt-4">
-                <h5>Sign UP</h5>
+                <h5>Register Account</h5>
               </div>
 
               <div class="row px-xl-5 px-sm-4 px-3">
@@ -55,44 +36,92 @@
 
               <div class="card-body">
 
-                {% if success %} 
-                
-                  <p class="text-sm mt-3 mb-0 text-center"> 
+                  {% if step==1 %}
+
+                  <span>Step 1</span>
+
+                    <form role="form text-left" method="post" action="">
+
+                      {{ form.hidden_tag() }}
+
+                        <label>Full Name</label>
+                        <div class="mb-3">
+                          {{ form.fullname(placeholder="Full name", class="form-control", value=session.fullname) }}
+                        </div>
+                        <label>Email</label>
+                        <div class="mb-3">
+                          {{ form.email(placeholder="Email", class="input form-control", type="email", value=session.email) }}
+                        </div>
+
+                        <div class="text-center">
+                          <button type="submit" name="step2" class="btn bg-gradient-dark w-100 my-4 mb-2">Next step</button>
+                        </div>
+
+                        <div class="text-center">
+                          <a href="{{ url_for('webapp_blueprint.start') }}" class="btn bg-gradient-secondary w-100 mt-4 mb-0">Back to start</a>
+                        </div>                
+
+                    </form>
+                  {% endif %}
+
+                  {% if step==2 %}
+
+                  <span>Step 2</span>
+
+                    <form role="form text-left" method="post" action="">
+
+                      {{ form.hidden_tag() }}
+
+                        <label>Study Programme</label>
+                        <div class="mb-3">
+                          {{ form.study(placeholder="Study Programme", class="form-control", value=session.study) }}
+                        </div>
+                        <label>Faculty</label>
+                        <div class="mb-3">
+                          {{ form.faculty(placeholder="Faculty", class="form-control", value=session.faculty) }}
+                        </div>
+
+                        <div class="text-center">
+                          <button type="submit" name="step3" class="btn bg-gradient-dark w-100 my-4 mb-2">Next step</button>
+                        </div>
+
+                        <div class="text-center">
+                          <button type="submit" name="step1" class="btn bg-gradient-secondary w-100 mt-4 mb-0">Back</button>
+                        </div>                
+
+                    </form>
+                  {% endif %}
+
+                  
+
+                  {% if step==3 %}
+
+                    <span>Step 3</span>
+
+                    <form role="form text-left" method="post" action="">
+
+                      {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                          {{ form.uid_1(placeholder="card_id", class="form-control") }}
+                        </div>
+
+                        <div class="text-center">
+                          <button type="submit" name="finalize" class="btn bg-gradient-dark w-100 my-4 mb-2">Create Account</button>
+                        </div>
+
+                        <div class="text-center">
+                          <button type="submit" name="step2" class="btn bg-gradient-secondary w-100 mt-4 mb-0">Back</button>
+                        </div>                
+
+                    </form>
+                  {% endif %}
+
+                  {% if msg %}
                     <div class="text-center">
-                      <a href="{{ url_for('authentication_blueprint.login') }}" class="btn bg-gradient-dark w-100 my-4 mb-2">Sign IN</a>
-                    </div> 
-                  </p>
-
-                {% else %}
-
-                  <form role="form text-left" method="post" action="">
-
-                    {{ form.hidden_tag() }}
-
-                      <label>Username</label>
-                      <div class="mb-3">
-                        {{ form.username(placeholder="Username", class="form-control") }}
-                      </div>
-                      <label>Email</label>
-                      <div class="mb-3">
-                        {{ form.email(placeholder="Email", class="input form-control", type="email") }}
-                      </div>
-                      <label>Password</label>
-                      <div class="mb-3">
-                        {{ form.password(placeholder="Password", class="form-control", type="password") }}
-                      </div>
-
-                      <div class="text-center">
-                        <button type="submit" name="register" class="btn bg-gradient-dark w-100 my-4 mb-2">Sign UP</button>
-                      </div>
-
-                      <div class="text-center">
-                        <a href="{{ url_for('authentication_blueprint.login') }}" class="btn bg-gradient-secondary w-100 mt-4 mb-0">Sign IN</a>
-                      </div>                
-
-                  </form>
-
-                {% endif %}
+                      <a href="{{ url_for('webapp_blueprint.start') }}" class="btn bg-gradient-secondary w-100 mt-4 mb-0">Back to start</a>
+                    </div>     
+                  {% endif %}  
 
               </div>
             </div>
@@ -100,9 +129,6 @@
         </div>
       </div>
     </section>
-
-    {% include "includes/footer-fullscreen.html" %}
-
   </main>
 
   {% endblock content %}

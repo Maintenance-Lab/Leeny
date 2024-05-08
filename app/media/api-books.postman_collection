@@ -155,7 +155,7 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "username",
+							"key": "fullname",
 							"value": "test",
 							"type": "text"
 						},

@@ -1,0 +1,38 @@
+{% for item in data['data'] %}
+<tr>
+    <td style="padding-left: 24px;">
+        <h6 class="mb-0 text-sm">#{{item.id}}</h6>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0">{{ item.created_at_ts }}</p>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0">{{item.title}}</p>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0">{{item.fullname}}</p>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0">{{item.quantity}}</p>
+    </td>
+    
+    <td>
+        {% if item.status == 1 %}
+        <p class="text-xs font-weight-bold mb-0">Waiting for approval</p>
+        {% endif %}
+        {% if item.status == 2 %}
+        <p class="text-xs font-weight-bold mb-0">In transit</p>
+        {% endif %}
+        {% if item.status == 3 %}
+        <p class="text-xs font-weight-bold mb-0">Delivered</p>
+        {% endif %}
+        {% if item.status == 4 %}
+        <p class="text-xs font-weight-bold mb-0">Finished</p>
+        {% endif %}
+        {% if item.status == -1 %}
+        <p class="text-xs font-weight-bold mb-0">Cancelled</p>
+        {% endif %}
+    </td>
+    
+</tr>
+{% endfor %}

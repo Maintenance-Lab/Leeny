@@ -3,13 +3,21 @@ from wtforms.validators import DataRequired
 from wtforms import StringField, IntegerField, TextAreaField
 
 class ProductForm(FlaskForm):
-    article_number = StringField('Article number', validators=[DataRequired()])
-    model = StringField('Model', validators=[DataRequired()])
+    title = StringField('Title', validators=[DataRequired()])
+    barcode = StringField('Barcode')
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     price_when_bought = IntegerField('Price when bought', validators=[DataRequired()])
     description = TextAreaField('Description')
-    EAN = StringField('EAN')
     url = StringField('url')
+    documentation = StringField('Documentation')
+    notes = StringField('Notes')
+    quantity_unavailable = StringField('Quantity Unavailable')
+
     manufacturer_id = IntegerField('Manufacturer ID', validators=[DataRequired()])
     category_id = IntegerField('Category ID', validators=[DataRequired()])
     vendor_id = IntegerField('Vendor ID', validators=[DataRequired()])
+
+
+    # Timestamps (Nog toevoegen?)
+    # created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))
+    # updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))

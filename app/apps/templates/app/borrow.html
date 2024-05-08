@@ -9,6 +9,7 @@
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
+            <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''" />
             <tr class="container px-0 w-100">
                 <td class="col-7">
                     <div class="">
@@ -21,254 +22,229 @@
             <div class="card text-left">
                 <div class="table-responsive p-0 " style="max-height: 450px;">
                     <table class="table align-items-center mb-0 p-3">
-                    <tbody>
-                        <tr class="container px-0">
-                        <td class="col-7">
-                            <div class="d-flex px-2 py-1">
-                            <div class="d-flex flex-column justify-content-center">
-                                <h6 class="mb-0 text-sm text-wrap">Apple MacBook Air M1 2022 </h6>   
-                            </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="col-3 input-group"> 
-                                <input type="text" class="form-control p-1" placeholder="Quantity" onfocus="focused(this)" onfocusout="defocused(this)">
-                            </div>
-                        </td>
-                        <td class="align-middle col-2">
-                            <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete item">
-                            Delete
-                            </a>
-                        </td>
-                        </tr>
-                        <tr class="container px-0">
-                            <td class="col-7">
-                                <div class="d-flex px-2 py-1">
-                                <div class="d-flex flex-column justify-content-center">
-                                    <h6 class="mb-0 text-sm text-wrap">2WD dubbeldekker robot chassis</h6>   
-                                </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="col-3 input-group"> 
-                                    <input type="text" class="form-control p-1" placeholder="Quantity" onfocus="focused(this)" onfocusout="defocused(this)">
-                                </div>
-                            </td>
-                            <td class="align-middle col-2">
-                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete item">
-                                Delete
-                                </a>
-                            </td>
-                        </tr>
-                        <tr class="container px-0">
-                            <td class="col-7">
-                                <div class="d-flex px-2 py-1">
-                                <div class="d-flex flex-column justify-content-center">
-                                    <h6 class="mb-0 text-sm text-wrap">Raspberry Pi 4 Model B 1GB</h6>   
-                                </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="col-3 input-group"> 
-                                    <input type="text" class="form-control p-1" placeholder="Quantity" onfocus="focused(this)" onfocusout="defocused(this)">
-                                </div>
-                            </td>
-                            <td class="align-middle col-2">
-                                <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Delete item">
-                                Delete
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
+
+                    <tbody></tbody>
+
                     </table>
                     <div class="text-center">
-                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4">Continue</button>
+                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4" id="continue">Continue</button>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-3">
-                <a type="button" class="btn btn-outline-danger opacity-25 w-25 mt-2 mb-4 btn-sm" href="/dashboard">Cancel</a>
-            </div>
+            <form method="POST" class="text-center mt-3">
+                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Cancel</button>
+            </form>
         </div>
-        
     </div>
 
-    
+
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
+<!-- Specific JS goes HERE -->
 {% block javascripts %}
 
-  <script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
-  <script>
-    var ctx = document.getElementById("chart-bars").getContext("2d");
+<script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
 
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-          label: "Sales",
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: false,
-          backgroundColor: "#fff",
-          data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-          maxBarThickness: 6
-        }, ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-            },
-            ticks: {
-              suggestedMin: 0,
-              suggestedMax: 500,
-              beginAtZero: true,
-              padding: 15,
-              font: {
-                size: 14,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-              color: "#fff"
-            },
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false
-            },
-            ticks: {
-              display: false
-            },
-          },
-        },
-      },
+<!-- Script importen die barcodes verkrijgt -->
+<script src="app/apps/scripts/barcode.js"></script>
+
+<script>
+    function deleteRow(link) {
+        // Find the closest row to the clicked link
+        var row = link.closest('tr');
+        row.remove();
+
+        // Get the barcode of the item to be deleted
+        var barcode = row.querySelector('input').getAttribute('data-barcode');
+        delete addedBarcodes[barcode];
+    }
+
+    function incrementQuantity(barcode) {
+         // Get the current value of the quantity input for the corresponding barcode
+        var quantityInput = document.getElementById(`${barcode}`);
+        var currentQuantity = addedBarcodes[barcode];
+        console.log("currentQuantity: ", currentQuantity);
+
+        // Increment the quantity
+        quantityInput.value = currentQuantity + 1;
+        addedBarcodes[barcode] = currentQuantity + 1;
+
+    }
+
+    const tableBody = document.querySelector('tbody');
+    var addedBarcodes = {};
+
+    function createElement(tag, classes = [], attributes = {}, content = '') {
+        const element = document.createElement(tag);
+        if (classes.length) element.classList.add(...classes);
+        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+        if (content) element.textContent = content;
+        return element;
+    }
+
+    function addTableRow(barcode) {
+        var quantity = addedBarcodes[barcode] || 1; // Get the current quantity or default to 1
+
+        const row = createElement('tr');
+        const nameCell = createElement('td', ['col-7']);
+        const nameDiv = createElement('div', ['d-flex', 'px-2', 'py-1']);
+        const nameColumn = createElement('div', ['d-flex', 'flex-column', 'justify-content-center']);
+        const itemName = createElement('h6', ['mb-0', 'text-sm', 'text-wrap', 'item-name'], {}, item_name);
+
+        nameColumn.appendChild(itemName);
+        nameDiv.appendChild(nameColumn);
+        nameCell.appendChild(nameDiv);
+        row.appendChild(nameCell);
+
+        const quantityCell = createElement('td');
+        const quantityDiv = createElement('div', ['col-3', 'input-group']);
+        const quantityInput = createElement('input', ['form-control', 'p-1'], {
+            type: 'number',
+            min: '1',
+            'data-barcode': barcode,
+            id: barcode,
+            value: quantity
+        });
+        quantityInput.addEventListener('focus', focused);
+        quantityInput.addEventListener('focusout', defocused);
+        quantityDiv.appendChild(quantityInput);
+        quantityCell.appendChild(quantityDiv);
+        row.appendChild(quantityCell);
+
+        const deleteCell = createElement('td', ['align-middle', 'col-2']);
+        const deleteLink = createElement('a', ['text-secondary', 'font-weight-bold', 'text-xs'], {
+            href: 'javascript:;',
+            'data-toggle': 'tooltip',
+            'data-original-title': 'Delete item'
+        }, 'Delete');
+        deleteLink.addEventListener('click', () => deleteRow(deleteLink));
+        deleteCell.appendChild(deleteLink);
+        row.appendChild(deleteCell);
+
+        tableBody.appendChild(row);
+
+        addedBarcodes[barcode] = quantity;
+    }
+
+
+
+    // function addTableRow(barcode) {
+    //     tableBody.innerHTML += `
+    //         <tr>
+    //             <td class="col-7">
+    //                 <div class="d-flex px-2 py-1">
+    //                     <div class="d-flex flex-column justify-content-center">
+    //                         <h6 class="mb-0 text-sm text-wrap item-name">${item_name}</h6>
+    //                     </div>
+    //                 </div>
+    //             </td>
+    //             <td>
+    //                 <div class="col-3 input-group">
+    //                     <input type="number" class="form-control p-1" min="1" data-barcode="${barcode}" id="${barcode}" value="1" onfocus="focused(this)" onfocusout="defocused(this)">
+    //                 </div>
+    //             </td>
+    //             <td class="align-middle col-2">
+    //                 <a href="javascript:;" class="text-secondary font-weight-bold text-xs" onclick="deleteRow(this)" data-toggle="tooltip" data-original-title="Delete item">
+    //                     Delete
+    //                 </a>
+    //             </td>
+    //         </tr>`;
+    // }
+
+
+    var barcode = '';
+    var all_products = {};
+    var item_name = '';
+    var typingTimer;
+    var doneTypingInterval = 50;
+
+    // autofocus input field on loading page
+    document.getElementById("barcodeInputField").focus();
+
+    // autofocus input field on every click everywhere on the page
+    document.addEventListener('click', function() {
+        document.getElementById("barcodeInputField").focus();
+    });
+
+    // change value in dict if quantity is manually changed
+    document.addEventListener('input', function(event) {
+        // only if quantity of product is not higher than max quantity
+        if (event.target.tagName === 'INPUT') {
+            var barcode = event.target.getAttribute('data-barcode');
+                addedBarcodes[barcode] = parseInt(event.target.value);
+        }
+    });
+
+    // Whenever a barcode is scanned
+    document.getElementById("barcodeInputField").addEventListener('input', function() {
+        // Clear the previous timer
+        clearTimeout(typingTimer);
+
+        console.log("added barcodes 1: ", addedBarcodes);
+
+        // Get barcode from input field
+        barcode = document.getElementById("barcodeInputField").value;
+
+        // Set a new timer to handle barcode input after a certain amount of time
+        typingTimer = setTimeout(function() {
+            console.log("Sending this barcode: ", barcode);
+
+            // Send the barcode to the server
+            fetch('api/borrow', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ barcode: barcode })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response from server:', data);
+
+                message = data.message;
+                if (message == "Product found") {
+                    // when barcode found
+                    item_name = data.name;
+                    item_quantity = data.quantity;
+
+
+
+                    // Check if barcode already exists on the screen
+                    if (barcode in addedBarcodes) {
+                        // Increment quantity for existing barcode
+                        incrementQuantity(barcode);
+                        console.log("alleen incrementen")
+                    } else {
+                        // Add the new barcode to the array and create a new table row
+                        console.log("nieuwe barcode toevoegen: ", barcode)
+                        addedBarcodes[barcode] = 1;
+                        addTableRow(barcode);
+                    }
+
+                    console.log("added barcodes 2: ", addedBarcodes);
+
+                    // Clear the input field after processing
+                    document.getElementById("barcodeInputField").value = "";
+                }
+                else {
+                    // when barcode not found
+                    console.log("Barcode not found");
+                }
+
+
+
+            })
+            .catch(error => console.error('Error:', error));
+        }, doneTypingInterval);
     });
 
 
-    var ctx2 = document.getElementById("chart-line").getContext("2d");
 
-    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
-    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
-
-    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
-
-    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
-    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
-
-    new Chart(ctx2, {
-      type: "line",
-      data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        datasets: [{
-            label: "Mobile apps",
-            tension: 0.4,
-            borderWidth: 0,
-            pointRadius: 0,
-            borderColor: "#cb0c9f",
-            borderWidth: 3,
-            backgroundColor: gradientStroke1,
-            fill: true,
-            data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
-            maxBarThickness: 6
-
-          },
-          {
-            label: "Websites",
-            tension: 0.4,
-            borderWidth: 0,
-            pointRadius: 0,
-            borderColor: "#575f9a",
-            borderWidth: 3,
-            backgroundColor: gradientStroke2,
-            fill: true,
-            data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
-            maxBarThickness: 6
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index',
-        },
-        scales: {
-          y: {
-            grid: {
-              drawBorder: false,
-              display: true,
-              drawOnChartArea: true,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              padding: 10,
-              color: '#b2b9bf',
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-          x: {
-            grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
-              borderDash: [5, 5]
-            },
-            ticks: {
-              display: true,
-              color: '#b2b9bf',
-              padding: 20,
-              font: {
-                size: 11,
-                family: "Open Sans",
-                style: 'normal',
-                lineHeight: 2
-              },
-            }
-          },
-        },
-      },
-    });
-  </script>
+</script>
 
 {% endblock javascripts %}

@@ -6,11 +6,33 @@
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
+<style>
+.dt-search {
+  margin-right: 20px;
+  height: 29px;
+}
+.dt-search input {
+  border-radius: 8px !important;
+  padding: 3px 0px !important;
+  text-indent: 10px !important;
+}
+
+.page-item.active .page-link {
+  background-color: #344767 !important;
+  border-color: #344767 !important;
+}
+
+.dt-paging .dt-paging-button:hover {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+</style>
+
 
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid py-4">
+  <div class="container-fluid">
     <div class="row">
         <div class="d-flex align-items-center justify-content-between">
             <h1>Orders</h1>
@@ -20,7 +42,7 @@
             </div>
           </div>
       <div class="col-12">
-        <div class=" mb-4">
+        <div class="">
           <div class="card-body px-0 pt-0 pb-2">
             <div class="p-0">
               <div class="dataTable-wrapper dataTable-loading">
@@ -35,16 +57,10 @@
                           Date
                         </th>
                         <th>
-                          Product
-                        </th>
-                        <th>
                           By
                         </th>
                         <th>
-                          Quantity
-                        </th>
-                        <th>
-                          Status
+                          For
                         </th>
                       </tr>
                     </thead>

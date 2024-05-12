@@ -9,11 +9,11 @@ import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
 from flask import current_app, flash, render_template, redirect, url_for, request, session
-from flask_login import login_required
+from flask_login import login_required, login_user
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
-from apps.authentication.forms import CreateAccountForm
+from apps.authentication.forms import CreateAccountForm, LoginForm
 from apps.authentication.models import Users
 from flask_login import current_user
 from apps import db, login_manager
@@ -25,12 +25,8 @@ from apps.webapp.forms import *
 # staat nog niet goed ivm verplaatsing ivm api traag
 from apps.api.forms import *
 from sqlalchemy import update
+from sqlalchemy.inspection import inspect
 
-
-@blueprint.route('/index')
-# @login_required
-def index():
-    return render_template('app/index.html', segment='index', API_GENERATOR=len(API_GENERATOR))
 
 @blueprint.route('/barcode-scanning')
 def barcode_scanning():
@@ -38,11 +34,50 @@ def barcode_scanning():
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
-    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+    login_form = LoginForm(request.form)
+
     if request.method == "POST":
-        flash({'text':'123'}, 'Login')
-        # Login scanner activeren
-    return render_template('app/start.html', API_GENERATOR=len(API_GENERATOR))
+        if 'finalize' in request.form:
+            # read form data
+            uid_1 = request.form['uid_1']
+
+            # Check if uid exists
+            if uid_1:
+                try:
+                    user = Users.query.filter_by(uid_1=uid_1).first()
+                except Exception as e1:
+                    print('Error when card scanning:', e1)
+                if user is None:
+                    try:
+                        user = Users.query.filter_by(uid_2=uid_1).first()
+                    except Exception as e2:
+                        print('Error when card scanning:', e2)
+                if user is None:
+                    try:
+                        user = Users.query.filter_by(uid_3=uid_1).first()
+                    except Exception as e3:
+                        print('Error when card scanning:', e3)
+
+            if user:
+                login_user(user)
+                flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
+                return render_template('app/start.html',
+                                    form=login_form)
+
+            # Edge cases
+            return render_template('accounts/rfid_login.html',
+                                msg='Wrong user or password *** edge case ***',
+                                form=login_form)
+        else:
+            flash({'text':'123'}, 'Login')
+            return render_template('app/start.html',
+                                   form=login_form)
+
+    if current_user.is_authenticated:
+        return redirect(url_for('webapp_blueprint.index'))
+    else:
+        return render_template('app/start.html',
+                               form=login_form)
 
 
 @blueprint.route('/borrow', methods=["GET","POST"])
@@ -169,6 +204,39 @@ def new_item(id = None):
 
     return render_template('app/new-item.html', data=result, segment='inventory')
 
+@blueprint.route('/orders/<int:order_id>')
+def order_info(order_id = None):
+
+    select_columns = [column.name for column in inspect(Ordered).c]
+    all_objects = Ordered.query.filter(Ordered.order_id == order_id).all()
+    result = []
+
+    for obj in all_objects:
+        obj_dict = {}
+        for column in obj.__table__.columns.keys():
+            obj_dict[column] = getattr(obj, column)
+        result.append(obj_dict)
+
+    result_order = []
+    order_object = Order.query.filter(Order.ordered_id == order_id).first()
+    for obj in [order_object]:
+        obj_dict = {}
+        for column in obj.__table__.columns.keys():
+            obj_dict[column] = getattr(obj, column)
+        result_order.append(obj_dict)
+
+    data = {'data': result,'order_data':result_order[0]}
+
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
+        item['created_at_ts'] = timestamp
+
+    data['order_data']['created_at_ts'] = datetime.fromtimestamp(data['order_data']['created_at_ts']).date()
+
+    print(data)
+
+    return render_template('app/order-info.html', data=data, segment='orders')
+
 
 @blueprint.route('/<template>')
 # @login_required
@@ -217,7 +285,7 @@ def get_segment(request):
         segment = request.path.split('/')[-1]
 
         if segment == '':
-            segment = 'index'
+            segment = 'home'
 
         return segment
 
@@ -258,14 +326,15 @@ def inventory_borrowed():
 
     return render_template('app/inventory-results.html', data=data)
 
+    return render_template('app/borrowed-results.html', data=data)
+
 
 from datetime import datetime, timedelta
 
 @blueprint.route('/orders/load')
 def orders_load():
-    select_columns = [Ordered.id, Ordered.title, Ordered.quantity, Ordered.url, Ordered.created_at_ts, Users.fullname, Ordered.status]
-    all_objects = Ordered.query \
-    .join(Order, Ordered.order_id == Order.ordered_id, isouter = True) \
+    select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project]
+    all_objects = Order.query \
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
 
@@ -274,7 +343,7 @@ def orders_load():
     for item in data['data']:
         timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
         now = datetime.now().date()
-        if (timestamp - now) <= timedelta(days=2) and timestamp != now:
+        if (timestamp - now) <= timedelta(days=1) and timestamp != now:
             item['created_at_ts'] = 'Yesterday'
         elif timestamp == now:
             item['created_at_ts'] = 'Today'

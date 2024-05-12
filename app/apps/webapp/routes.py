@@ -116,6 +116,8 @@ def post():
             # db.session.commit()
 
             # return  redirect('/return')
+            # return to home
+            return redirect(url_for('webapp_blueprint.home'))
             pass
 
         if 'cancel' in request.form:

@@ -61,13 +61,13 @@ class Borrow2(Resource):
                 product.quantity_borrowed += quantity
 
                 # Add borrow entry to borrowed table
-                user_id = session['_user_id']
-                borrow = 'hoi'
-                # Borrowed(user_id=user_id,
-                #                   product_id=product.id,
-                #                   quantity=quantity,
-                #                   estimated_return_date=int(datetime.now().timestamp() + 604800)
-                #                   )
+                # user_id = session['_user_id']
+                user_id = 22
+                borrow = Borrowed(user_id=user_id,
+                                  product_id=product.id,
+                                  quantity=quantity,
+                                  estimated_return_date=int(datetime.now().timestamp() + 604800)
+                                  )
                 print("ADD TO TABLE: ", borrow)
                 db.session.add(borrow)
 
@@ -93,6 +93,15 @@ class Borrow(Resource):
             quantity_borrowed = product.quantity_borrowed
 
             quantity = quantity_total - quantity_unavailable - quantity_borrowed
+
+            if quantity <= 0:
+                # Product not available
+                output = {
+                    'barcode': barcode,
+                    'name': title,
+                    'message': f'Product not available',
+                    'success': False
+                }
 
             # Product found
             output = {

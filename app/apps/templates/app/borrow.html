@@ -19,6 +19,7 @@
             </tr>
         </div>
         <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
+            <div id="notFoundText"></div>
             <div class="card text-left">
                 <div class="table-responsive p-0 " style="max-height: 450px;">
                     <table class="table align-items-center mb-0 p-3">
@@ -37,7 +38,6 @@
                 <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/dashboard">Cancel</a>
             </div>
         </div>
-
     </div>
 
 
@@ -90,7 +90,7 @@
         return element;
     }
 
-    function addTableRow(barcode, item_name, item_quantity) {
+    function addTableRow(barcode, item_name, item_quantity, notFound) {
         // If item is scanned, enable continue button
         if (addedBarcodes != {}) {
             document.getElementById("continue").disabled = false;
@@ -143,8 +143,55 @@
         addedBarcodes[barcode] = quantity;
     }
 
-    const tableBody = document.querySelector('tbody');
+    // // If item not found, display following text in notFoundText div
+    // function notFoundText(notFound) {
+    //     notFound.innerHTML = 'Item not found';
+    // }
 
+    // // If item found, display following text in notFoundText div
+    // function foundText(notFound) {
+    //     notFound.innerHTML = '';
+    // }
+
+    function notFoundText(notFound, available, item_name=null) {
+        if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
+            // Remove existing content from notFound div
+            while (notFound.firstChild) {
+                notFound.removeChild(notFound.firstChild);
+            }
+
+            // Create a new text node with the message
+            let message;
+            if (available == true) {
+                message = 'Item not found';
+            } else {
+                message = 'Item not available for borrowing, pls return: ' + (item_name || '');
+            }
+
+            // Append the text node to the notFound div
+            const textNode = document.createTextNode(message);
+            notFound.appendChild(textNode);
+        }
+    }
+
+    function foundText(notFound) {
+        if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
+            // Remove existing content from notFound div
+            while (notFound.firstChild) {
+                notFound.removeChild(notFound.firstChild);
+            }
+        }
+    }
+
+    var barcode = '';
+    var item_name = '';
+    var addedBarcodes = {};
+
+    var typingTimer;
+    var doneTypingInterval = 50;
+
+    const tableBody = document.querySelector('tbody');
+    const notFound = document.getElementById('notFoundText');
 
     // Disable continue button on loading page, when no items are scanned
     document.getElementById("continue").disabled = true;
@@ -156,13 +203,6 @@
     document.addEventListener('click', function() {
         document.getElementById("barcodeInputField").focus();
     });
-
-    var barcode = '';
-    var item_name = '';
-    var addedBarcodes = {};
-
-    var typingTimer;
-    var doneTypingInterval = 50;
 
     // Change value in dict if quantity is manually changed
     document.addEventListener('input', function(event) {
@@ -209,6 +249,7 @@
                     item_quantity = data.quantity;
 
                     if (item_quantity != 0) {
+                        foundText(notFound);
                         // Check if barcode already exists on the screen
                         if (barcode in addedBarcodes) {
                             // Increment quantity for existing barcode
@@ -219,12 +260,21 @@
                             addTableRow(barcode, item_name, item_quantity);
                         }
                     }
+                    else {
+                        // When quantity is 0
+                        notFoundText(notFound, false, item_name);
+                        console.log("Quantity is 0");
+                    }
 
                     // Clear the input field after processing
+                    barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                 }
                 else {
                     // When barcode not found
+                    notFoundText(notFound, true);
+                    barcode = '';
+                    document.getElementById("barcodeInputField").value = "";
                     console.log("Barcode not found");
                 }
             })

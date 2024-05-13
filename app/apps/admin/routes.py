@@ -1,5 +1,5 @@
 from apps.admin import blueprint
-from flask import current_app, flash, render_template, request
+from flask import current_app, render_template, request
 
 @blueprint.route('/login')
 def admin_login():

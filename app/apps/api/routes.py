@@ -87,63 +87,6 @@ class Borrow2(Resource):
         db.session.commit()
 
 
-
-# HET PROBLEEM: USER ID FROM SESSION IS 1. DEZE HEEFT AL MEERDERE BORROWED ITEMS
-# DUS ALS EEN USER HETZELFDE WIL LENEN MOET JE HET OPTELLEN WANT DUBBEL TOEVOEGEN MAG NIET
-
-# @api.route('/borrow2', methods=['POST'])
-# class Borrow2(Resource):
-#     def post(self):
-#         print("Session Contents:", session)
-#         data = request.get_json()['addedBarcodes']
-
-#         print("DATA", data)
-
-#         try:
-#             for barcode, quantity in data.items():
-#                 print("barcode: ", barcode, "quantity: ", quantity)
-
-#                 # If barcode is an int
-#                 if barcode.isdigit():
-#                     print("Barcode is an int")
-#                     # Add 1 to quantity borrowed
-#                     product = Product.query.filter_by(barcode=barcode).first()
-#                     if product:
-#                         product.quantity_borrowed += quantity
-
-#                         # Add borrow entry to borrowed table
-#                         user_id = session['_user_id']
-#                         # user_id = 22
-#                         borrow = Borrowed(user_id=user_id,
-#                                           product_id=product.id,
-#                                           quantity=quantity,
-#                                           estimated_return_date=int(datetime.now().timestamp() + 604800)
-#                                           )
-#                         print("ADD TO TABLE: ", borrow)
-
-#                         # Check if the user already has a borrowed item with the same product_id
-#                         existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-#                         if existing_borrow:
-#                             existing_borrow.quantity += quantity
-#                             print("Existing borrow found. Quantity updated.")
-#                         else:
-#                             db.session.add(borrow)
-#                             print("New borrow added to table.")
-
-#                     else:
-#                         print(f"Product with barcode {barcode} not found.")
-#                 else:
-#                     print("Barcode is not an int.")
-
-#             # Save changes to database
-#             print("COMMITTING CHANGES -------------------------------")
-#             db.session.commit()
-#             print("Changes committed successfully")
-#         except Exception as e:
-#             print("Error:", e)
-#             db.session.rollback()
-
-
 @api.route('/borrow', methods=['POST'])
 class Borrow(Resource):
     def post(self):

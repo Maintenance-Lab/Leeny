@@ -17,6 +17,8 @@ from apps.authentication.forms import CreateAccountForm, LoginForm
 from apps.authentication.models import Users
 from flask_login import current_user
 from apps import db, login_manager
+from flask_restx import Resource
+
 from apps.webapp.models import *
 from apps.authentication.models import *
 from apps.webapp.forms import *
@@ -55,15 +57,16 @@ def start():
                         user = Users.query.filter_by(uid_3=uid_1).first()
                     except Exception as e3:
                         print('Error when card scanning:', e3)
-            
+
             if user:
                 login_user(user)
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 return render_template('app/start.html',
                                     form=login_form)
-            
+
             # Edge cases
-            return render_template('accounts/rfid_login.html',
+            flash({'category':'error', 'title': 'Card not recognized', 'text': 'Please register your card or try a different one.'}, 'General')
+            return render_template('app/start.html',
                                 msg='Wrong user or password *** edge case ***',
                                 form=login_form)
         else:
@@ -80,11 +83,32 @@ def start():
 
 @blueprint.route('/borrow', methods=["GET","POST"])
 # @login_required
-def borrow():
+def post():
     if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+            print("session from blueprint: ", session)
+            return redirect(url_for('webapp_blueprint.home'))
+            pass
+
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
+
+
+@blueprint.route('/return', methods=["GET","POST"])
+# @login_required
+def post_return():
+    if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+            print("session from blueprint: ", session)
+            return redirect(url_for('webapp_blueprint.home'))
+            pass
+
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
+    return render_template('app/return.html')
 
 @blueprint.route('/borrow/confirm')
 def borrow_confirm():
@@ -95,7 +119,7 @@ def borrow_confirm():
         except:
             flash({'text':'123'}, 'cancel')
             # Nog aanpassen naar error message
-    
+
     # for item in session['data']:
 
 
@@ -123,6 +147,12 @@ def orders():
 def returns():
     # Add pagination
     return render_template('app/return.html', segment='return')
+
+@blueprint.route('/borrowed')
+# @login_required
+def borrows():
+    # Add pagination
+    return render_template('app/borrowed.html', segment='borrowed')
 
 @blueprint.route('/settings' , methods=["GET","POST"])
 # @login_required
@@ -165,7 +195,7 @@ def new_item(id = None):
         response.raise_for_status()
 
         result = response.json()
-        
+
     except:
         pass
 
@@ -193,7 +223,7 @@ def order_info(order_id = None):
         result_order.append(obj_dict)
 
     data = {'data': result,'order_data':result_order[0]}
-    
+
     for item in data['data']:
         timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
         item['created_at_ts'] = timestamp
@@ -258,13 +288,13 @@ def get_segment(request):
 
     except:
         return None
-    
+
 ### HTMX Routes
 
 @blueprint.route('/inventory/search')
 def inventory_search():
     q = request.args.get("q")
-    
+
     all_objects = Product.query \
     .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
@@ -281,16 +311,18 @@ def inventory_borrowed():
     user_id = session['_user_id']
 
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
-    
+
     all_objects = Borrowed.query \
     .filter(Borrowed.user_id == user_id) \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
     .with_entities(*select_columns)
 
-    
+
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
-    
+
+    # return render_template('app/inventory-results.html', data=data)
+
     return render_template('app/borrowed-results.html', data=data)
 
 
@@ -302,7 +334,7 @@ def orders_load():
     all_objects = Order.query \
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
-        
+
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
 
     for item in data['data']:

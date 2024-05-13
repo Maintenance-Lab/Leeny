@@ -65,7 +65,8 @@ def start():
                                     form=login_form)
 
             # Edge cases
-            return render_template('accounts/rfid_login.html',
+            flash({'category':'error', 'title': 'Card not recognized', 'text': 'Please register your card or try a different one.'}, 'General')
+            return render_template('app/start.html',
                                 msg='Wrong user or password *** edge case ***',
                                 form=login_form)
         else:

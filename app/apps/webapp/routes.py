@@ -86,37 +86,7 @@ def post():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            # data = request.get_json()['addedBarcodes']
-            # print("DATA", data)
-
-            # for items in data.items():
-            #     print("barcode: ", items[0], "quantity: ", items[1])
-            #     barcode = items[0]
-            #     quantity = items[1]
-
-            #     # If barcode is an int
-            #     if barcode.isdigit():
-            #         print("Barcode is an int")
-            #         # Add 1 to quantity borrowed
-            #         product = Product.query.filter_by(barcode=barcode).first()
-            #         product.quantity_borrowed += quantity
-
-            #         # Add borrow entry to borrowed table
-            #         user_id = session['_user_id']
-            #         borrow = Borrowed(user_id=user_id,
-            #                         product_id=product.id,
-            #                         quantity=quantity,
-            #                         estimated_return_date=int(datetime.now().timestamp() + 604800)
-            #                         )
-            #         print("ADD TO TABLE")
-            #         db.session.add(borrow)
-
-            # # Save changes to database
-            # print("COMMITING CHANGES -------------------------------")
-            # db.session.commit()
-
-            # return  redirect('/return')
-            # return to home
+            print("session from blueprint: ", session)
             return redirect(url_for('webapp_blueprint.home'))
             pass
 

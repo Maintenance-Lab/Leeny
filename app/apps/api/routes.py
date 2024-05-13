@@ -46,6 +46,7 @@ class BarcodeScanningRoute(Resource):
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
     def post(self):
+        print("IN BORROW 2")
         print("Session Contents:", session)
         data = request.get_json()['addedBarcodes']
 
@@ -133,6 +134,91 @@ class Borrow(Resource):
         return output, 200
 
 
+@api.route('/return', methods=['POST'])
+class Return(Resource):
+    def post(self):
+        # Get the barcode data from the request
+        data = request.get_json()
+        barcode = data['barcode']
+
+        # Query the database for the product based on barcode
+        product = Product.query.filter_by(barcode=barcode).first()
+
+        if product is not None:
+            title = product.title
+
+            # quantity for borrowed from user
+            user_id = session['_user_id']
+            borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+            quantity = borrow.quantity
+
+            if borrow is not None:
+                # Product found
+                output = {
+                    'barcode': barcode,
+                    'name': title,
+                    'quantity': quantity,
+                    'message': f'Product found',
+                    'success': True
+                }
+            else:
+                # Product not found
+                output = {
+                    'barcode': barcode,
+                    'message': f'Product not found',
+                    'success': False
+                }
+        else:
+            # Product not found
+            output = {
+                'barcode': barcode,
+                'message': f'Product not found',
+                'success': False
+        }
+
+        return output, 200
+
+
+@api.route('/return2', methods=['POST'])
+class Return2(Resource):
+    def post(self):
+        print("IN RETURN 2")
+        print("Session Contents:", session)
+        data = request.get_json()['addedBarcodes']
+
+        print("DATA", data)
+
+        for items in data.items():
+            print("barcode: ", items[0], "quantity: ", items[1])
+            barcode = items[0]
+            quantity = items[1]
+
+            # If barcode is an int
+            if barcode.isdigit():
+                print("Barcode is an int")
+                # Subtract from quantity borrowed
+                product = Product.query.filter_by(barcode=barcode).first()
+                product.quantity_borrowed -= quantity
+
+                # Change/remove borrow entry from borrowed table
+                user_id = session['_user_id']
+                borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+                borrow.quantity -= quantity
+
+                print("New borrowed quantity: ", borrow.quantity)
+                print("Product quantity borrowed: ", product.quantity_borrowed)
+
+                if borrow.quantity <= 0:
+                    db.session.delete(borrow)
+                    print("Borrow entry removed from table.")
+                else:
+                    print("Quantity updated in borrow table.")
+
+        # Save changes to database
+        print("COMMITING CHANGES -------------------------------")
+        db.session.commit()
+
+
 @api.route('/borrow_rfid', methods=['POST'])
 class Borrow(Resource):
     def post(self):
@@ -186,7 +272,19 @@ class BorrowRoute(Resource):
                 'success': True
             }, 200
 
-@api.route('/return/', methods=['GET'])
+# @api.route('/return/', methods=['GET'])
+# class ReturnRoute(Resource):
+#     def get(self):
+#         user_id = request.args.get('user_id')
+#         all_objects = Borrowed.query.filter_by(user_id=user_id)
+#         output = [{**BorrowForm(obj=obj).data} for obj in all_objects]
+#         print(output)
+#         return {
+#                 'data': output,
+#                 'success': True
+#             }, 200
+
+@api.route('/borrowed/', methods=['GET'])
 class ReturnRoute(Resource):
     def get(self):
         user_id = request.args.get('user_id')

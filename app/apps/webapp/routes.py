@@ -95,6 +95,21 @@ def post():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
+
+@blueprint.route('/return', methods=["GET","POST"])
+# @login_required
+def post_return():
+    if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+            print("session from blueprint: ", session)
+            return redirect(url_for('webapp_blueprint.home'))
+            pass
+
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
+    return render_template('app/return.html')
+
 @blueprint.route('/borrow/confirm')
 def borrow_confirm():
     if session.get('data') == False:
@@ -132,6 +147,12 @@ def orders():
 def returns():
     # Add pagination
     return render_template('app/return.html', segment='return')
+
+@blueprint.route('/borrowed')
+# @login_required
+def borrows():
+    # Add pagination
+    return render_template('app/borrowed.html', segment='borrowed')
 
 @blueprint.route('/settings' , methods=["GET","POST"])
 # @login_required
@@ -297,7 +318,7 @@ def inventory_borrowed():
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
 
-    return render_template('app/inventory-results.html', data=data)
+    # return render_template('app/inventory-results.html', data=data)
 
     return render_template('app/borrowed-results.html', data=data)
 

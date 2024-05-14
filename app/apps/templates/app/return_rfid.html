@@ -272,15 +272,15 @@
                     }
 
                     console.log("added uids 2: ", addedUIDs)
-
-                    // Continue fetching uids
-                    interval_id = setInterval(fetchUID, 1000);
                 }
                 else {
                     // When uid not found
                     notFoundText(notFound, true);
                     console.log("Uid not found");
                 }
+
+                // Continue fetching uids
+                interval_id = setInterval(fetchUID, 1000);
             })
             .catch(error => console.error('Error:', error));
 

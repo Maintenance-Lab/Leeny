@@ -313,9 +313,9 @@ class ReturnRFID(Resource):
             # quantity for borrowed from user
             user_id = session['_user_id']
             borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-            quantity = borrow.quantity
 
             if borrow is not None:
+                quantity = borrow.quantity
                 # Product found
                 output = {
                     'uid': uid,

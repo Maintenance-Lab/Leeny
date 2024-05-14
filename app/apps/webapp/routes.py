@@ -97,6 +97,23 @@ def post():
     return render_template('app/borrow.html')
 
 
+@blueprint.route('/borrow_rfid', methods=["GET","POST"])
+# @login_required
+def post_rfid():
+    form = ProductForm(request.form)
+    if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+            print("session from blueprint: ", session)
+            # flash({'category':'success', 'title': 'Return successful!', 'text': 'You can now log in using your card.'}, 'General')
+            return redirect(url_for('webapp_blueprint.home'))
+            pass
+
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
+    return render_template('app/borrow_rfid.html', form=form)
+
+
 @blueprint.route('/return', methods=["GET","POST"])
 # @login_required
 def post_return():

@@ -220,7 +220,7 @@ class Return2(Resource):
 
 
 @api.route('/borrow_rfid', methods=['POST'])
-class Borrow(Resource):
+class BorrowRFID(Resource):
     def post(self):
         # Get rfid data from the request
         data = request.get_json()
@@ -229,7 +229,11 @@ class Borrow(Resource):
         # Query the database for the product based on barcode
         product = Product.query.filter_by(item_uid=uid).first()
         title = product.title
-        quantity = product.quantity
+        quantity_total = product.quantity_total
+        quantity_unavailable = product.quantity_unavailable
+        quantity_borrowed = product.quantity_borrowed
+
+        quantity = quantity_total - quantity_unavailable - quantity_borrowed
 
         if product is not None:
             # Product found
@@ -249,6 +253,51 @@ class Borrow(Resource):
         }
 
         return output, 200
+
+
+@api.route('/borrow_rfid2', methods=['POST'])
+class BorrowRFID2(Resource):
+    def post(self):
+        print("IN BORROWRFID 2")
+        print("Session Contents:", session)
+        data = request.get_json()['addedUIDs']
+
+        print("DATA", data)
+
+        for items in data.items():
+            print("uid: ", items[0], "quantity: ", items[1])
+            uid = items[0]
+            quantity = items[1]
+
+            # If barcode is an int
+            if uid.isdigit():
+                print("Barcode is an int")
+                # Add 1 to quantity borrowed
+                product = Product.query.filter_by(item_uid=uid).first()
+                product.quantity_borrowed += quantity
+
+                # Add borrow entry to borrowed table
+                user_id = session['_user_id']
+                # user_id = 22
+                borrow = Borrowed(user_id=user_id,
+                                  product_id=product.id,
+                                  quantity=quantity,
+                                  estimated_return_date=int(datetime.now().timestamp() + 604800)
+                                  )
+                print("ADD TO TABLE: ", borrow)
+
+                # Check if the user already has a borrowed item with the same product_id
+                existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+                if existing_borrow:
+                    existing_borrow.quantity += quantity
+                    print("Existing borrow found. Quantity updated.")
+                else:
+                    db.session.add(borrow)
+                    print("New borrow added to table.")
+
+        # Save changes to database
+        print("COMMITING CHANGES -------------------------------")
+        db.session.commit()
 
 
 @api.route('/product/', methods=['GET'])

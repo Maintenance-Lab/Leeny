@@ -60,7 +60,7 @@
         var row = link.closest('tr');
         row.remove();
 
-        // Get the barcode of the item to be deleted
+        // Get the uid of the item to be deleted
         var uid = row.querySelector('input').getAttribute('data-rfid');
         delete addedUIDs[uid];
 
@@ -246,7 +246,7 @@
 
                 message = data.message;
                 if (message == "Product found") {
-                    // When barcode found in database, get name and quantity
+                    // When uid found in database, get name and quantity
                     item_name = data.name;
                     item_quantity = data.quantity;
 
@@ -254,7 +254,7 @@
                         foundText(notFound);
                         // Check if uid already exists on the screen
                         if (current_uid in addedUIDs) {
-                            // Increment quantity for existing barcode
+                            // Increment quantity for existing uid
                             incrementQuantity(current_uid, addedUIDs);
                         } else {
                             // Add new uid to screen and dictionary
@@ -299,7 +299,7 @@
                 'Content-Type': 'application/json'
             },
 
-            // Send last version of addedBarcodes to server
+            // Send last version of addedUIDs to server
            body: JSON.stringify({ addedUIDs: addedUIDs })
         })
         .then(response => {

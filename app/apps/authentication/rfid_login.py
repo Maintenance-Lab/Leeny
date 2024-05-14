@@ -186,7 +186,7 @@ def main():
             print(f"\nUID: {uid}\n")
 
             scanner.set_led()
-            scanner.set_buzzer()
+            # scanner.set_buzzer()
         print("END SCAN ROUND:\n")
 
         if uid:

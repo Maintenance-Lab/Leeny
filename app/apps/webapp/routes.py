@@ -129,6 +129,24 @@ def post_return():
             flash({'text':'123'}, 'cancel')
     return render_template('app/return.html')
 
+
+@blueprint.route('/return_rfid', methods=["GET","POST"])
+# @login_required
+def post_returnRFID():
+    form = ProductForm(request.form)
+    if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+            print("session from blueprint: ", session)
+            flash({'category':'success', 'title': 'Return successful!'}, 'General')
+            return redirect(url_for('webapp_blueprint.home'))
+            pass
+
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
+    return render_template('app/return_rfid.html', form=form)
+
+
 @blueprint.route('/borrow/confirm')
 def borrow_confirm():
     if session.get('data') == False:
@@ -161,11 +179,11 @@ def orders():
     # Add pagination
     return render_template('app/orders.html', segment='orders')
 
-@blueprint.route('/return')
-# @login_required
-def returns():
-    # Add pagination
-    return render_template('app/return.html', segment='return')
+# @blueprint.route('/return')
+# # @login_required
+# def returns():
+#     # Add pagination
+#     return render_template('app/return.html', segment='return')
 
 @blueprint.route('/borrowed')
 # @login_required

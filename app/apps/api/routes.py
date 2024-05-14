@@ -269,31 +269,28 @@ class BorrowRFID2(Resource):
             uid = items[0]
             quantity = items[1]
 
-            # If barcode is an int
-            if uid.isdigit():
-                print("Barcode is an int")
-                # Add 1 to quantity borrowed
-                product = Product.query.filter_by(item_uid=uid).first()
-                product.quantity_borrowed += quantity
+            # Add quantity to quantity borrowed
+            product = Product.query.filter_by(item_uid=uid).first()
+            product.quantity_borrowed += quantity
 
-                # Add borrow entry to borrowed table
-                user_id = session['_user_id']
-                # user_id = 22
-                borrow = Borrowed(user_id=user_id,
-                                  product_id=product.id,
-                                  quantity=quantity,
-                                  estimated_return_date=int(datetime.now().timestamp() + 604800)
-                                  )
-                print("ADD TO TABLE: ", borrow)
+            # Add borrow entry to borrowed table
+            user_id = session['_user_id']
+            borrow = Borrowed(user_id=user_id,
+                                product_id=product.id,
+                                quantity=quantity,
+                                estimated_return_date=int(datetime.now().timestamp() + 604800)
+                                )
 
-                # Check if the user already has a borrowed item with the same product_id
-                existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-                if existing_borrow:
-                    existing_borrow.quantity += quantity
-                    print("Existing borrow found. Quantity updated.")
-                else:
-                    db.session.add(borrow)
-                    print("New borrow added to table.")
+            print("ADD TO TABLE: ", borrow)
+
+            # Check if the user already has a borrowed item with the same product_id
+            existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+            if existing_borrow:
+                existing_borrow.quantity += quantity
+                print("Existing borrow found. Quantity updated.")
+            else:
+                db.session.add(borrow)
+                print("New borrow added to table.")
 
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")

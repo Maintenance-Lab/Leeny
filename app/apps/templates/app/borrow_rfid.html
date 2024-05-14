@@ -6,17 +6,16 @@
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
-            <!-- <div class="visually-hidden">
-                <input name="rfidInput" id="rfidInputField" value="" onfocus="this.value=''" />
-            </div> -->
+            <div class="visually-hidden">
 
-            <form role="form text-left" method="post" action="" id="uid_form">
-                {{ form.hidden_tag() }}
-                <h6>
-                    {{ form.item_uid(placeholder="Card UID", class="form-control", id="item_uid") }}
+                <form role="form text-left" method="post" action="" id="uid_form">
+                    {{ form.hidden_tag() }}
+                    <h6>
+                        {{ form.item_uid(placeholder="Card UID", class="form-control", id="item_uid") }}
 
-                </h6>
-            </form>
+                    </h6>
+                </form>
+            </div>
 
 
             <tr class="container px-0 w-100">
@@ -71,29 +70,19 @@
         }
     }
 
-    // function incrementQuantity(uid, addedUIDs) {
-    //      // Get the current value of the quantity input for the corresponding uid
-    //     // var quantityInput = document.getElementById(`${uid}`);
-    //     var quantityInput = document.getElementById(uid);
-    //     var currentQuantity = addedUIDs[uid];
-
-    //     console.log("currentQuantity: ", currentQuantity);
-    //     if (currentQuantity < item_quantity) {
-
-    //         // Increment the quantity
-    //         quantityInput.value = currentQuantity + 1;
-    //         addedUIDs[uid] = currentQuantity + 1;
-    //     }
-    // }
-
     function incrementQuantity(uid, addedUIDs) {
-        // Get the current value of the quantity input for the corresponding uid
+         // Get the current value of the quantity input for the corresponding uid
+        // var quantityInput = document.getElementById(`${uid}`);
         var quantityInput = document.getElementById(uid);
         var currentQuantity = addedUIDs[uid];
 
-        // Increment the quantity
-        quantityInput.value = currentQuantity + 1;
-        addedUIDs[uid] = currentQuantity + 1;
+        console.log("currentQuantity: ", currentQuantity);
+        if (currentQuantity < item_quantity) {
+
+            // Increment the quantity
+            quantityInput.value = currentQuantity + 1;
+            addedUIDs[uid] = currentQuantity + 1;
+        }
     }
 
     function createElement(tag, classes = [], attributes = {}, content = '') {
@@ -119,12 +108,6 @@
 
         // Get the current quantity or default to 1
         var quantity = addedUIDs[uid] || 1;
-
-        if (quantity > item_quantity) {
-            // Alert or handle the case where quantity exceeds maximum
-            console.log("Quantity exceeds maximum");
-            return; // Don't add row if quantity exceeds maximum
-        }
 
         // Create a new table row with the item name, quantity input and delete link
         const row = createElement('tr');
@@ -230,7 +213,7 @@
 
 
     // Get uid
-    var interval_id = setInterval(fetchUID, 3000);
+    var interval_id = setInterval(fetchUID, 1000);
     function fetchUID() {
         fetch('/get_uid')
             .then(response => response.json())
@@ -287,7 +270,7 @@
                     console.log("added uids 2: ", addedUIDs)
 
                     // Continue fetching uids
-                    interval_id = setInterval(fetchUID, 3000);
+                    interval_id = setInterval(fetchUID, 1000);
                 }
                 else {
                     // When uid not found

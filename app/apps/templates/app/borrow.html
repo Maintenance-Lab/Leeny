@@ -119,7 +119,8 @@
             max: item_quantity,
             'data-barcode': barcode,
             id: barcode,
-            value: quantity
+            value: quantity,
+            onkeydown: 'preventKeyboardInput(event)'
         });
 
         quantityInput.addEventListener('focus', focused);
@@ -143,17 +144,7 @@
         addedBarcodes[barcode] = quantity;
     }
 
-    // // If item not found, display following text in notFoundText div
-    // function notFoundText(notFound) {
-    //     notFound.innerHTML = 'Item not found';
-    // }
-
-    // // If item found, display following text in notFoundText div
-    // function foundText(notFound) {
-    //     notFound.innerHTML = '';
-    // }
-
-    function notFoundText(notFound, available, item_name=null) {
+    function notFoundText(notFound, available, message, item_name=null) {
         if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
             // Remove existing content from notFound div
             while (notFound.firstChild) {
@@ -161,12 +152,7 @@
             }
 
             // Create a new text node with the message
-            let message;
-            if (available == true) {
-                message = 'Item not found';
-            } else {
-                message = 'Item not available for borrowing, pls return: ' + (item_name || '');
-            }
+            message = message + (item_name || '');
 
             // Append the text node to the notFound div
             const textNode = document.createTextNode(message);
@@ -182,6 +168,11 @@
             }
         }
     }
+
+    function preventKeyboardInput(event) {
+      event.preventDefault();
+    }
+
 
     var barcode = '';
     var item_name = '';
@@ -262,7 +253,7 @@
                     }
                     else {
                         // When quantity is 0
-                        notFoundText(notFound, false, item_name);
+                        notFoundText(notFound, false, "This item is out of stock: " + item_name);
                         console.log("Quantity is 0");
                     }
 
@@ -271,8 +262,8 @@
                     document.getElementById("barcodeInputField").value = "";
                 }
                 else {
-                    // When barcode not found
-                    notFoundText(notFound, true);
+                    // When barcode not found in database
+                    notFoundText(notFound, true, "Barcode not found ");
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                     console.log("Barcode not found");

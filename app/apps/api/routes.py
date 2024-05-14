@@ -328,7 +328,8 @@ class ReturnRFID(Resource):
                 # Product not found
                 output = {
                     'uid': uid,
-                    'message': f'Product not found',
+                    'name': title,
+                    'message': f'Product not borrowed',
                     'success': False
                 }
         else:

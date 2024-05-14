@@ -83,6 +83,10 @@
             quantityInput.value = currentQuantity + 1;
             addedUIDs[uid] = currentQuantity + 1;
         }
+        else {
+            // Show error message when quantity is higher than max quantity
+            notFoundText(notFound, false, "Quantity is higher than max quantity: ", item_name);
+        }
     }
 
     function createElement(tag, classes = [], attributes = {}, content = '') {
@@ -129,7 +133,8 @@
             max: item_quantity,
             'data-rfid': uid,
             id: uid,
-            value: quantity
+            value: quantity,
+            onkeydown: 'preventKeyboardInput(event)'
         });
 
         quantityInput.addEventListener('focus', focused);
@@ -153,7 +158,7 @@
         addedUIDs[uid] = quantity;
     }
 
-    function notFoundText(notFound, available, item_name=null) {
+    function notFoundText(notFound, available, message, item_name=null) {
         if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
             // Remove existing content from notFound div
             while (notFound.firstChild) {
@@ -161,12 +166,13 @@
             }
 
             // Create a new text node with the message
-            let message;
-            if (available == true) {
-                message = 'Item not found';
-            } else {
-                message = 'Item not available for borrowing, pls return: ' + (item_name || '');
-            }
+            message = message + (item_name || '');
+
+            // if (available == true) {
+            //     message = 'Item not found';
+            // } else {
+            //     message = 'Item not available for borrowing, pls return: ' + (item_name || '');
+            // }
 
             // Append the text node to the notFound div
             const textNode = document.createTextNode(message);
@@ -182,6 +188,11 @@
             }
         }
     }
+
+    function preventKeyboardInput(event) {
+      event.preventDefault();
+    }
+
 
 
     const tableBody = document.querySelector('tbody');
@@ -263,7 +274,7 @@
                         }
                     }
                     else {
-                        notFoundText(notFound, false, item_name);
+                        notFoundText(notFound, false, "Item not available for borrowing:", item_name);
                         console.log("Quantity is 0");
                     }
 
@@ -274,7 +285,7 @@
                 }
                 else {
                     // When uid not found
-                    notFoundText(notFound, true);
+                    notFoundText(notFound, true, "Item not found");
                     console.log("Uid not found");
                 }
             })

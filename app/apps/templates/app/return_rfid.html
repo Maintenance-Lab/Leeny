@@ -129,7 +129,8 @@
             max: borrowed_quantity,
             'data-rfid': uid,
             id: uid,
-            value: quantity
+            value: quantity,
+            onkeydown: 'preventKeyboardInput(event)'
         });
 
         quantityInput.addEventListener('focus', focused);
@@ -153,7 +154,7 @@
         addedUIDs[uid] = quantity;
     }
 
-    function notFoundText(notFound, available, item_name=null) {
+    function notFoundText(notFound, available, message, item_name=null) {
         if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
             // Remove existing content from notFound div
             while (notFound.firstChild) {
@@ -161,12 +162,7 @@
             }
 
             // Create a new text node with the message
-            let message;
-            if (available == true) {
-                message = 'Item not found';
-            } else {
-                message = 'Item not available for borrowing, pls return: ' + (item_name || '');
-            }
+            message = message + (item_name || '');
 
             // Append the text node to the notFound div
             const textNode = document.createTextNode(message);
@@ -181,6 +177,10 @@
                 notFound.removeChild(notFound.firstChild);
             }
         }
+    }
+
+    function preventKeyboardInput(event) {
+      event.preventDefault();
     }
 
 
@@ -267,16 +267,20 @@
                         }
                     }
                     else {
-                        notFoundText(notFound, false, item_name);
+                        notFoundText(notFound, false, "Quantity to return is higher than borrowed quantity:", item_name);
                         console.log("Quantity to return is higher than borrowed quantity");
                     }
 
                     console.log("added uids 2: ", addedUIDs)
                 }
                 else {
-                    // When uid not found
-                    notFoundText(notFound, true);
-                    console.log("Uid not found");
+                    if (message == "Product not borrowed") {
+                        item_name = data.name;
+                        notFoundText(notFound, true, "Item not borrowed: ", data.name);
+                    }
+                    else {
+                        notFoundText(notFound, true, "Item not found");
+                    }
                 }
 
                 // Continue fetching uids

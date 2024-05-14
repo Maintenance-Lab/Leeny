@@ -88,6 +88,7 @@ def post():
         # Check if post is from continue button
         if 'continue' in request.form:
             print("session from blueprint: ", session)
+            # flash({'category':'success', 'title': 'Return successful!', 'text': 'You can now log in using your card.'}, 'General')
             return redirect(url_for('webapp_blueprint.home'))
             pass
 
@@ -103,6 +104,7 @@ def post_return():
         # Check if post is from continue button
         if 'continue' in request.form:
             print("session from blueprint: ", session)
+            flash({'category':'success', 'title': 'Return successful!'}, 'General')
             return redirect(url_for('webapp_blueprint.home'))
             pass
 

@@ -227,7 +227,7 @@ class Borrow(Resource):
         uid = data['uid']
 
         # Query the database for the product based on barcode
-        product = Product.query.filter_by(uid=uid).first()
+        product = Product.query.filter_by(item_uid=uid).first()
         title = product.title
         quantity = product.quantity
 

@@ -11,6 +11,7 @@ import glob
 class Scanner:
     def __init__(self):
         self.port = self.serial_ports()[3]
+        print("PORTS: ", self.serial_ports)
         self.ser = self.open_serial()
         print(self.serial_ports())
 

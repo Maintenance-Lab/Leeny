@@ -1,24 +1,64 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/base-start.html' %}
 
 {% block title %} Borrow {% endblock title %}
-
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
-
 {% block content %}
-<!-- [macbook, raspberry, pc] -->
-<!-- {% for item in int %}
-  <input class="form-control datepicker" placeholder="Please select date" type="text" onfocus="focused(this)" onfocusout="defocused(this)">
-{% endfor %} -->
+
+<section class="min-vh-100">
+
+  <div class="container mt-7">
+    <div class="row">
+      <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
+        <div class="card z-index-0">
+          <div class="card-header text-center pt-4">
+
+                <form role="form text-left" method="post" action="">
+
+
+                  {{ form.hidden_tag() }}
+
+                  <label>For which project do you need the assets?</label>
+                  <div class="mb-3">
+                    {{ form.project(placeholder="Project", class="form-control", type="text") }}
+                  </div>
+
+                  <label>Add a return date</label>
+                  <div class="mb-3">
+                    {{ form.estimated_return_date(placeholder="Return date", class="form-control datepicker", type="date") }}
+                  </div>
+
+                  <div class="text-center">
+                      <button type="submit" class="btn btn-dark w-50 mt-2 mb-4" id="continue" name="continue">Continue</button>
+                  </div>
+
+                  <div class="text-center mt-3">
+                    <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/inventory">Cancel</a>
+                  </div>
+
+
+
+                </form>
+              </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 
 {% block javascripts %}
 <script>
+     // Calculate tomorrow's date
+     var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     if (document.querySelector('.datepicker')) {
       flatpickr('.datepicker', {
-        mode: "single"
+        mode: "single",
+        dateFormat: "U",
+        defaultDate: tomorrow
       });
     }
+
   </script>
 {% endblock javascripts %}

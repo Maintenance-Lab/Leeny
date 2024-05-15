@@ -5,8 +5,6 @@ from wtforms import StringField, IntegerField, TextAreaField
 class ProductForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     barcode = StringField('Barcode')
-    # item_uid = StringField('Item UID', validators=[DataRequired()])
-    item_uid = StringField('Item UID')
     quantity_total = IntegerField('Quantity Available', validators=[DataRequired()])
     quantity_borrowed = IntegerField('Quantity Borrowed')
 

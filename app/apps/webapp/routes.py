@@ -26,11 +26,8 @@ from apps.webapp.forms import *
 from apps.api.forms import *
 from sqlalchemy import update
 from sqlalchemy.inspection import inspect
+import json
 
-
-@blueprint.route('/barcode-scanning')
-def barcode_scanning():
-    return render_template('app/barcode-scanning.html', API_GENERATOR=len(API_GENERATOR))
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
@@ -87,14 +84,73 @@ def post():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            # flash({'category':'success', 'title': 'Return successful!', 'text': 'You can now log in using your card.'}, 'General')
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
+            print("form data: ", request.form["borrow_data"])
+
+            # add data to session
+            # session["borrow_data"] = request.form["borrow_data"]
+            borrow_data = json.loads(request.form["borrow_data"])
+            session['addedBarcodes'] = borrow_data
+
+            # create dictionary with names and quantities
+            # addedBarcodes = request.form["borrow_data"]
+            addedProducts = {}
+
+            for items in borrow_data.items():
+                barcode = items[0]
+                quantity = items[1]
+
+                if barcode.isdigit():
+
+                    # get product name
+                    product = Product.query.filter_by(barcode=barcode).first()
+                    product_name = product.title
+
+                    addedProducts[product_name] = quantity
+
+            session["addedProducts"] = addedProducts
+
+            return redirect(url_for('webapp_blueprint.borrow_date'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
+
+
+@blueprint.route('/borrow-date', methods=["GET","POST"])
+# @login_required
+def borrow_date():
+    form = BorrowDateForm()
+    if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+
+            # lookup name with session uid
+            user_id = session['_user_id']
+            print("User id: ", user_id)
+
+            user = Users.query.filter_by(id=user_id).first()
+
+            if user:
+                name = user.fullname
+                print("User: ", user.fullname)
+                session["name"] = name
+            else:
+                session["name"] = None
+
+            estimated_return_date = request.form["estimated_return_date"]
+            project = request.form["project"]
+
+            # add data to session
+            session["estimated_return_date"] = estimated_return_date
+            session["project"] = project
+            print("Return date: ", estimated_return_date)
+            print("Project: ", project)
+
+            return redirect(url_for('webapp_blueprint.borrow_confirm'))
+
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
+    return render_template('app/borrow-date.html', form=form)
 
 
 @blueprint.route('/return', methods=["GET","POST"])
@@ -112,20 +168,21 @@ def post_return():
             flash({'text':'123'}, 'cancel')
     return render_template('app/return.html')
 
-@blueprint.route('/borrow/confirm')
+@blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
-    if session.get('data') == False:
-        try:
-            data = request.args.get('data')
-            session['data'] = data
-        except:
-            flash({'text':'123'}, 'cancel')
+    print("hallo")
+    # if session.get('data') == False:
+    #     try:
+    #         data = request.args.get('data')
+    #         session['data'] = data
+    #     except:
+    #         flash({'text':'123'}, 'cancel')
             # Nog aanpassen naar error message
 
     # for item in session['data']:
 
 
-    return render_template('app/borrow-confirm.html', data=data)
+    return render_template('app/borrow-confirm.html')
 
 @blueprint.route('/home')
 # @login_required
@@ -144,22 +201,12 @@ def orders():
     # Add pagination
     return render_template('app/orders.html', segment='orders')
 
-@blueprint.route('/return')
-# @login_required
-def returns():
-    # Add pagination
-    return render_template('app/return.html', segment='return')
-
 @blueprint.route('/borrowed')
 # @login_required
 def borrows():
     # Add pagination
     return render_template('app/borrowed.html', segment='borrowed')
 
-@blueprint.route('/borrow-date')
-# @login_required
-def borrow_date():
-    return render_template('app/borrow-date.html', segment='borrowed')
 
 @blueprint.route('/settings' , methods=["GET","POST"])
 # @login_required
@@ -178,7 +225,7 @@ def settings():
             db.session.commit()
             flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
             return redirect(url_for('webapp_blueprint.settings'))
-        
+
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
 

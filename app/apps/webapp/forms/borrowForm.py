@@ -9,3 +9,4 @@ class BorrowForm(FlaskForm):
     returned = IntegerField('Returned', default=0, validators=[DataRequired()])
     estimated_return_date = IntegerField('Estimated return date', default=0, validators=[DataRequired()])
     borrowed_at = IntegerField('Borrowed at', validators=[DataRequired()])
+    project = IntegerField('Project', validators=[DataRequired()])

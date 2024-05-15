@@ -46,13 +46,13 @@ class BarcodeScanningRoute(Resource):
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
     def post(self):
-        print("IN BORROW 2")
-        print("Session Contents:", session)
-        data = request.get_json()['addedBarcodes']
+        addedBarcodes = session['addedBarcodes']
+        project = session['project']
+        return_date = session['estimated_return_date']
 
-        print("DATA", data)
 
-        for items in data.items():
+
+        for items in addedBarcodes.items():
             print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
             quantity = items[1]
@@ -66,11 +66,11 @@ class Borrow2(Resource):
 
                 # Add borrow entry to borrowed table
                 user_id = session['_user_id']
-                # user_id = 22
                 borrow = Borrowed(user_id=user_id,
                                   product_id=product.id,
                                   quantity=quantity,
-                                  estimated_return_date=int(datetime.now().timestamp() + 604800)
+                                  project=project,
+                                  estimated_return_date=return_date
                                   )
                 print("ADD TO TABLE: ", borrow)
 
@@ -86,6 +86,33 @@ class Borrow2(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+
+@api.route('/authenticate_admin', methods=['POST'])
+class AuthenticateAdmin(Resource):
+    def post(self):
+        data = request.get_json()
+        uid = data['uid']
+
+        try:
+            user = Users.query.filter_by(uid_1=uid).first()
+        except:
+            try:
+                user = Users.query.filter_by(uid_2=uid).first()
+            except:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except:
+                    user = None
+
+        if user:
+            print("User role: ", user.role)
+            if user.role == 'admin':
+                return {'authenticated': True, 'role': 'admin'}
+            else:
+                return {'authenticated': True, 'role': 'student'}
+        else:
+            return {'authenticated': False}
 
 
 @api.route('/borrow', methods=['POST'])

@@ -156,21 +156,29 @@ def borrows():
     # Add pagination
     return render_template('app/borrowed.html', segment='borrowed')
 
+@blueprint.route('/borrow-date')
+# @login_required
+def borrow_date():
+    return render_template('app/borrow-date.html', segment='borrowed')
+
 @blueprint.route('/settings' , methods=["GET","POST"])
 # @login_required
 def settings():
     create_account_form = CreateAccountForm(request.form)
     all_objects = Users.query.filter_by(id=session['_user_id'])
     data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
+
     if request.method == "POST":
-        test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname']))
-        test2 = Users.query.filter_by(id=session['_user_id']).update(dict(email=request.form['email']))
-        test3 = Users.query.filter_by(id=session['_user_id']).update(dict(study=request.form['study']))
-        test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
-        test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
-        db.session.commit()
-        flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
-        return redirect(url_for('webapp_blueprint.settings'))
+        if "update_profile" in request.form:
+            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname']))
+            test2 = Users.query.filter_by(id=session['_user_id']).update(dict(email=request.form['email']))
+            test3 = Users.query.filter_by(id=session['_user_id']).update(dict(study=request.form['study']))
+            test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
+            # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
+            db.session.commit()
+            flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
+            return redirect(url_for('webapp_blueprint.settings'))
+        
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
 

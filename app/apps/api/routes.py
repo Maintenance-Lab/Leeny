@@ -1,4 +1,5 @@
 import json
+import random
 
 from apps.api import blueprint
 from apps.api.forms import *
@@ -6,12 +7,13 @@ from apps.authentication.decorators import token_required
 from apps.authentication.models import Users
 from apps.webapp.models import *
 from apps.webapp.forms import *
-from flask import request, jsonify, Response, session, flash
+from flask import request, jsonify, Response, session, flash, render_template
 from flask_restx import Api, Resource
 from werkzeug.datastructures import MultiDict
 from apps import db
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
+from apps.scripts.email_verif import send_email
 
 
 api = Api(blueprint)
@@ -59,6 +61,16 @@ class Borrow2(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+        # Send email to user
+        user_id = session['_user_id']
+        user = Users.query.filter_by(id=user_id).first()
+        email = user.email
+
+        session['email_code'] = random.randint(0000, 9999)
+        html = render_template('app/borrow-confirm.html')
+        send_email(email, "leeny test", html)
+
 
 
 @api.route('/authenticate_admin', methods=['POST'])
@@ -200,8 +212,6 @@ class Return2(Resource):
                 addedProducts[product_name] = quantity
 
         session["addedProducts"] = addedProducts
-
-
 
 
 @api.route('/return-confirm', methods=['POST'])

@@ -16,33 +16,6 @@ from datetime import datetime, timedelta
 
 api = Api(blueprint)
 
-# TODO: DELETE and PUT have to be implemented
-# TODO: Implement a user permission system to not allow everyone to access user info
-@api.route('/test/', methods=['GET'])
-class TestRoute(Resource):
-    def get(self):
-        return {
-                'data': 'Hello World',
-                'success': True
-            }, 200
-
-
-@api.route('/barcode-scanning', methods=['POST'])
-class BarcodeScanningRoute(Resource):
-    def post(self):
-        # Get the barcode data from the request
-        data = request.get_json()
-        barcode = data['barcode']
-
-        # Process the barcode data to generate different data
-        updated_string = f"Hello from Flask! You scanned barcode: {barcode}"
-
-        return {
-            'data': updated_string,
-            'success': True
-        }, 200
-
-
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
     def post(self):
@@ -211,11 +184,32 @@ class Return2(Resource):
     def post(self):
         print("IN RETURN 2")
         print("Session Contents:", session)
-        data = request.get_json()['addedBarcodes']
+        return_data = request.get_json()['addedBarcodes']
+        session['return_data'] = return_data
 
-        print("DATA", data)
+        addedProducts = {}
 
-        for items in data.items():
+        for items in return_data.items():
+            barcode = items[0]
+            quantity = items[1]
+
+            if barcode.isdigit():
+                # get product name
+                product = Product.query.filter_by(barcode=barcode).first()
+                product_name = product.title
+                addedProducts[product_name] = quantity
+
+        session["addedProducts"] = addedProducts
+
+
+
+
+@api.route('/return-confirm', methods=['POST'])
+class ReturnConfirm(Resource):
+    def post(self):
+        return_data = session['return_data']
+
+        for items in return_data.items():
             print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
             quantity = items[1]
@@ -298,18 +292,6 @@ class BorrowRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-
-# @api.route('/return/', methods=['GET'])
-# class ReturnRoute(Resource):
-#     def get(self):
-#         user_id = request.args.get('user_id')
-#         all_objects = Borrowed.query.filter_by(user_id=user_id)
-#         output = [{**BorrowForm(obj=obj).data} for obj in all_objects]
-#         print(output)
-#         return {
-#                 'data': output,
-#                 'success': True
-#             }, 200
 
 @api.route('/borrowed/', methods=['GET'])
 class ReturnRoute(Resource):

@@ -4,7 +4,6 @@ from apps.config import Config
 
 
 app = Flask(__name__)
-
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USERNAME'] = 'leeny.maintenance@gmail.com'     # Sender Gmail address
@@ -16,11 +15,12 @@ mail = Mail(app)
 
 
 def send_email(to, subject, template):
-    print(Config.MAIL_DEFAULT_SENDER, Config.MAIL_USERNAME, Config.MAIL_PASSWORD)
+    print(subject, Config.MAIL_USERNAME, to, template)
     msg = Message(
-        subject,
+        subject=subject,
+        sender=Config.MAIL_USERNAME,
         recipients=[to],
-        html=template,
-        sender=Config.MAIL_DEFAULT_SENDER
+        html=template
     )
     mail.send(msg)
+    return "Message sent!"

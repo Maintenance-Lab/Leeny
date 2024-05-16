@@ -20,6 +20,7 @@ class ProductForm(FlaskForm):
     manufacturer_id = IntegerField('Manufacturer ID', validators=[DataRequired()])
     category_id = IntegerField('Category ID', validators=[DataRequired()])
     vendor_id = IntegerField('Vendor ID', validators=[DataRequired()])
+    
 
 
     # Timestamps (Nog toevoegen?)

@@ -1,15 +1,23 @@
 {% extends 'layouts/base-start.html' %}
 
-{% block title %} Return {% endblock title %}
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+{% block title %} Borrow {% endblock title %}
 
 {% block content %}
     <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
             <div class="visually-hidden">
-                <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''" />
+
+                <form role="form text-left" method="post" action="" id="uid_form">
+                    {{ form.hidden_tag() }}
+                    <h6>
+                        {{ form.item_uid(placeholder="Card UID", class="form-control", id="item_uid") }}
+
+                    </h6>
+                </form>
             </div>
+
+
             <tr class="container px-0 w-100">
                 <td class="col-7">
                     <div class="">
@@ -38,40 +46,42 @@
                 <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/borrowed">Cancel</a>
             </div>
         </div>
+
     </div>
 
 
 {% endblock content %}
 
-{% block javascripts %}
 
+{% block javascripts %}
 <script>
     function deleteRow(link) {
         // Find the closest row to the clicked link and delete
         var row = link.closest('tr');
         row.remove();
 
-        // Get the barcode of the item to be deleted
-        var barcode = row.querySelector('input').getAttribute('data-barcode');
-        delete addedBarcodes[barcode];
+        // Get the uid of the item to be deleted
+        var uid = row.querySelector('input').getAttribute('data-rfid');
+        delete addedUIDs[uid];
 
         // Disable the continue button if there are no items scanned
-        if (Object.keys(addedBarcodes) == 'null') {
+        if (Object.keys(addedUIDs) == 'null') {
             document.getElementById("continue").disabled = true;
         }
     }
 
-    function incrementQuantity(barcode, addedBarcodes, borrowed_quantity) {
-         // Get the current value of the quantity input for the corresponding barcode
-        var quantityInput = document.getElementById(`${barcode}`);
-        var currentQuantity = addedBarcodes[barcode];
+    function incrementQuantity(uid, addedUIDs, borrowed_quantity) {
+         // Get the current value of the quantity input for the corresponding uid
+        // var quantityInput = document.getElementById(`${uid}`);
+        var quantityInput = document.getElementById(uid);
+        var currentQuantity = addedUIDs[uid];
 
         console.log("currentQuantity: ", currentQuantity);
         if (currentQuantity < borrowed_quantity) {
 
             // Increment the quantity
             quantityInput.value = currentQuantity + 1;
-            addedBarcodes[barcode] = currentQuantity + 1;
+            addedUIDs[uid] = currentQuantity + 1;
         }
     }
 
@@ -90,14 +100,14 @@
         return element;
     }
 
-    function addTableRow(barcode, item_name, borrowed_quantity) {
+    function addTableRow(uid, item_name, borrowed_quantity) {
         // If item is scanned, enable continue button
-        if (addedBarcodes != {}) {
+        if (addedUIDs != {}) {
             document.getElementById("continue").disabled = false;
         }
 
         // Get the current quantity or default to 1
-        var quantity = addedBarcodes[barcode] || 1;
+        var quantity = addedUIDs[uid] || 1;
 
         // Create a new table row with the item name, quantity input and delete link
         const row = createElement('tr');
@@ -117,8 +127,8 @@
             type: 'number',
             min: '1',
             max: borrowed_quantity,
-            'data-barcode': barcode,
-            id: barcode,
+            'data-rfid': uid,
+            id: uid,
             value: quantity,
             onkeydown: 'preventKeyboardInput(event)'
         });
@@ -141,9 +151,8 @@
 
         tableBody.appendChild(row);
 
-        addedBarcodes[barcode] = quantity;
+        addedUIDs[uid] = quantity;
     }
-
 
     function notFoundText(notFound, available, message, item_name=null) {
         if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
@@ -175,13 +184,6 @@
     }
 
 
-    var barcode = '';
-    var item_name = '';
-    var addedBarcodes = {};
-
-    var typingTimer;
-    var doneTypingInterval = 50;
-
     const tableBody = document.querySelector('tbody');
     const notFound = document.getElementById('notFoundText');
 
@@ -189,108 +191,120 @@
     document.getElementById("continue").disabled = true;
 
     // autofocus input field on loading page
-    document.getElementById("barcodeInputField").focus();
+    document.getElementById("uid_form").focus();
 
     // autofocus input field on every click everywhere on the page
     document.addEventListener('click', function() {
-        document.getElementById("barcodeInputField").focus();
+        document.getElementById("uid_form").focus();
     });
+
+    var current_uid = '';
+    var item_name = '';
+    var addedUIDs = {};
 
     // Change value in dict if quantity is manually changed
     document.addEventListener('input', function(event) {
-        // only if quantity of product is not higher than max quantity
+        // Only if quantity of product is not higher than max quantity
         if (event.target.tagName === 'INPUT') {
-            var barcode = event.target.getAttribute('data-barcode');
-                addedBarcodes[barcode] = parseInt(event.target.value);
+            var uid = event.target.getAttribute('data-rfid');
+                addedUIDs[uid] = parseInt(event.target.value);
         }
     });
 
-    // Whenever a barcode is scanned
-    document.getElementById("barcodeInputField").addEventListener('input', function() {
-        // Clear the previous timer
-        clearTimeout(typingTimer);
 
-        // Get barcode from input field
-        barcode = document.getElementById("barcodeInputField").value;
+    // Get uid
+    var interval_id = setInterval(fetchUID, 1000);
+    function fetchUID() {
+        fetch('/get_uid')
+            .then(response => response.json())
+            .then(data => {
+            // document.getElementById('uid').innerHTML = data.uid
+            document.getElementById('item_uid').value = data.uid
+            current_uid = data.uid
 
-        // Set a new timer to handle barcode input after a certain amount of time
-        typingTimer = setTimeout(function() {
-            console.log("Sending this barcode: ", barcode);
+            if (data.uid !== null) {
+                clearInterval(interval_id); // Stop fetching
+                console.log('UID: ' + data.uid);
 
-            // Send the barcode to the server
-            fetch('api/return', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ barcode: barcode })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Response was not ok');
-                }
-                return response.json();
-            })
+
+                // Send uid to server
+                fetch('api/return', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ uid: current_uid })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Response was not ok');
+                    }
+                    return response.json();
+                })
             .then(data => {
                 console.log('Response from server:', data);
 
                 message = data.message;
                 if (message == "Product found") {
-                    // When barcode found in database, get name and quantity
+                    // When uid found in database, get name and quantity
                     item_name = data.name;
                     borrowed_quantity = data.quantity;
-                    quantity = addedBarcodes[barcode] || 1;
+                    quantity = addedUIDs[current_uid] || 1;
 
                     console.log("borrowed_quantity: ", borrowed_quantity);
                     console.log("quantity: ", quantity);
 
-                    // Check if quantity user wants to return is less than or equal to borrowed quantity
                     if (borrowed_quantity >= quantity) {
                         foundText(notFound);
-
-                        if (barcode in addedBarcodes) {
-                            // Increment quantity for existing barcode
-                            incrementQuantity(barcode, addedBarcodes, borrowed_quantity);
+                        // Check if uid already exists on the screen
+                        if (current_uid in addedUIDs) {
+                            // Increment quantity for existing uid
+                            incrementQuantity(current_uid, addedUIDs, borrowed_quantity);
                         } else {
-                            // Add new barcode to screen and dictionary
-                            addedBarcodes[barcode] = 1;
-                            addTableRow(barcode, item_name, borrowed_quantity);
+                            // Add new uid to screen and dictionary
+                            addedUIDs[current_uid] = 1;
+                            addTableRow(current_uid, item_name, borrowed_quantity);
                         }
                     }
                     else {
-                        notFoundText(notFound, false, "Quantity to return is higher than borrowed quantity for: ", item_name);
+                        notFoundText(notFound, false, "Quantity to return is higher than borrowed quantity:", item_name);
                         console.log("Quantity to return is higher than borrowed quantity");
                     }
 
-                    // Clear the input field after processing
-                    barcode = '';
-                    document.getElementById("barcodeInputField").value = "";
+                    console.log("added uids 2: ", addedUIDs)
                 }
                 else {
-                    // When barcode not found
-                    notFoundText(notFound, true, "Barcode not found ");
-                    barcode = '';
-                    document.getElementById("barcodeInputField").value = "";
-                    console.log("Barcode not found");
+                    if (message == "Product not borrowed") {
+                        item_name = data.name;
+                        notFoundText(notFound, true, "Item not borrowed: ", data.name);
+                    }
+                    else {
+                        notFoundText(notFound, true, "Item not found");
+                    }
                 }
+
+                // Continue fetching uids
+                interval_id = setInterval(fetchUID, 1000);
             })
             .catch(error => console.error('Error:', error));
-        }, doneTypingInterval);
-    });
+            }
+        })
+        .catch(error => console.error('Error fetching UID:', error))
+    }
+
 
     document.getElementById("continue").addEventListener('click', function() {
         console.log("continue clicked");
-        console.log("added barcodes 3: ", addedBarcodes);
+        console.log("added uids 3: ", addedUIDs);
 
-        // Send to blueprint in routes.py in webapp
         fetch('api/return2', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
 
-            // Send last version of addedBarcodes to server
-           body: JSON.stringify({ addedBarcodes: addedBarcodes })
+            // Send last version of addedUIDs to server
+           body: JSON.stringify({ addedUIDs: addedUIDs })
         })
         .then(response => {
             if (!response.ok) {
@@ -303,3 +317,8 @@
 </script>
 
 {% endblock javascripts %}
+
+
+
+
+

@@ -17,16 +17,6 @@
                     <p style="margin: 0;">{{ session.name }}</p>
                   </div>
 
-                  <label style="display: block;">Project</label>
-                  <div class="mb-3">
-                    <p style="margin: 0;">{{ session.project }}</p>
-                  </div>
-
-                  <label style="display: block;">Return Date</label>
-                  <div class="mb-3">
-                    <p style="margin: 0;">{{ session.estimated_return_date }}</p>
-                  </div>
-
                   <label style="display: block;">Items</label>
                   <ul style="list-style-type: none; padding-left: 0;">
                     {% for item, quantity in session.addedProducts.items() %}
@@ -45,7 +35,7 @@
             </div>
             <div class="row justify-content-center mt-4">
                 <div class="col-auto">
-                    <a href="/borrow-date" class="btn btn-outline-danger">Cancel</a>
+                    <a href="/return" class="btn btn-outline-danger">Cancel</a>
                 </div>
                 <div class="col-auto">
                     <button type="button" class="btn btn-dark" id="scan-card">Scan Admin Card</button>
@@ -110,7 +100,7 @@
                 console.log(data);
                 if (data.authenticated) {
                     if (data.role === 'admin') {
-                        fetch(`${window.location.origin}/api/borrow2`, {
+                        fetch(`${window.location.origin}/api/return-confirm`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -122,7 +112,7 @@
                                 throw new Error('Response was not ok');
                             }
                             Swal.fire({
-                                title: "Borrow successfully completed!",
+                                title: "Return successfully completed!",
                                 html: "",
                                 timer: 800,
                                 timerProgressBar: true,

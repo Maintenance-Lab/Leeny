@@ -1,8 +1,11 @@
 from wtforms import Form
 from wtforms_alchemy import model_form_factory
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, TextAreaField
+from wtforms import StringField, IntegerField, TextAreaField, HiddenField
 from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField
+from wtforms.fields import DateField
+from wtforms.validators import DataRequired, Length
 
 from apps.webapp.models import *
 from apps.authentication.models import Users
@@ -21,5 +24,12 @@ class ProductForm(FlaskForm):
     quantity_borrowed = IntegerField('Borrowed Quantity', validators=[DataRequired()])
     quantity_unavailable = IntegerField('Unavailable Quantity', validators=[DataRequired()])
 
+class BorrowDateForm(FlaskForm):
+    user_id = HiddenField('ID')
+    borrow_data = HiddenField('Borrow Data')
+
+    project = StringField('Project', validators=[DataRequired(), Length(max=100)], render_kw={"type": "text"})
+    estimated_return_date = DateField('Estimated Return Date', format='%d-%m-%Y', validators=[DataRequired()], render_kw={"placeholder": "DD-MM-YYYY"})
+    submit = SubmitField('Borrow')
 
 

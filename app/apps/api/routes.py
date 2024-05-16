@@ -16,87 +16,15 @@ from datetime import datetime, timedelta
 
 api = Api(blueprint)
 
-# TODO: DELETE and PUT have to be implemented
-# TODO: Implement a user permission system to not allow everyone to access user info
-@api.route('/test/', methods=['GET'])
-class TestRoute(Resource):
-    def get(self):
-        return {
-                'data': 'Hello World',
-                'success': True
-            }, 200
-
-
-@api.route('/barcode-scanning', methods=['POST'])
-class BarcodeScanningRoute(Resource):
-    def post(self):
-        # Get the barcode data from the request
-        data = request.get_json()
-        barcode = data['barcode']
-
-        # Process the barcode data to generate different data
-        updated_string = f"Hello from Flask! You scanned barcode: {barcode}"
-
-        return {
-            'data': updated_string,
-            'success': True
-        }, 200
-
-
-@api.route('/borrow2', methods=['POST'])
-class Borrow2(Resource):
-    def post(self):
-        print("IN BORROW 2")
-        print("Session Contents:", session)
-        data = request.get_json()['addedBarcodes']
-
-        print("DATA", data)
-
-        for items in data.items():
-            print("barcode: ", items[0], "quantity: ", items[1])
-            barcode = items[0]
-            quantity = items[1]
-
-            # If barcode is an int
-            if barcode.isdigit():
-                print("Barcode is an int")
-                # Add 1 to quantity borrowed
-                product = Product.query.filter_by(barcode=barcode).first()
-                product.quantity_borrowed += quantity
-
-                # Add borrow entry to borrowed table
-                user_id = session['_user_id']
-                # user_id = 22
-                borrow = Borrowed(user_id=user_id,
-                                  product_id=product.id,
-                                  quantity=quantity,
-                                  estimated_return_date=int(datetime.now().timestamp() + 604800)
-                                  )
-                print("ADD TO TABLE: ", borrow)
-
-                # Check if the user already has a borrowed item with the same product_id
-                existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-                if existing_borrow:
-                    existing_borrow.quantity += quantity
-                    print("Existing borrow found. Quantity updated.")
-                else:
-                    db.session.add(borrow)
-                    print("New borrow added to table.")
-
-        # Save changes to database
-        print("COMMITING CHANGES -------------------------------")
-        db.session.commit()
-
-
 @api.route('/borrow', methods=['POST'])
-class Borrow(Resource):
+class BorrowRFID(Resource):
     def post(self):
-        # Get the barcode data from the request
+        # Get rfid data from the request
         data = request.get_json()
-        barcode = data['barcode']
+        uid = data['uid']
 
         # Query the database for the product based on barcode
-        product = Product.query.filter_by(barcode=barcode).first()
+        product = Product.query.filter_by(item_uid=uid).first()
 
         if product is not None:
             title = product.title
@@ -109,7 +37,7 @@ class Borrow(Resource):
             if quantity <= 0:
                 # Product not available
                 output = {
-                    'barcode': barcode,
+                    'uid': uid,
                     'name': title,
                     'message': f'Product not available',
                     'success': False
@@ -117,127 +45,6 @@ class Borrow(Resource):
 
             # Product found
             output = {
-                'barcode': barcode,
-                'name': title,
-                'quantity': quantity,
-                'message': f'Product found',
-                'success': True
-        }
-        else:
-            # Product not found
-            output = {
-                'barcode': barcode,
-                'message': f'Product not found',
-                'success': False
-        }
-
-        return output, 200
-
-
-@api.route('/return', methods=['POST'])
-class Return(Resource):
-    def post(self):
-        # Get the barcode data from the request
-        data = request.get_json()
-        barcode = data['barcode']
-
-        # Query the database for the product based on barcode
-        product = Product.query.filter_by(barcode=barcode).first()
-
-        if product is not None:
-            title = product.title
-
-            # quantity for borrowed from user
-            user_id = session['_user_id']
-            borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-            quantity = borrow.quantity
-
-            if borrow is not None:
-                # Product found
-                output = {
-                    'barcode': barcode,
-                    'name': title,
-                    'quantity': quantity,
-                    'message': f'Product found',
-                    'success': True
-                }
-            else:
-                # Product not found
-                output = {
-                    'barcode': barcode,
-                    'message': f'Product not found',
-                    'success': False
-                }
-        else:
-            # Product not found
-            output = {
-                'barcode': barcode,
-                'message': f'Product not found',
-                'success': False
-        }
-
-        return output, 200
-
-
-@api.route('/return2', methods=['POST'])
-class Return2(Resource):
-    def post(self):
-        print("IN RETURN 2")
-        print("Session Contents:", session)
-        data = request.get_json()['addedBarcodes']
-
-        print("DATA", data)
-
-        for items in data.items():
-            print("barcode: ", items[0], "quantity: ", items[1])
-            barcode = items[0]
-            quantity = items[1]
-
-            # If barcode is an int
-            if barcode.isdigit():
-                print("Barcode is an int")
-                # Subtract from quantity borrowed
-                product = Product.query.filter_by(barcode=barcode).first()
-                product.quantity_borrowed -= quantity
-
-                # Change/remove borrow entry from borrowed table
-                user_id = session['_user_id']
-                borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-                borrow.quantity -= quantity
-
-                print("New borrowed quantity: ", borrow.quantity)
-                print("Product quantity borrowed: ", product.quantity_borrowed)
-
-                if borrow.quantity <= 0:
-                    db.session.delete(borrow)
-                    print("Borrow entry removed from table.")
-                else:
-                    print("Quantity updated in borrow table.")
-
-        # Save changes to database
-        print("COMMITING CHANGES -------------------------------")
-        db.session.commit()
-
-
-@api.route('/borrow_rfid', methods=['POST'])
-class BorrowRFID(Resource):
-    def post(self):
-        # Get rfid data from the request
-        data = request.get_json()
-        uid = data['uid']
-
-        # Query the database for the product based on barcode
-        product = Product.query.filter_by(item_uid=uid).first()
-        title = product.title
-        quantity_total = product.quantity_total
-        quantity_unavailable = product.quantity_unavailable
-        quantity_borrowed = product.quantity_borrowed
-
-        quantity = quantity_total - quantity_unavailable - quantity_borrowed
-
-        if product is not None:
-            # Product found
-            output = {
                 'uid': uid,
                 'name': title,
                 'quantity': quantity,
@@ -255,16 +62,15 @@ class BorrowRFID(Resource):
         return output, 200
 
 
-@api.route('/borrow_rfid2', methods=['POST'])
+@api.route('/borrow2', methods=['POST'])
 class BorrowRFID2(Resource):
     def post(self):
-        print("IN BORROWRFID 2")
-        print("Session Contents:", session)
-        data = request.get_json()['addedUIDs']
+        addedUIDs = session['addedUIDs']
+        project = session['project']
+        return_date = session['estimated_return_date']
 
-        print("DATA", data)
 
-        for items in data.items():
+        for items in addedUIDs.items():
             print("uid: ", items[0], "quantity: ", items[1])
             uid = items[0]
             quantity = items[1]
@@ -278,7 +84,8 @@ class BorrowRFID2(Resource):
             borrow = Borrowed(user_id=user_id,
                                 product_id=product.id,
                                 quantity=quantity,
-                                estimated_return_date=int(datetime.now().timestamp() + 604800)
+                                estimated_return_date=return_date,
+                                project=project
                                 )
 
             print("ADD TO TABLE: ", borrow)
@@ -297,7 +104,7 @@ class BorrowRFID2(Resource):
         db.session.commit()
 
 
-@api.route('/return_rfid', methods=['POST'])
+@api.route('/return', methods=['POST'])
 class ReturnRFID(Resource):
     def post(self):
         # Get rfid data from the request
@@ -343,32 +150,45 @@ class ReturnRFID(Resource):
         return output, 200
 
 
-@api.route('/return_rfid2', methods=['POST'])
+@api.route('/return2', methods=['POST'])
 class ReturnRDID2(Resource):
     def post(self):
         print("IN RETURNrfid 2")
         print("Session Contents:", session)
-        data = request.get_json()['addedUIDs']
+        return_data = request.get_json()['addedUIDs']
+        session['return_data'] = return_data
 
-        print("DATA", data)
+        addedProducts = {}
 
-        for items in data.items():
-            print("uid: ", items[0], "quantity: ", items[1])
+        for items in return_data.items():
             item_uid = items[0]
             quantity = items[1]
 
             # Subtract from quantity borrowed
             # product = Product.query.filter_by(iem_uid=uid).first()
             product = Product.query.filter_by(item_uid=item_uid).first()
+            product_name = product.title
+            addedProducts[product_name] = quantity
+
+        session['addedProducts'] = addedProducts
+
+
+@api.route('/return-confirm', methods=['POST'])
+class ReturnConfirm(Resource):
+    def post(self):
+        return_data = session['return_data']
+
+        for items in return_data.items():
+            uid = items[0]
+            quantity = items[1]
+
+            product = Product.query.filter_by(item_uid=uid).first()
             product.quantity_borrowed -= quantity
 
             # Change/remove borrow entry from borrowed table
             user_id = session['_user_id']
             borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
             borrow.quantity -= quantity
-
-            print("New borrowed quantity: ", borrow.quantity)
-            print("Product quantity borrowed: ", product.quantity_borrowed)
 
             if borrow.quantity <= 0:
                 db.session.delete(borrow)
@@ -379,6 +199,33 @@ class ReturnRDID2(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+
+@api.route('/authenticate_admin', methods=['POST'])
+class AuthenticateAdmin(Resource):
+    def post(self):
+        data = request.get_json()
+        uid = data['uid']
+
+        try:
+            user = Users.query.filter_by(uid_1=uid).first()
+        except:
+            try:
+                user = Users.query.filter_by(uid_2=uid).first()
+            except:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except:
+                    user = None
+
+        if user:
+            print("User role: ", user.role)
+            if user.role == 'admin':
+                return {'authenticated': True, 'role': 'admin'}
+            else:
+                return {'authenticated': True, 'role': 'student'}
+        else:
+            return {'authenticated': False}
 
 
 @api.route('/product/', methods=['GET'])

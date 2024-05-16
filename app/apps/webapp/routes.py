@@ -26,6 +26,7 @@ from apps.webapp.forms import *
 from apps.api.forms import *
 from sqlalchemy import update
 from sqlalchemy.inspection import inspect
+import json
 
 
 @blueprint.route('/barcode-scanning')
@@ -83,84 +84,103 @@ def start():
 
 @blueprint.route('/borrow', methods=["GET","POST"])
 # @login_required
-def post():
-    if request.method == "POST":
-        # Check if post is from continue button
-        if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            # flash({'category':'success', 'title': 'Return successful!', 'text': 'You can now log in using your card.'}, 'General')
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
-
-        if 'cancel' in request.form:
-            flash({'text':'123'}, 'cancel')
-    return render_template('app/borrow.html')
-
-
-@blueprint.route('/borrow_rfid', methods=["GET","POST"])
-# @login_required
 def post_rfid():
     form = ProductForm(request.form)
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            # flash({'category':'success', 'title': 'Return successful!', 'text': 'You can now log in using your card.'}, 'General')
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
+            borrow_data = json.loads(request.form["borrow_data"])
+            session['addedUIDs'] = borrow_data
+
+            addedProducts = {}
+
+            for items in borrow_data.items():
+                uid = items[0]
+                quantity = items[1]
+
+                product = Product.query.filter_by(item_uid=uid).first()
+                product_name = product.title
+
+                addedProducts[product_name] = quantity
+
+            session['addedProducts'] = addedProducts
+            return redirect(url_for('webapp_blueprint.borrow_date'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
-    return render_template('app/borrow_rfid.html', form=form)
+    return render_template('app/borrow.html', form=form)
 
 
-@blueprint.route('/return', methods=["GET","POST"])
+@blueprint.route('/borrow-date', methods=["GET","POST"])
 # @login_required
-def post_return():
+def borrow_date():
+    form = BorrowDateForm()
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            flash({'category':'success', 'title': 'Return successful!'}, 'General')
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
+
+            # lookup name with session uid
+            user_id = session['_user_id']
+            print("User id: ", user_id)
+
+            user = Users.query.filter_by(id=user_id).first()
+
+            if user:
+                name = user.fullname
+                print("User: ", user.fullname)
+                session["name"] = name
+            else:
+                session["name"] = None
+
+            estimated_return_date = request.form["estimated_return_date"]
+            project = request.form["project"]
+
+          # add data to session
+            session["estimated_return_date"] = estimated_return_date
+            session["project"] = project
+            print("Return date: ", estimated_return_date)
+            print("Project: ", project)
+
+            return redirect(url_for('webapp_blueprint.borrow_confirm'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
-    return render_template('app/return.html')
+    return render_template('app/borrow-date.html', form=form)
 
 
-@blueprint.route('/return_rfid', methods=["GET","POST"])
+@blueprint.route('/return', methods=["GET","POST"])
 # @login_required
 def post_returnRFID():
     form = ProductForm(request.form)
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            flash({'category':'success', 'title': 'Return successful!'}, 'General')
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
+            user_id = session['_user_id']
+            user = Users.query.filter_by(id=user_id).first()
+
+            if user:
+                name = user.fullname
+                print("User: ", user.fullname)
+                session["name"] = name
+            else:
+                session["name"] = None
+
+            return redirect(url_for('webapp_blueprint.return_confirm'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
-    return render_template('app/return_rfid.html', form=form)
+    return render_template('app/return.html', form=form)
+
+
+@blueprint.route('/return-confirm', methods=["GET","POST"])
+# @login_required
+def return_confirm():
+    return render_template('app/return-confirm.html')
 
 
 @blueprint.route('/borrow/confirm')
 def borrow_confirm():
-    if session.get('data') == False:
-        try:
-            data = request.args.get('data')
-            session['data'] = data
-        except:
-            flash({'text':'123'}, 'cancel')
-            # Nog aanpassen naar error message
-
-    # for item in session['data']:
-
-
-    return render_template('app/borrow-confirm.html', data=data)
+    return render_template('app/borrow-confirm.html')
 
 @blueprint.route('/home')
 # @login_required

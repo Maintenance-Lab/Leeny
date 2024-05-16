@@ -6,6 +6,7 @@ import subprocess
 from apps import create_app, db
 from apps.config import config_dict
 from apps.webapp.models import Manufacturer, Product, ProductCategory, Vendor, Ordered, Borrowed, Order, Category
+from apps.authentication.models import Users
 
 def create_and_return_app(config_mode):
     app_config = config_dict[config_mode.capitalize()]
@@ -19,6 +20,11 @@ def insert_dummy_data():
         initialize_database()
 
     with app.app_context():
+        users = [
+            Users(id='1', fullname='AmberAdmin', email='amber@a.nl', uid_1='44032007048a3e12796a80', role='admin'),
+            Users(id='2', fullname='StudentAmber', email='amber@hva.nl', uid_1='02001804d7919327', role='student'),
+        ]
+
         vendors = [
             Vendor(name='KIWI Electronics', website='https://www.kiwi-electronics.com'),
             Vendor(name='Distrelec', website='https://www.distrelec.nl'),
@@ -155,6 +161,7 @@ def insert_dummy_data():
         db.session.bulk_save_objects(ordered)
         db.session.bulk_save_objects(borrowed)
         db.session.bulk_save_objects(order)
+        db.session.bulk_save_objects(users)
         db.session.commit()
         print('Dummy data inserted')
 
@@ -169,7 +176,7 @@ def log_database():
     with app.app_context():
         print(f"{'Model':<15}{'Count':>10}")
         print('-' * 25)
-        for model in [Vendor, ProductCategory, Manufacturer, Product, Ordered, Borrowed, Order]:
+        for model in [Vendor, ProductCategory, Manufacturer, Product, Ordered, Borrowed, Order, Users]:
             count = model.query.count()
             print(f"{model.__name__:<15}{count:>10}")
 

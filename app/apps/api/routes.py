@@ -72,9 +72,11 @@ class Borrow(Resource):
         # Get the barcode data from the request
         data = request.get_json()
         barcode = data['barcode']
+        print("BARCODE: ", barcode)
 
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
+        print("PRODUCT: ", product)
 
         if product is not None:
             title = product.title
@@ -84,7 +86,16 @@ class Borrow(Resource):
 
             quantity = quantity_total - quantity_unavailable - quantity_borrowed
 
-            if quantity <= 0:
+            if quantity > 0:
+                # Product found
+                output = {
+                    'barcode': barcode,
+                    'name': title,
+                    'quantity': quantity,
+                    'message': f'Product found',
+                    'success': True
+                }
+            else:
                 # Product not available
                 output = {
                     'barcode': barcode,
@@ -92,25 +103,15 @@ class Borrow(Resource):
                     'message': f'Product not available',
                     'success': False
                 }
-
-            # Product found
+        else:
+            # Product not found
             output = {
                 'barcode': barcode,
-                'name': title,
-                'quantity': quantity,
-                'message': f'Product found',
-                'success': True
-        }
-
-        # Product not found
-        output = {
-            'barcode': barcode,
-            'message': f'Product not found',
-            'success': False
-        }
+                'message': f'Product not found',
+                'success': False
+            }
 
         return output, 200
-
 
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
@@ -308,6 +309,91 @@ class GetOptions(Resource):
             'categories': categories,
             'vendors': vendors
         }
+
+
+@api.route('/add-product', methods=['POST'])
+class AddProduct(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Fetch or create Manufacturer
+        manufacturer_name = data.get('manufacturer')
+        manufacturer = Manufacturer.query.filter_by(name=manufacturer_name).first()
+        if not manufacturer:
+            manufacturer = Manufacturer(name=manufacturer_name)
+            db.session.add(manufacturer)
+
+        # Fetch or create ProductCategory
+        category_name = data.get('category')
+        category = ProductCategory.query.filter_by(name=category_name).first()
+        if not category:
+            category = ProductCategory(name=category_name)
+            db.session.add(category)
+
+        # Fetch or create Vendor
+        vendor_name = data.get('vendor')
+        vendor = Vendor.query.filter_by(name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(name=vendor_name)
+            db.session.add(vendor)
+
+        # Convert price to float, replace comma with dot
+
+        price = data['price']
+        if ',' in price:
+            price = price.replace(',', '.')
+        price = float(price)
+
+        # Add to database
+        product = Product(title=data['title'],
+                            barcode=data['barcode'],
+                            price_when_bought=price,
+                            description=data['description'],
+                            url=data['url'],
+                            notes=data['notes'],
+                            created_at_ts=datetime.now(),
+                            manufacturer=manufacturer,
+                            category=category,
+                            vendor=vendor,
+                            quantity_total=data['quantity'],
+                            quantity_unavailable=data['quantity_unavailable'],
+                            quantity_borrowed='0',
+                            )
+
+        db.session.add(product)
+        db.session.commit()
+
+
+@api.route('/update-product', methods=['POST'])
+class UpdateProduct(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Fetch or create Vendor
+        vendor_name = data.get('vendor')
+        vendor = Vendor.query.filter_by(name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(name=vendor_name)
+            db.session.add(vendor)
+
+        # Convert price to float, replace comma with dot
+        price = data['price']
+        if ',' in price:
+            price = price.replace(',', '.')
+        price = float(price)
+
+        # Update product
+        product = Product.query.filter_by(barcode=data['barcode']).first()
+        og_quantity = product.quantity_total
+        og_quantity_unavailable = product.quantity_unavailable
+
+        product.price_when_bought = price
+        product.url = data['url']
+        product.vendor = vendor
+        product.quantity_total = int(data['quantity']) + og_quantity
+        product.quantity_unavailable = int(data['quantity_unavailable']) + og_quantity_unavailable
+
+        db.session.commit()
 
 
 @api.route('/product/', methods=['GET'])

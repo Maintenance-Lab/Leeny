@@ -1,0 +1,160 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Borrow {% endblock title %}
+{% block content %}
+
+<section class="min-vh-100">
+  <div class="container mt-7">
+    <div class="row justify-content-center">
+      <div class="col-xl-6 col-lg-8 col-md-10">
+        <div class="card z-index-0">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div style="text-align: left;">
+                  <label style="display: block;">Name borrower</label>
+                  <div class="mb-3">
+                    <p style="margin: 0;">{{ session.name }}</p>
+                  </div>
+
+                  <label style="display: block;">Items</label>
+                  <ul style="list-style-type: none; padding-left: 0;">
+                    {% for item, quantity in session.addedProducts.items() %}
+                    <li style="margin-bottom: 5px;">
+                      <span style="display: inline-block; width: 50px;">{{ quantity }}</span>
+                      <span>{{ item }}</span>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-6 text-center">
+                <p>Ask an employee to scan their card for ver/authentication</p>
+                <img src="https://static.thenounproject.com/png/74445-200.png" width="200" height="200" alt="Admin Card Image">
+              </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-auto">
+                    <a href="/return" class="btn btn-outline-danger">Cancel</a>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-dark" id="scan-card">Scan Admin Card</button>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    document.getElementById('scan-card').addEventListener('click', function() {
+        Swal.fire({
+            title: "Scan Admin Card",
+            text: "Please scan an admin card for authentication.",
+            imageUrl: "https://static.thenounproject.com/png/74445-200.png",
+            imageWidth: 300,
+            imageHeight: 300,
+            imageAlt: "Admin Card Image",
+            showConfirmButton: false,
+            showCancelButton: true,
+            cancelButtonText: "Go back",
+        });
+
+        var interval_id = setInterval(fetchUID, 1000);
+        function fetchUID() {
+            fetch('/get_uid')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('UID: ' + data.uid);
+
+                    if (data.uid !== null) {
+                        clearInterval(interval_id);
+                        authenticateUser(data.uid);
+                    }
+                })
+                .catch(error => console.error('Error fetching UID:', error));
+        }
+
+        function authenticateUser(uid) {
+            fetch(`${window.location.origin}/api/authenticate_admin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ uid: uid })
+            })
+            .then(response => {
+                console.log(response);
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to authenticate user.');
+                }
+            })
+            .then(data => {
+                console.log(data);
+                if (data.authenticated) {
+                    if (data.role === 'admin') {
+                        fetch(`${window.location.origin}/api/return-confirm`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({})
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Response was not ok');
+                            }
+                            Swal.fire({
+                                title: "Borrow successfully completed!",
+                                html: "",
+                                timer: 800,
+                                timerProgressBar: true,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                    const timer = Swal.getPopup().querySelector("c");
+                                    timerInterval = setInterval(() => {
+                                        timer.textContent = `${Swal.getTimerLeft()}`;
+                                    }, 100);
+                                },
+                                willClose: () => {
+                                    clearInterval(timerInterval);
+                                }
+                            }).then(function (result) {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    window.location.href = "/borrowed";
+                                }
+                            });
+
+                            return response.json();
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
+                }
+
+                Swal.fire({
+                    title: "Error!",
+                    text: "Authentication failed. Please try again.",
+                    icon: "error",
+                    showConfirmButton: true
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "An unexpected error occurred. Please try again later.",
+                    icon: "error",
+                    showConfirmButton: true
+                });
+            });
+        }
+    });
+</script>
+{% endblock javascripts %}

@@ -10,8 +10,10 @@ import glob
 # Scanner class
 class Scanner:
     def __init__(self):
-        self.port = self.serial_ports()[0]
+        self.port = self.serial_ports()[3]
+        print("PORTS: ", self.serial_ports)
         self.ser = self.open_serial()
+        print(self.serial_ports())
 
     def serial_ports(self):
         # https://stackoverflow.com/questions/12090503/listing-available-com-ports-with-python

@@ -1,22 +1,22 @@
 <!-- Begin alerts -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-{% with messages = get_flashed_messages(with_categories=true) %}               
+{% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 {% for category, message in messages %}
 
     {% if category == 'cancel' %}
         <script>
-        var swal_options = {"title": "Success!", 
-                            "text": "{{ message.text }}", 
+        var swal_options = {"title": "Success!",
+                            "text": "{{ message.text }}",
                             "icon": "{{message.category}}"
-                        
+
                             };
         Swal.fire({
 
                 title:swal_options.title,
                 // success , error , warning ,info
 
-                text: swal_options.text,  
+                text: swal_options.text,
                 // Custom message flashed from your flask routes
 
                 icon: swal_options.icon,
@@ -67,7 +67,7 @@
                 Swal.fire({
                 title: "Welcome <b>{{message.user}}</b>",
                 html: "Succesfully logged in!",
-                timer: 200,
+                timer: 800,
                 timerProgressBar: true,
                 didOpen: () => {
                     Swal.showLoading();
@@ -86,25 +86,53 @@
                 });
             </script>
         {% endif %}
+        {% if category == 'TimerBorrowed' %}
+            <script>
+            let timeInterval;
+                Swal.fire({
+                title: "Borrow successful completed!",
+                html: "",
+                timer: 800,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("c");
+                    timerInterval = setInterval(() => {
+                    timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+                }).then(function (result) {
+                if (result.dismiss === swal.DismissReason.timer) {
+                    window.location.href = "/{{message.location}}";
+                }
+                });
+            </script>
+    {% endif %}
         {% if category == 'General' %}
         <script>
-            var swal_options = {"title": "{{ message.title }}", 
-                                "text": "{{ message.text }}", 
+            var swal_options = {"title": "{{ message.title }}",
+                                "text": "{{ message.text }}",
                                 "icon": "{{message.category}}"
                                 };
             Swal.fire({
-    
+
                     title:swal_options.title,
                     // success , error , warning ,info
-    
-                    text: swal_options.text,  
+
+                    text: swal_options.text,
                     // Custom message flashed from your flask routes
-    
+
                     icon: swal_options.icon,
                     // success , error , warning ,info
             });
             </script>
         {% endif %}
+
+
+
 {% endfor %}
 {% endif %}
 {% endwith %}

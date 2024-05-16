@@ -62,7 +62,7 @@ def get_uid():
         uid = scanner.response_parse(picca_res)
         # print(f"\nUID: {uid}\n")
         scanner.set_led()
-        scanner.set_buzzer()
+        # scanner.set_buzzer()
     # print("END SCAN ROUND:\n")
     if uid:
         # print("UID found. Exiting...")
@@ -441,7 +441,7 @@ def card_reader():
                                msg='No user found for this card',
                                form=login_form)
             # return redirect(url_for('authentication_blueprint.rfid_register'))
-        
+
         if user:
             login_user(user)
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')

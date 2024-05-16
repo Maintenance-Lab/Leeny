@@ -16,43 +16,16 @@ from datetime import datetime, timedelta
 
 api = Api(blueprint)
 
-# TODO: DELETE and PUT have to be implemented
-# TODO: Implement a user permission system to not allow everyone to access user info
-@api.route('/test/', methods=['GET'])
-class TestRoute(Resource):
-    def get(self):
-        return {
-                'data': 'Hello World',
-                'success': True
-            }, 200
-
-
-@api.route('/barcode-scanning', methods=['POST'])
-class BarcodeScanningRoute(Resource):
-    def post(self):
-        # Get the barcode data from the request
-        data = request.get_json()
-        barcode = data['barcode']
-
-        # Process the barcode data to generate different data
-        updated_string = f"Hello from Flask! You scanned barcode: {barcode}"
-
-        return {
-            'data': updated_string,
-            'success': True
-        }, 200
-
-
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
     def post(self):
-        print("IN BORROW 2")
-        print("Session Contents:", session)
-        data = request.get_json()['addedBarcodes']
+        addedBarcodes = session['addedBarcodes']
+        project = session['project']
+        return_date = session['estimated_return_date']
 
-        print("DATA", data)
 
-        for items in data.items():
+
+        for items in addedBarcodes.items():
             print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
             quantity = items[1]
@@ -66,11 +39,11 @@ class Borrow2(Resource):
 
                 # Add borrow entry to borrowed table
                 user_id = session['_user_id']
-                # user_id = 22
                 borrow = Borrowed(user_id=user_id,
                                   product_id=product.id,
                                   quantity=quantity,
-                                  estimated_return_date=int(datetime.now().timestamp() + 604800)
+                                  project=project,
+                                  estimated_return_date=return_date
                                   )
                 print("ADD TO TABLE: ", borrow)
 
@@ -86,6 +59,33 @@ class Borrow2(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+
+@api.route('/authenticate_admin', methods=['POST'])
+class AuthenticateAdmin(Resource):
+    def post(self):
+        data = request.get_json()
+        uid = data['uid']
+
+        try:
+            user = Users.query.filter_by(uid_1=uid).first()
+        except:
+            try:
+                user = Users.query.filter_by(uid_2=uid).first()
+            except:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except:
+                    user = None
+
+        if user:
+            print("User role: ", user.role)
+            if user.role == 'admin':
+                return {'authenticated': True, 'role': 'admin'}
+            else:
+                return {'authenticated': True, 'role': 'student'}
+        else:
+            return {'authenticated': False}
 
 
 @api.route('/borrow', methods=['POST'])
@@ -184,11 +184,32 @@ class Return2(Resource):
     def post(self):
         print("IN RETURN 2")
         print("Session Contents:", session)
-        data = request.get_json()['addedBarcodes']
+        return_data = request.get_json()['addedBarcodes']
+        session['return_data'] = return_data
 
-        print("DATA", data)
+        addedProducts = {}
 
-        for items in data.items():
+        for items in return_data.items():
+            barcode = items[0]
+            quantity = items[1]
+
+            if barcode.isdigit():
+                # get product name
+                product = Product.query.filter_by(barcode=barcode).first()
+                product_name = product.title
+                addedProducts[product_name] = quantity
+
+        session["addedProducts"] = addedProducts
+
+
+
+
+@api.route('/return-confirm', methods=['POST'])
+class ReturnConfirm(Resource):
+    def post(self):
+        return_data = session['return_data']
+
+        for items in return_data.items():
             print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
             quantity = items[1]
@@ -227,7 +248,7 @@ class Borrow(Resource):
         uid = data['uid']
 
         # Query the database for the product based on barcode
-        product = Product.query.filter_by(uid=uid).first()
+        product = Product.query.filter_by(item_uid=uid).first()
         title = product.title
         quantity = product.quantity
 
@@ -271,18 +292,6 @@ class BorrowRoute(Resource):
                 'data': output,
                 'success': True
             }, 200
-
-# @api.route('/return/', methods=['GET'])
-# class ReturnRoute(Resource):
-#     def get(self):
-#         user_id = request.args.get('user_id')
-#         all_objects = Borrowed.query.filter_by(user_id=user_id)
-#         output = [{**BorrowForm(obj=obj).data} for obj in all_objects]
-#         print(output)
-#         return {
-#                 'data': output,
-#                 'success': True
-#             }, 200
 
 @api.route('/borrowed/', methods=['GET'])
 class ReturnRoute(Resource):

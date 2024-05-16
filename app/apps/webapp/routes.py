@@ -223,7 +223,7 @@ def settings():
             test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
             # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
-            flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
+            flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect(url_for('webapp_blueprint.settings'))
 
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)

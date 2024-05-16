@@ -400,11 +400,7 @@ def card_reader():
     login_form = RfidLoginForm(request.form)
 
     if request.method == 'POST':
-
-        # read form data
-        # username = request.form['username'] or None
         uid = request.form['uid'] or None
-        # password = request.form['password'] or None
 
         # Locate user
         if uid:

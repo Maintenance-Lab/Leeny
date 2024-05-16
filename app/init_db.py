@@ -24,6 +24,7 @@ def insert_dummy_data():
         users = [
             Users(id='1', fullname='AmberAdmin', email='amber@a.nl', uid_1='44032007048a3e12796a80', role='admin'),
             Users(id='2', fullname='StudentAmber', email='amber@hva.nl', uid_1='02001804d7919327', role='student'),
+            Users(id='3', fullname='Donna', email='donna@donna.nl', uid_1='440008070499d1aa3e3e80', role='admin', password='1'),
         ]
 
 

@@ -459,34 +459,6 @@ def card_reader():
         return render_template('app/card_reader.html',
                                form=login_form)
 
-
-# @blueprint.route('/email_verification', methods=['GET', 'POST'])
-# def email_verification():
-#     login_form = EmailForm(request.form)
-#     session['email_code'] = '1234'
-#     html = render_template("app/email_send.html", confirm_code=session['email_code'])
-#     send_email("robinalmekinders@gmail.com", "leeny test", html)
-#     if request.method == 'POST':
-#         code_1 = request.form['code_1']
-#         code_2 = request.form['code_2']
-#         code_3 = request.form['code_3']
-#         code_4 = request.form['code_4']
-
-#         code = f'{code_1}{code_2}{code_3}{code_4}'
-#         print('code', code)
-
-#         if code == session['email_code']:
-#             # Update user
-#             user = Users.query.filter_by(email=session['email']).first()
-#             user.email_verified = True
-#             db.session.commit()
-#             return redirect(url_for('authentication_blueprint.login'))
-
-#         return render_template('accounts/email_verification.html',
-#                                msg='Invalid code',
-#                                form=login_form)
-#     return render_template('accounts/email_verification.html', form=login_form)
-
 app = Flask(__name__)
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -499,14 +471,41 @@ mail = Mail(app)
 
 @blueprint.route('/email_verification', methods=['GET', 'POST'])
 def email_verification():
-    msg = Message(
-        subject='Hello from the other side!',
-        sender='leeny.maintenance@gmail.com',  # Ensure this matches MAIL_USERNAME
-        recipients=['robinalmekinders@gmail.com']  # Replace with actual recipient's email
-    )
-    msg.body = "Hey, sending you this email from my Flask app, let me know if it works."
-    mail.send(msg)
-    return "Message sent!"
+    login_form = EmailForm(request.form)
+    session['email_code'] = '1234'
+    html = render_template("app/email_send.html", confirm_code=session['email_code'])
+    send_email("robinalmekinders@gmail.com", "leeny test", html)
+    if request.method == 'POST':
+        code_1 = request.form['code_1']
+        code_2 = request.form['code_2']
+        code_3 = request.form['code_3']
+        code_4 = request.form['code_4']
+
+        code = f'{code_1}{code_2}{code_3}{code_4}'
+        print('code', code)
+
+        if code == session['email_code']:
+            # Update user
+            user = Users.query.filter_by(email=session['email']).first()
+            user.email_verified = True
+            db.session.commit()
+            return redirect(url_for('authentication_blueprint.login'))
+
+        return render_template('accounts/email_verification.html',
+                               msg='Invalid code',
+                               form=login_form)
+    return render_template('accounts/email_verification.html', form=login_form)
+
+# @blueprint.route('/email_verification', methods=['GET', 'POST'])
+# def email_verification():
+#     msg = Message(
+#         subject='Hello from the other side!',
+#         sender='leeny.maintenance@gmail.com',  # Ensure this matches MAIL_USERNAME
+#         recipients=['robinalmekinders@gmail.com']  # Replace with actual recipient's email
+#     )
+#     msg.body = "Hey, sending you this email from my Flask app, let me know if it works."
+#     mail.send(msg)
+#     return "Message sent!"
 
 
 @blueprint.route('/logout')

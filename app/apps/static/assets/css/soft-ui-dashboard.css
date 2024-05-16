@@ -9231,6 +9231,32 @@ fieldset:disabled .btn {
   margin-bottom: 1rem !important;
 }
 
+.email {
+  margin-bottom: 1rem !important;
+}
+
+.email span {
+  display: inline-block;
+  margin: 5px;
+  width: 20%;
+}
+
+.email span input {
+  text-align: center;
+  font-weight: bold;
+  width: 80%;
+  aspect-ratio: 1/1;
+}
+
+.email input[type="text"] {
+  font-size: 34px !important; /* Adjust font size as needed */
+  font-weight: bold; /* Make numbers bold */
+  text-align: center; /* Center-align the numbers */
+  padding: 5px; /* Adjust padding as needed */
+  border: 1px solid #ccc; /* Add border */
+  border-radius: 5px; /* Add border radius */
+}
+
 .mb-4 {
   margin-bottom: 1.5rem !important;
 }

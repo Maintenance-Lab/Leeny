@@ -67,7 +67,18 @@ class Config(object):
     if USE_SQLITE:
 
         # This will create a file in <app> FOLDER
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')          
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')   
+
+    # Mail Settings
+    # MAIL_DEFAULT_SENDER = "leeny.maintenance@gmail.com"
+    # MAIL_SERVER = "smtp.gmail.com"
+    # MAIL_PORT = 587
+    # MAIL_USE_TLS = True
+    # MAIL_USE_SSL = False
+    # MAIL_DEBUG = False
+    # MAIL_NAME = "Leeny"
+    # MAIL_USERNAME = os.getenv("EMAIL_USER")
+    # MAIL_PASSWORD = os.getenv("EMAIL_PASS")       
              
 class ProductionConfig(Config):
     DEBUG = False

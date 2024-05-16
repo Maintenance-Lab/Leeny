@@ -16,76 +16,53 @@ from datetime import datetime, timedelta
 
 api = Api(blueprint)
 
-@api.route('/borrow2', methods=['POST'])
-class Borrow2(Resource):
-    def post(self):
-        addedBarcodes = session['addedBarcodes']
-        project = session['project']
-        return_date = session['estimated_return_date']
-
-
-
-        for items in addedBarcodes.items():
-            print("barcode: ", items[0], "quantity: ", items[1])
-            barcode = items[0]
-            quantity = items[1]
-
-            # If barcode is an int
-            if barcode.isdigit():
-                print("Barcode is an int")
-                # Add 1 to quantity borrowed
-                product = Product.query.filter_by(barcode=barcode).first()
-                product.quantity_borrowed += quantity
-
-                # Add borrow entry to borrowed table
-                user_id = session['_user_id']
-                borrow = Borrowed(user_id=user_id,
-                                  product_id=product.id,
-                                  quantity=quantity,
-                                  project=project,
-                                  estimated_return_date=return_date
-                                  )
-                print("ADD TO TABLE: ", borrow)
-
-                # Check if the user already has a borrowed item with the same product_id
-                existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-                if existing_borrow:
-                    existing_borrow.quantity += quantity
-                    print("Existing borrow found. Quantity updated.")
-                else:
-                    db.session.add(borrow)
-                    print("New borrow added to table.")
-
-        # Save changes to database
-        print("COMMITING CHANGES -------------------------------")
-        db.session.commit()
-
-
-@api.route('/authenticate_admin', methods=['POST'])
-class AuthenticateAdmin(Resource):
+@api.route('/changeCardUID', methods=['POST'])
+class changeCardUID(Resource):
     def post(self):
         data = request.get_json()
-        uid = data['uid']
+        print("DATA ---------------------:", data)
+        card = data['card']
+        new_uid = data['new_uid']
 
         try:
-            user = Users.query.filter_by(uid_1=uid).first()
-        except:
+            user = Users.query.filter_by(uid_1=new_uid).first()
+        except Exception as e1:
             try:
-                user = Users.query.filter_by(uid_2=uid).first()
-            except:
+                user = Users.query.filter_by(uid_2=new_uid).first()
+            except Exception as e2:
                 try:
-                    user = Users.query.filter_by(uid_3=uid).first()
-                except:
-                    user = None
+                    user = Users.query.filter_by(uid_3=new_uid).first()
+                except Exception as e3:
+                    print('Card UID does not exist in database')
 
-        if user:
-            print("User role: ", user.role)
-            if user.role == 'admin':
-                return {'authenticated': True, 'role': 'admin'}
-            else:
-                return {'authenticated': True, 'role': 'student'}
+        if user is None:
+            # Get the user_id from the session
+            user_id = session['_user_id']
+            user = Users.query.filter_by(id=user_id).first()
+
+            # Change uid to new uid
+            if card == '1':
+                user.uid_1 = new_uid
+            elif card == '2':
+                user.uid_2 = new_uid
+            elif card == '3':
+                user.uid_3 = new_uid
+
+            # Save changes to database
+            db.session.commit()
+
+            output = {
+                'message': f'Card UID updated',
+                'success': True
+            }
+
         else:
-            return {'authenticated': False}
+            output = {
+                'message': f'Card UID already exists',
+                'success': False
+            }
+
+        return output, 200
 
 
 @api.route('/borrow', methods=['POST'])
@@ -132,6 +109,51 @@ class Borrow(Resource):
         }
 
         return output, 200
+
+
+@api.route('/borrow2', methods=['POST'])
+class Borrow2(Resource):
+    def post(self):
+        addedBarcodes = session['addedBarcodes']
+        project = session['project']
+        return_date = session['estimated_return_date']
+
+
+
+        for items in addedBarcodes.items():
+            print("barcode: ", items[0], "quantity: ", items[1])
+            barcode = items[0]
+            quantity = items[1]
+
+            # If barcode is an int
+            if barcode.isdigit():
+                print("Barcode is an int")
+                # Add 1 to quantity borrowed
+                product = Product.query.filter_by(barcode=barcode).first()
+                product.quantity_borrowed += quantity
+
+                # Add borrow entry to borrowed table
+                user_id = session['_user_id']
+                borrow = Borrowed(user_id=user_id,
+                                  product_id=product.id,
+                                  quantity=quantity,
+                                  project=project,
+                                  estimated_return_date=return_date
+                                  )
+                print("ADD TO TABLE: ", borrow)
+
+                # Check if the user already has a borrowed item with the same product_id
+                existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+                if existing_borrow:
+                    existing_borrow.quantity += quantity
+                    print("Existing borrow found. Quantity updated.")
+                else:
+                    db.session.add(borrow)
+                    print("New borrow added to table.")
+
+        # Save changes to database
+        print("COMMITING CHANGES -------------------------------")
+        db.session.commit()
 
 
 @api.route('/return', methods=['POST'])
@@ -202,8 +224,6 @@ class Return2(Resource):
         session["addedProducts"] = addedProducts
 
 
-
-
 @api.route('/return-confirm', methods=['POST'])
 class ReturnConfirm(Resource):
     def post(self):
@@ -238,38 +258,6 @@ class ReturnConfirm(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
-
-
-@api.route('/borrow_rfid', methods=['POST'])
-class Borrow(Resource):
-    def post(self):
-        # Get rfid data from the request
-        data = request.get_json()
-        uid = data['uid']
-
-        # Query the database for the product based on barcode
-        product = Product.query.filter_by(item_uid=uid).first()
-        title = product.title
-        quantity = product.quantity
-
-        if product is not None:
-            # Product found
-            output = {
-                'uid': uid,
-                'name': title,
-                'quantity': quantity,
-                'message': f'Product found',
-                'success': True
-        }
-        else:
-            # Product not found
-            output = {
-                'uid': uid,
-                'message': f'Product not found',
-                'success': False
-        }
-
-        return output, 200
 
 
 @api.route('/product/', methods=['GET'])

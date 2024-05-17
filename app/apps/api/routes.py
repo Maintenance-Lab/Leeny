@@ -67,7 +67,6 @@ class Borrow2(Resource):
         user = Users.query.filter_by(id=user_id).first()
         email = user.email
 
-        session['email_code'] = random.randint(0000, 9999)
         html = render_template('app/borrow-confirm.html')
         send_email(email, "leeny test", html)
 

@@ -146,6 +146,13 @@ def borrow_date():
             print("Return date: ", estimated_return_date)
             print("Project: ", project)
 
+            # If price > number go to email verif
+            limit_price = 1000
+            borrow_price = 1200
+            if borrow_price > limit_price:
+                # go to route email_verification
+                return redirect(url_for('authentication_blueprint.email_verification'))
+
             return redirect(url_for('webapp_blueprint.borrow_confirm'))
 
         if 'cancel' in request.form:
@@ -188,6 +195,7 @@ def return_confirm():
 
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
+    print("Session data: ", session)
     return render_template('app/borrow-confirm.html')
 
 @blueprint.route('/home')

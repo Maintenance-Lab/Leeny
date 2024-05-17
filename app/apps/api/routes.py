@@ -188,14 +188,6 @@ class Borrow2(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
-        
-        # Send email to user
-        user_id = session['_user_id']
-        user = Users.query.filter_by(id=user_id).first()
-        email = user.email
-
-        html = render_template('app/borrow-confirm.html')
-        send_email(email, "leeny test", html)
 
 
 @api.route('/return', methods=['POST'])

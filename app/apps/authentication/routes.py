@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import time
+import random
 from datetime import datetime
 
 from flask_restx import Resource, Api
@@ -24,6 +25,11 @@ from apps.authentication.forms import *
 from apps.authentication.models import Users, Scanner
 
 from apps.authentication.util import verify_pass, generate_token
+
+from apps.scripts.email_verif import send_email
+
+from flask import Flask
+from flask_mail import Mail, Message
 
 # Bind API -> Auth BP
 api = Api(blueprint)
@@ -57,7 +63,7 @@ def get_uid():
         uid = scanner.response_parse(picca_res)
         # print(f"\nUID: {uid}\n")
         scanner.set_led()
-        # scanner.set_buzzer()
+        scanner.set_buzzer()
     # print("END SCAN ROUND:\n")
     if uid:
         # print("UID found. Exiting...")

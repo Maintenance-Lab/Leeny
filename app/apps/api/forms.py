@@ -1,9 +1,7 @@
 from wtforms import Form
 from wtforms_alchemy import model_form_factory
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, TextAreaField, HiddenField
-from wtforms.validators import DataRequired
-from wtforms import StringField, SubmitField
+from wtforms import StringField, IntegerField, TextAreaField, HiddenField, SubmitField
 from wtforms.fields import DateField
 from wtforms.validators import DataRequired, Length
 

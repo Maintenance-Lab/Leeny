@@ -3,4 +3,4 @@ from wtforms.validators import DataRequired
 from wtforms import StringField
 
 class ManufacturerForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    manufacturer_name = StringField('Manufacturer name', validators=[DataRequired()])

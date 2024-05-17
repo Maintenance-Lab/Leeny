@@ -15,6 +15,7 @@ class Borrowed(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)
     returned = db.Column(db.Integer, nullable=False, default=0)
     estimated_return_date = db.Column(db.Integer, nullable=False, default=int(datetime.now().timestamp()))
+    project = db.Column(db.String(255), nullable=False)
 
     # Timestamps
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))

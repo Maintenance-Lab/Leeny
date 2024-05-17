@@ -35,7 +35,7 @@
                 </div>
             </div>
             <div class="text-center mt-3">
-                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/dashboard">Cancel</a>
+                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/borrowed">Cancel</a>
             </div>
         </div>
     </div>
@@ -90,7 +90,7 @@
         return element;
     }
 
-    function addTableRow(barcode, item_name, borrowed_quantity, notFound) {
+    function addTableRow(barcode, item_name, borrowed_quantity) {
         // If item is scanned, enable continue button
         if (addedBarcodes != {}) {
             document.getElementById("continue").disabled = false;
@@ -119,7 +119,8 @@
             max: borrowed_quantity,
             'data-barcode': barcode,
             id: barcode,
-            value: quantity
+            value: quantity,
+            onkeydown: 'preventKeyboardInput(event)'
         });
 
         quantityInput.addEventListener('focus', focused);
@@ -144,7 +145,7 @@
     }
 
 
-    function notFoundText(notFound, available, item_name=null) {
+    function notFoundText(notFound, available, message, item_name=null) {
         if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
             // Remove existing content from notFound div
             while (notFound.firstChild) {
@@ -152,12 +153,7 @@
             }
 
             // Create a new text node with the message
-            let message;
-            if (available == true) {
-                message = 'Item not found';
-            } else {
-                message = 'You didn\'t borrow: ' + (item_name || '');
-            }
+            message = message + (item_name || '');
 
             // Append the text node to the notFound div
             const textNode = document.createTextNode(message);
@@ -173,6 +169,11 @@
             }
         }
     }
+
+    function preventKeyboardInput(event) {
+      event.preventDefault();
+    }
+
 
     var barcode = '';
     var item_name = '';
@@ -257,7 +258,7 @@
                         }
                     }
                     else {
-                        notFoundText(notFound, false, item_name);
+                        notFoundText(notFound, false, "Quantity to return is higher than borrowed quantity for: ", item_name);
                         console.log("Quantity to return is higher than borrowed quantity");
                     }
 
@@ -267,7 +268,7 @@
                 }
                 else {
                     // When barcode not found
-                    notFoundText(notFound, true);
+                    notFoundText(notFound, true, "Barcode not found ");
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                     console.log("Barcode not found");

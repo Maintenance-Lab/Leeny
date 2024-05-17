@@ -31,11 +31,9 @@ from googlesearch import search
 from bs4 import BeautifulSoup
 from apps.webapp.imagescraper import get_largest_image
 
+import json
+from datetime import datetime
 
-
-@blueprint.route('/barcode-scanning')
-def barcode_scanning():
-    return render_template('app/barcode-scanning.html', API_GENERATOR=len(API_GENERATOR))
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
@@ -92,13 +90,72 @@ def post():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
+            print("form data: ", request.form["borrow_data"])
+
+            # add data to session
+            # session["borrow_data"] = request.form["borrow_data"]
+            borrow_data = json.loads(request.form["borrow_data"])
+            session['addedBarcodes'] = borrow_data
+
+            # create dictionary with names and quantities
+            # addedBarcodes = request.form["borrow_data"]
+            addedProducts = {}
+
+            for items in borrow_data.items():
+                barcode = items[0]
+                quantity = items[1]
+
+                if barcode != 'null':
+                    # get product name
+                    product = Product.query.filter_by(barcode=barcode).first()
+                    product_name = product.title
+
+                    addedProducts[product_name] = quantity
+
+            session["addedProducts"] = addedProducts
+
+            return redirect(url_for('webapp_blueprint.borrow_date'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
+
+
+@blueprint.route('/borrow-date', methods=["GET","POST"])
+# @login_required
+def borrow_date():
+    form = BorrowDateForm()
+    if request.method == "POST":
+        # Check if post is from continue button
+        if 'continue' in request.form:
+
+            # lookup name with session uid
+            user_id = session['_user_id']
+            print("User id: ", user_id)
+
+            user = Users.query.filter_by(id=user_id).first()
+
+            if user:
+                name = user.fullname
+                print("User: ", user.fullname)
+                session["name"] = name
+            else:
+                session["name"] = None
+
+            estimated_return_date = request.form["estimated_return_date"]
+            project = request.form["project"]
+
+            # add data to session
+            session["estimated_return_date"] = estimated_return_date
+            session["project"] = project
+            print("Return date: ", estimated_return_date)
+            print("Project: ", project)
+
+            return redirect(url_for('webapp_blueprint.borrow_confirm'))
+
+        if 'cancel' in request.form:
+            flash({'text':'123'}, 'cancel')
+    return render_template('app/borrow-date.html', form=form)
 
 
 @blueprint.route('/return', methods=["GET","POST"])
@@ -107,33 +164,74 @@ def post_return():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("session from blueprint: ", session)
-            return redirect(url_for('webapp_blueprint.home'))
-            pass
+            # lookup name with session uid
+            user_id = session['_user_id']
+            print("User id: ", user_id)
+
+            user = Users.query.filter_by(id=user_id).first()
+
+            if user:
+                name = user.fullname
+                print("User: ", user.fullname)
+                session["name"] = name
+            else:
+                session["name"] = None
+
+            return redirect(url_for('webapp_blueprint.return_confirm'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/return.html')
 
-@blueprint.route('/borrow/confirm')
+
+@blueprint.route('/return-confirm', methods=["GET","POST"])
+# @login_required
+def return_confirm():
+    return render_template('app/return-confirm.html')
+
+
+@blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
-    if session.get('data') == False:
-        try:
-            data = request.args.get('data')
-            session['data'] = data
-        except:
-            flash({'text':'123'}, 'cancel')
-            # Nog aanpassen naar error message
-
-    # for item in session['data']:
-
-
-    return render_template('app/borrow-confirm.html', data=data)
+    return render_template('app/borrow-confirm.html')
 
 @blueprint.route('/home')
 # @login_required
 def home():
     return render_template('app/home.html', segment='home')
+
+
+@blueprint.route('/admin-dashboard')
+# @login_required
+def admin_dashboard():
+    return render_template('app/admin-dashboard.html', segment='admin-dashboard')
+
+
+@blueprint.route('/admin-inventory')
+# @login_required
+def admin_inventory():
+    return render_template('app/admin-inventory.html', segment='admin-inventory')
+
+
+@blueprint.route('/add-product')
+# @login_required
+def admin_add_product():
+    return render_template('app/add-product.html', segment='add-product')
+
+@blueprint.route('/edit-product/<int:id>')
+# @login_required
+def admin_edit_product(id):
+    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable]
+
+    all_objects = Product.query.filter(Product.id == id) \
+        .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+        .join(ProductCategory, ProductCategory.id == Product.category_id) \
+        .join(Vendor, Vendor.id == Product.vendor_id) \
+        .with_entities(*select_columns)
+
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+    print("DATA: ", data)
+    return render_template('app/edit-product.html', product=data, segment='edit-product')
+
 
 @blueprint.route('/inventory')
 # @login_required
@@ -146,22 +244,12 @@ def inventory():
 def orders():
     return render_template('app/orders.html', segment='orders')
 
-@blueprint.route('/return')
-# @login_required
-def returns():
-    # Add pagination
-    return render_template('app/return.html', segment='return')
-
 @blueprint.route('/borrowed')
 # @login_required
 def borrows():
     # Add pagination
     return render_template('app/borrowed.html', segment='borrowed')
 
-@blueprint.route('/borrow-date')
-# @login_required
-def borrow_date():
-    return render_template('app/borrow-date.html', segment='borrowed')
 
 @blueprint.route('/settings' , methods=["GET","POST"])
 # @login_required
@@ -178,9 +266,9 @@ def settings():
             test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
             # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
-            flash({'category':'success', 'title': 'Changes saved!', 'text': '.'}, 'General')
+            flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect(url_for('webapp_blueprint.settings'))
-        
+
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
 
@@ -196,7 +284,7 @@ def item(id):
 @blueprint.route('/new_item/')
 @blueprint.route('/item/<int:id>/edit')
 # @login_required
-def new_item(id = None):    
+def new_item(id = None):
     result=None
     try:
         api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
@@ -328,12 +416,12 @@ def inventory_search():
     q = request.args.get("q")
 
     all_objects = Product.query \
-    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
 
     # Legacy code; moet nog vervangen worden met voorbeeld zoals in /inventory/borrowed
     data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \
-                       'name': obj.manufacturer.name if obj.manufacturer else None} \
+                       'name': obj.manufacturer.manufacturer_name if obj.manufacturer else None} \
                         for obj in all_objects]}
 
     return render_template('app/htmx-results/inventory-results.html', data=data)
@@ -343,7 +431,7 @@ def inventory_search_small():
     q = request.args.get("q")
 
     select_columns = [Product.id, Product.title, Manufacturer.name]
-    
+
     all_objects = Product.query \
     .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
@@ -358,7 +446,7 @@ def inventory_search_small():
 def inventory_borrowed():
     user_id = session['_user_id']
 
-    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
+    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name]
 
     all_objects = Borrowed.query \
     .filter(Borrowed.user_id == user_id) \
@@ -368,15 +456,20 @@ def inventory_borrowed():
 
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
-    
-    return render_template('app/htmx-results/borrowed-results.html', data=data)
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
+
+    # return render_template('app/inventory-results.html', data=data)
+
+    return render_template('app/borrowed-results.html', data=data)
 
 
 from datetime import datetime, timedelta
 
 @blueprint.route('/orders/load/<int:load>')
 def orders_load(load):
-    
+
     select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project]
     all_objects = Order.query \
     .join(Users, Users.id == Order.user_id, isouter = True) \
@@ -411,11 +504,11 @@ def googlesearchURL():
             return all([result.scheme, result.netloc])  # Check if both scheme and netloc (domain) are present
         except ValueError:
             return False
-        
+
     def extract_price(text):
         # Regular expression pattern to match prices
         price_pattern = r'\b(?:\d{1,3}(?:[,\.]\d{3})*(?:[,\.]\d+)?|\d+(?:[,\.]\d+)?)\b'
-        
+
         # Find the first occurrence of a price in the text
         match = re.search(price_pattern, text)
 
@@ -428,42 +521,42 @@ def googlesearchURL():
     def get_url_data(url):
         # Send a GET request to the URL
         response = requests.get(url)
-        
+
         # Make data variable
         data = {}
-    
+
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
             # Parse the HTML content of the page using Beautiful Soup
             soup = BeautifulSoup(response.text, 'html.parser')
-            
+
             # Find the first <h1> tag in the parsed HTML
             first_h1 = soup.find('h1')
 
             # If <h1> tag is found, return its inner text
             if first_h1:
                 data['title'] = first_h1.get_text().strip()
-            
+
             # Define a function to check if a class contains the word "price" and not "cart"
             def contains_price_class(class_name):
                 return class_name and 'price' in class_name.lower() and not 'cart' in class_name.lower()
-            
+
             # Find the first element with a class containing the word "price"
             element_with_price_class = soup.find(class_=contains_price_class)
             if element_with_price_class:
                 price = extract_price(element_with_price_class.get_text().strip())
                 data['price'] = price
-            
+
             # print("Starting image retriever")
             # data['image'] = get_largest_image(url)
 
             return data
         else:
             return {"error":"Failed to retrieve page information. Please confirm correctness manually."}
-        
+
     if is_valid_url(q):
         data = get_url_data(q)
-       
+
     return render_template('app/htmx-results/googlesearch-results.html', data=data)
 
 
@@ -471,20 +564,20 @@ def googlesearchURL():
 def manufacturer_dropdown():
     all_objects = Manufacturer.query.all()
     data = [obj.name for obj in all_objects]
-        
+
     return render_template('app/htmx-results/manufacturer-dropdown.html', data=data)
 
 @blueprint.route('/category/dropdown/')
 def category_dropdown():
     all_objects = Category.query.all()
     data = [obj.name for obj in all_objects]
-        
+
     return render_template('app/htmx-results/category-dropdown.html', data=data)
 
 @blueprint.route('/vendor/dropdown/')
 def vendor_dropdown():
     all_objects = Vendor.query.all()
     data = [obj.name for obj in all_objects]
-        
+
     return render_template('app/htmx-results/vendor-dropdown.html', data=data)
 

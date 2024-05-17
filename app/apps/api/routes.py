@@ -12,6 +12,7 @@ from werkzeug.datastructures import MultiDict
 from apps import db
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
+from apps.authentication.util import verify_pass
 
 
 api = Api(blueprint)
@@ -146,12 +147,12 @@ class Borrow(Resource):
                 'message': f'Product found',
                 'success': True
         }
-        else:
-            # Product not found
-            output = {
-                'barcode': barcode,
-                'message': f'Product not found',
-                'success': False
+
+        # Product not found
+        output = {
+            'barcode': barcode,
+            'message': f'Product not found',
+            'success': False
         }
 
         return output, 200
@@ -304,6 +305,55 @@ class ReturnConfirm(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+
+@api.route('/admin-login', methods=['POST'])
+class AdminLogin(Resource):
+    def post(self):
+        data = request.get_json()
+        email = data['email']
+        password = data['password']
+
+        user = Users.query.filter_by(email=email).first()
+
+        if user is not None and user.role == 'admin':
+            if verify_pass(password, user.password):
+                session['_user_id'] = user.id
+                session['email'] = user.email
+                session['role'] = user.role
+
+                output = {
+                    'message': f'Login successful',
+                    'success': True
+                }
+        else:
+            output = {
+                'message': f'Login failed',
+                'success': False
+            }
+
+        return output, 200
+
+
+@api.route('/get-options')
+class GetOptions(Resource):
+    def get(self):
+        # Get all manufacturers, categories, and vendors
+        manufacturers = [manufacturer.name for manufacturer in Manufacturer.query.all()]
+        categories = [category.name for category in ProductCategory.query.all()]
+        vendors = [vendor.name for vendor in Vendor.query.all()]
+
+        # sort alphabetically
+        manufacturers.sort()
+        categories.sort()
+        vendors.sort()
+
+        return {
+            'success': True,
+            'manufacturers': manufacturers,
+            'categories': categories,
+            'vendors': vendors
+        }
 
 
 @api.route('/product/', methods=['GET'])

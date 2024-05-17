@@ -1,0 +1,191 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Inventory {% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4" style="max-width: 700px; margin: 0 auto;">
+        <div class="card-body px-4 pt-4 pb-2">
+          <h1 style="display: inline;">Add product to database</h1>
+          <form id="add-product-form" class="row g-3">
+            <!-- Step 1 -->
+            <div id="step-1" class="col-12">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" class="form-control" id="product-name" name="product_name" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="price-bought">Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="text" class="form-control" id="price-bought" name="price_bought" step="0.01"  required>
+                    </div>
+                </div>
+                  <div class="form-group mb-3">
+                    <label for="url-bought">Website URL</label>
+                    <input type="url" class="form-control" id="url-bought" name="url_bought" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="category">Category</label>
+                    <input list="category-options" class="form-control" id="category" name="category" required>
+                    <datalist id="category-options">
+                        
+                    </datalist>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="quantity-borrowing">Quantity for Borrowing</label>
+                    <input type="number" class="form-control" id="quantity-borrowing" name="quantity_borrowing" value="1" onkeypress="allowNumbersOnly(event)" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="quantity-not-available">Quantity Not Available for Borrowing</label>
+                    <input type="number" class="form-control" id="quantity-not-available" name="quantity_not_available"value="0" onkeypress="allowNumbersOnly(event)" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="manufacturer">Manufacturer</label>
+                    <input list="manufacturer-options" class="form-control" id="manufacturer" name="manufacturer" required>
+                    <datalist id="manufacturer-options">
+
+                    </datalist>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="vendor">Vendor</label>
+                    <input list="vendor-options" class="form-control" id="vendor" name="vendor" required>
+                    <datalist id="vendor-options">
+
+                    </datalist>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 text-center">
+                <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+                <button type="button" class="btn btn-dark mt-3" onclick="showStep3()" style="width: 150px;">Continue</button>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div id="step-3" class="col-12 d-none">
+              <div class="row">
+                <div class="col-md-12 text-center">
+                  <div class="form-group mb-3 visually-hidden">
+                    <label for="barcode">Barcode</label>
+                    <input type="text" class="form-control" id="barcode" name="barcode" required>
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    <p style="font-size: 16px; margin-bottom: 5px;">Scan the barcode of the product</p>
+                    <img src="https://static.thenounproject.com/png/74445-200.png" alt="" style="max-width: 150px; margin: 0 auto;">
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 text-center">
+                <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
+                <button type="submit" class="btn btn-dark mt-3" style="width: 150px;">Add Product</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+document.getElementById('price-bought').addEventListener('keypress', function(e) {
+    const keyCode = e.keyCode || e.which;
+    const inputValue = e.target.value;
+
+    // Allow digits, backspace, and the first dot or comma
+    if ((keyCode < 48 || keyCode > 57) && keyCode !== 46 && keyCode !== 44 && keyCode !== 8) {
+        e.preventDefault();
+    }
+
+    // Prevent more than one dot or comma
+    if ((inputValue.includes('.') || inputValue.includes(',')) && (keyCode === 46 || keyCode === 44)) {
+        e.preventDefault();
+    }
+
+    // Limit to two decimal places
+    if ((inputValue.includes('.') || inputValue.includes(',')) && inputValue.split(/[.,]/)[1]?.length >= 2) {
+        e.preventDefault();
+    }
+});
+
+function allowNumbersOnly(event) {
+    const keyCode = event.keyCode || event.which;
+    if (keyCode < 48 || keyCode > 57) {
+        event.preventDefault();
+    }
+}
+
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     fetch(`${window.location.origin}/api/get-options`)
+//         .then(response => response.json())
+//         .then(data => {
+//             const { manufacturers, categories, vendors } = data;
+
+//             populateSelect('manufacturer', manufacturers);
+//             populateSelect('category', categories);
+//             populateSelect('vendor', vendors);
+//         });
+
+//     function populateSelect(elementId, options) {
+//         const selectElement = document.getElementById(elementId);
+//         options.forEach(option => {
+//             const opt = document.createElement('option');
+//             opt.value = option; // Assuming the option value is the same as the option name
+//             opt.textContent = option;
+//             selectElement.appendChild(opt);
+//         });
+//     }
+// });
+
+document.addEventListener('DOMContentLoaded', function () {
+    fetch(`${window.location.origin}/api/get-options`)
+        .then(response => response.json())
+        .then(data => {
+            const { manufacturers, categories, vendors } = data;
+
+            populateDatalist('manufacturer-options', manufacturers);
+            populateDatalist('category-options', categories);
+            populateDatalist('vendor-options', vendors);
+        });
+
+    function populateDatalist(datalistId, options) {
+        const datalist = document.getElementById(datalistId);
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            datalist.appendChild(optionElement);
+        });
+    }
+});
+
+  function showStep1() {
+    document.getElementById('step-1').classList.remove('d-none');
+    document.getElementById('step-3').classList.add('d-none');
+  }
+
+  function showStep3() {
+    document.getElementById('step-1').classList.add('d-none');
+    document.getElementById('step-3').classList.remove('d-none');
+  }
+</script>
+{% endblock javascripts %}

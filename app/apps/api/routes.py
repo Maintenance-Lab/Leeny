@@ -206,12 +206,12 @@ class Borrow2(Resource):
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
         
-        # Send email to user
+        # Send email to users
         user_id = session['_user_id']
         user = Users.query.filter_by(id=user_id).first()
         email = user.email
 
-        html = render_template('app/borrow-confirm.html')
+        html = render_template('app/email_overview.html')
         send_email(email, "leeny test", html)
 
 

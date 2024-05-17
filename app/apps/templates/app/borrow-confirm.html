@@ -91,11 +91,11 @@
         }
 
         function authenticateUser(uid) {
-            fetch(`${window.location.origin}/api/authenticate_admin`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+        fetch(`${window.location.origin}/api/authenticate_admin`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
                 body: JSON.stringify({ uid: uid })
             })
             .then(response => {
@@ -121,7 +121,26 @@
                             if (!response.ok) {
                                 throw new Error('Response was not ok');
                             }
-                             
+                            Swal.fire({
+                                title: "Borrow successfully completed!",
+                                html: "",
+                                timer: 800,
+                                timerProgressBar: true,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                    const timer = Swal.getPopup().querySelector("c");
+                                    timerInterval = setInterval(() => {
+                                        timer.textContent = `${Swal.getTimerLeft()}`;
+                                    }, 100);
+                                },
+                                willClose: () => {
+                                    clearInterval(timerInterval);
+                                }
+                            }).then(function (result) {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    window.location.href = "/borrowed";
+                                }
+                            });
 
                             return response.json();
                         })

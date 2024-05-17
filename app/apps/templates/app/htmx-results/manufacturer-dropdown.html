@@ -1,0 +1,43 @@
+<select id="manufacturer-select" class="form-select" aria-label="Default select example">
+    <option value="" selected disabled>Select Manufacturer...</option>
+    {% for name in data %}
+    <option value="{{ name }}">{{ name }}</option>
+    {% endfor %}
+</select>
+
+<script>
+    $(document).ready(function() {
+        $('#manufacturer-select').select2({
+            placeholder: "Select Manufacturer...",
+            tags: true
+        });
+    });
+</script>
+
+<style>
+.select2-selection {
+    display: block;
+    width: 100%;
+    font-size: 0.91rem !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
+    color: #212529 !important;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da !important;
+    border-radius: .5rem !important;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    min-height: 40px;
+    text-align: left;
+}
+.select2-selection__rendered {
+  margin: 5px;
+}
+.select2-selection__arrow {
+  margin: 6px;
+}
+
+.select2-selection__placeholder {
+    color: #ABB3BB !important;
+}
+</style>

@@ -1,16 +1,20 @@
 {% for item in data['data'] %}
 <tr>
-    <td style="padding-left: 24px;">
-        <a href="/orders/{{item.id}}">#{{item.id}}</a>
+    <td>
+        <a href="/orders/{{item.id}}" class="w-100">
+            <div class="d-flex">
+                <u>{{item.id}}</u>
+            </div>
+        </a>
     </td>
     <td class="text-xs font-weight-bold mb-0">
         {{ item.created_at_ts }}
     </td>
     <td class="text-xs font-weight-bold mb-0">
-        {{item.fullname}}
+        {{item.project}}
     </td>
     <td class="text-xs font-weight-bold mb-0">
-        {{item.project}}
+        {{item.fullname}}
     </td>
 </tr>
 {% endfor %}
@@ -28,7 +32,11 @@
       },
       info: false,
       infoEmpty: false,
-      pageLength: 8
+      pageLength: 8,
+      columnDefs: [
+        {target: 0, className: 'd-flex'}
+        ],
+      order: [[0, 'desc']],
+      retrieve: true,
       });
 </script>
-

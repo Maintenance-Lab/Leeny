@@ -25,18 +25,35 @@ class changeCardUID(Resource):
         card = data['card']
         new_uid = data['new_uid']
 
-        try:
-            user = Users.query.filter_by(uid_1=new_uid).first()
-        except Exception as e1:
-            try:
-                user = Users.query.filter_by(uid_2=new_uid).first()
-            except Exception as e2:
-                try:
-                    user = Users.query.filter_by(uid_3=new_uid).first()
-                except Exception as e3:
-                    print('Card UID does not exist in database')
+        # try:
+        #     user = Users.query.filter_by(uid_1=new_uid).exists()
+        # except:
+        #     user = None
+        #     print('Card UID does not exist in database')
 
-        if user is None:
+        # try:
+        #     user = Users.query.filter_by(uid_2=new_uid).exists()
+        # except:
+        #     user = None
+        #     print('Card UID does not exist in database')
+
+        # try:
+        #     user = Users.query.filter_by(uid_3=new_uid).exists()
+        # except:
+        #     user = None
+        #     print('Card UID does not exist in database')
+
+        # Controleren of er een gebruiker bestaat met uid_1 gelijk aan new_uid
+        exists_1 = Users.query.filter_by(uid_1=new_uid).first() is not None
+        # Controleren of er een gebruiker bestaat met uid_2 gelijk aan new_uid
+        exists_2 = Users.query.filter_by(uid_2=new_uid).first() is not None
+        # Controleren of er een gebruiker bestaat met uid_3 gelijk aan new_uid
+        exists_3 = Users.query.filter_by(uid_3=new_uid).first() is not None
+
+        # Print de resultaten
+        print(exists_1, exists_2, exists_3)
+
+        if not (exists_1 or exists_2 or exists_3):
             # Get the user_id from the session
             user_id = session['_user_id']
             user = Users.query.filter_by(id=user_id).first()
@@ -65,6 +82,35 @@ class changeCardUID(Resource):
 
         return output, 200
 
+@api.route('/authenticate_admin', methods=['POST'])
+class AuthenticateAdmin(Resource):
+    def post(self):
+        data = request.get_json()
+        uid = data['uid']
+
+        try:
+            user = Users.query.filter_by(uid_1=uid).first()
+        except Exception as e1:
+            print('Error when card scanning:', e1)
+        if user is None:
+            try:
+                user = Users.query.filter_by(uid_2=uid).first()
+            except Exception as e2:
+                print('Error when card scanning:', e2)
+        if user is None:
+            try:
+                user = Users.query.filter_by(uid_3=uid).first()
+            except Exception as e3:
+                print('Error when card scanning:', e3)
+
+        if user:
+            print("User role: ", user.role)
+            if user.role == 'admin':
+                return {'authenticated': True, 'role': 'admin'}
+            else:
+                return {'authenticated': True, 'role': 'student'}
+        else:
+            return {'authenticated': False}
 
 @api.route('/borrow', methods=['POST'])
 class Borrow(Resource):

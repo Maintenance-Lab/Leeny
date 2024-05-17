@@ -13,9 +13,9 @@ class Ordered(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id'))
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('productCategory.id'))
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
-    
+
 
     # Properties
     title = db.Column(db.String(255), nullable=False)

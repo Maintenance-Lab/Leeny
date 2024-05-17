@@ -99,7 +99,7 @@ def post():
                 barcode = items[0]
                 quantity = items[1]
 
-                if barcode.isdigit():
+                if barcode != 'null':
                     # get product name
                     product = Product.query.filter_by(barcode=barcode).first()
                     product_name = product.title
@@ -210,6 +210,21 @@ def admin_inventory():
 # @login_required
 def admin_add_product():
     return render_template('app/add-product.html', segment='add-product')
+
+@blueprint.route('/edit-product/<int:id>')
+# @login_required
+def admin_edit_product(id):
+    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable]
+
+    all_objects = Product.query.filter(Product.id == id) \
+        .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+        .join(ProductCategory, ProductCategory.id == Product.category_id) \
+        .join(Vendor, Vendor.id == Product.vendor_id) \
+        .with_entities(*select_columns)
+
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+    print("DATA: ", data)
+    return render_template('app/edit-product.html', product=data, segment='edit-product')
 
 
 @blueprint.route('/inventory')
@@ -373,12 +388,12 @@ def inventory_search():
     q = request.args.get("q")
 
     all_objects = Product.query \
-    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
 
     # Legacy code; moet nog vervangen worden met voorbeeld zoals in /inventory/borrowed
     data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \
-                       'name': obj.manufacturer.name if obj.manufacturer else None} \
+                       'name': obj.manufacturer.manufacturer_name if obj.manufacturer else None} \
                         for obj in all_objects]}
 
     return render_template('app/inventory-results.html', data=data)
@@ -387,7 +402,7 @@ def inventory_search():
 def inventory_borrowed():
     user_id = session['_user_id']
 
-    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.name]
+    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name]
 
     all_objects = Borrowed.query \
     .filter(Borrowed.user_id == user_id) \

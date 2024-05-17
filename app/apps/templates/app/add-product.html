@@ -218,14 +218,31 @@
             });
     }
 
+
     function populateDatalist(datalistId, options) {
         const datalist = document.getElementById(datalistId);
-        options.forEach(option => {
+        datalist.innerHTML = ''; // Clear existing options
+        const uniqueOptions = Array.from(new Set(options)); // Remove duplicates
+
+        uniqueOptions.forEach(option => {
             const optionElement = document.createElement('option');
             optionElement.value = option;
             datalist.appendChild(optionElement);
         });
     }
+
+    document.getElementById("vendor").addEventListener('blur', function(e) {
+        const enteredVendor = e.target.value;
+        const vendorDatalist = document.getElementById('vendor-options');
+        const existingOptions = Array.from(vendorDatalist.children).map(option => option.value);
+
+        if (!existingOptions.includes(enteredVendor)) {
+            // Add the entered vendor to the datalist
+            const optionElement = document.createElement('option');
+            optionElement.value = enteredVendor;
+            vendorDatalist.appendChild(optionElement);
+        }
+    });
 
 
     document.addEventListener('DOMContentLoaded', function () {

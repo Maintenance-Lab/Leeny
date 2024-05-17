@@ -462,7 +462,7 @@ def inventory_borrowed():
 
     # return render_template('app/inventory-results.html', data=data)
 
-    return render_template('app/borrowed-results.html', data=data)
+    return render_template('app/htmx-results/borrowed-results.html', data=data)
 
 
 from datetime import datetime, timedelta

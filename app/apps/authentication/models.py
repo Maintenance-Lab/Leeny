@@ -41,7 +41,7 @@ class Users(db.Model, UserMixin):
     oauth_github  = db.Column(db.String(100), nullable=True)
 
     api_token     = db.Column(db.String(100))
-    api_token_ts  = db.Column(db.Integer)    
+    api_token_ts  = db.Column(db.Integer)
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))
     updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))
 
@@ -240,4 +240,3 @@ class Scanner:
 
         except Exception as e:
             print(f"Error: {e}")
-    

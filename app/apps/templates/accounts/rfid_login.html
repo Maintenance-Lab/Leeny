@@ -33,13 +33,13 @@
                       <span class="text-danger">{{ msg | safe }}</span>
                     {% else %}
                       Add your credentials
-                    {% endif %}                     
+                    {% endif %}
                   </p>
                 </div>
                 <div class="card-body">
 
                   <form role="form text-left" method="post" action="">
-                    
+
                     {{ form.hidden_tag() }}
 
                     <label>Fullname</label>
@@ -74,16 +74,16 @@
 
                     <!-- GitHub button starts here -->
                     {% if config.SOCIAL_AUTH_GITHUB %}
-                      
+
                       <p class="mb-2">or SignIn with</p>
-                      
+
                       <a class="btn btn-outline" href="{{url_for('authentication_blueprint.login_github')}}">
                         <span class="text-lg fs-1 fab fa-github"></span>
                       </a>
-                          
+
                     {% endif %}
                     <!-- GitHub ends here -->
-                                                           
+
                   </p>
                 </div>
               </div>
@@ -103,9 +103,7 @@
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
 {% block javascripts %}
-
 <script>
   // Fetch UID every 1 second
   var interval_id = setInterval(fetchUID, 1000);
@@ -131,7 +129,7 @@
 // - USE THE TOKEN TO LOG IN
 // *************************************************************
 
-// // Save aKey in localStorage 
+// // Save aKey in localStorage
 // const asyncLocalStorage = {
 //     setItem: function (key, value) {
 //         return Promise.resolve().then(function () {
@@ -140,11 +138,11 @@
 //     }
 // }
 
-// Login hook  
+// Login hook
 // document.getElementsByTagName('form')[0].onsubmit = (e) => {
 
 //   e.preventDefault();
-  
+
 //   const formData = new FormData(e.target)
 //   const username = formData.get('username');
 //   const password = formData.get('password');
@@ -164,13 +162,13 @@
 //   .then((response) => response.json())
 //       .then((res) => {
 
-//         //console.log('Token: ' + res.data); 
+//         //console.log('Token: ' + res.data);
 
 //         // store token in localStorage
 //         asyncLocalStorage.setItem('token',res.data).then(result => {e.target.submit()})
 
 //       })
-//       .catch((err) => {console.log(err)})   
+//       .catch((err) => {console.log(err)})
 // }
 
 </script>

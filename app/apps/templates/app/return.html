@@ -1,45 +1,304 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/base-start.html' %}
 
 {% block title %} Return {% endblock title %}
-
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
 {% block content %}
-
-  <div class="container-fluid py-4">
-
-    <div class="row">
-      <div class="d-flex align-items-center justify-content-between">
-        <h1>Your Borrowed Items</h1>
-        <a class="btn btn-dark m-0" href="/return">Return an item</a>     
-      </div>
-      <div class="col-12">
-        <div class="card mb-4">
-          <div class="card-body px-0 pt-0 pb-2">
-            <div class="table-responsive p-0">
-              <table class="table align-items-center mb-0">
-                <thead>
-                  <tr>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Item</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Manufacturer</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
-                    <th class="text-secondary opacity-7"></th>
-                  </tr>
-                </thead>
-                <span hx-get="/inventory/borrowed" hx-trigger="load" hx-target="#results">
-                <tbody id="results">
-                  
-                </tbody>
-              </table>
+    <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
+        <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
+            <h3 class="mb-2">Scan your items</h3>
+            <div class="visually-hidden">
+                <input name="barcodeInput" id="barcodeInputField" value="" onfocus="this.value=''" />
             </div>
-          </div>
+            <tr class="container px-0 w-100">
+                <td class="col-7">
+                    <div class="">
+                      <img src="https://static.thenounproject.com/png/74445-200.png" alt="">
+                    </div>
+                  </td>
+            </tr>
         </div>
-      </div>
-    </div>  
-  </div>
+        <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
+            <div id="notFoundText"></div>
+            <div class="card text-left">
+                <div class="table-responsive p-0 " style="max-height: 450px;">
+                    <table class="table align-items-center mb-0 p-3">
+
+                    <tbody></tbody>
+
+                    </table>
+                    <form method="POST">
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-dark w-50 mt-2 mb-4" id="continue" name="continue">Continue</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/dashboard">Cancel</a>
+            </div>
+        </div>
+    </div>
+
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+
+<script>
+    function deleteRow(link) {
+        // Find the closest row to the clicked link and delete
+        var row = link.closest('tr');
+        row.remove();
+
+        // Get the barcode of the item to be deleted
+        var barcode = row.querySelector('input').getAttribute('data-barcode');
+        delete addedBarcodes[barcode];
+
+        // Disable the continue button if there are no items scanned
+        if (Object.keys(addedBarcodes) == 'null') {
+            document.getElementById("continue").disabled = true;
+        }
+    }
+
+    function incrementQuantity(barcode, addedBarcodes, borrowed_quantity) {
+         // Get the current value of the quantity input for the corresponding barcode
+        var quantityInput = document.getElementById(`${barcode}`);
+        var currentQuantity = addedBarcodes[barcode];
+
+        console.log("currentQuantity: ", currentQuantity);
+        if (currentQuantity < borrowed_quantity) {
+
+            // Increment the quantity
+            quantityInput.value = currentQuantity + 1;
+            addedBarcodes[barcode] = currentQuantity + 1;
+        }
+    }
+
+    function createElement(tag, classes = [], attributes = {}, content = '') {
+        // Create an element with the specified tag, classes, attributes and content
+        const element = document.createElement(tag);
+        Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+
+        if (classes.length) {
+            element.classList.add(...classes);
+        }
+        if (content) {
+          element.textContent = content;
+        }
+
+        return element;
+    }
+
+    function addTableRow(barcode, item_name, borrowed_quantity, notFound) {
+        // If item is scanned, enable continue button
+        if (addedBarcodes != {}) {
+            document.getElementById("continue").disabled = false;
+        }
+
+        // Get the current quantity or default to 1
+        var quantity = addedBarcodes[barcode] || 1;
+
+        // Create a new table row with the item name, quantity input and delete link
+        const row = createElement('tr');
+        const nameCell = createElement('td', ['col-7']);
+        const nameDiv = createElement('div', ['d-flex', 'px-2', 'py-1']);
+        const nameColumn = createElement('div', ['d-flex', 'flex-column', 'justify-content-center']);
+        const itemName = createElement('h6', ['mb-0', 'text-sm', 'text-wrap', 'item-name'], {}, item_name);
+
+        nameColumn.appendChild(itemName);
+        nameDiv.appendChild(nameColumn);
+        nameCell.appendChild(nameDiv);
+        row.appendChild(nameCell);
+
+        const quantityCell = createElement('td');
+        const quantityDiv = createElement('div', ['col-3', 'input-group']);
+        const quantityInput = createElement('input', ['form-control', 'p-1'], {
+            type: 'number',
+            min: '1',
+            max: borrowed_quantity,
+            'data-barcode': barcode,
+            id: barcode,
+            value: quantity
+        });
+
+        quantityInput.addEventListener('focus', focused);
+        quantityInput.addEventListener('focusout', defocused);
+        quantityDiv.appendChild(quantityInput);
+        quantityCell.appendChild(quantityDiv);
+        row.appendChild(quantityCell);
+
+        const deleteCell = createElement('td', ['align-middle', 'col-2']);
+        const deleteLink = createElement('a', ['text-secondary', 'font-weight-bold', 'text-xs'], {
+            href: 'javascript:;',
+            'data-toggle': 'tooltip',
+            'data-original-title': 'Delete item'
+        }, 'Delete');
+        deleteLink.addEventListener('click', () => deleteRow(deleteLink));
+        deleteCell.appendChild(deleteLink);
+        row.appendChild(deleteCell);
+
+        tableBody.appendChild(row);
+
+        addedBarcodes[barcode] = quantity;
+    }
+
+
+    function notFoundText(notFound, available, item_name=null) {
+        if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
+            // Remove existing content from notFound div
+            while (notFound.firstChild) {
+                notFound.removeChild(notFound.firstChild);
+            }
+
+            // Create a new text node with the message
+            let message;
+            if (available == true) {
+                message = 'Item not found';
+            } else {
+                message = 'You didn\'t borrow: ' + (item_name || '');
+            }
+
+            // Append the text node to the notFound div
+            const textNode = document.createTextNode(message);
+            notFound.appendChild(textNode);
+        }
+    }
+
+    function foundText(notFound) {
+        if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
+            // Remove existing content from notFound div
+            while (notFound.firstChild) {
+                notFound.removeChild(notFound.firstChild);
+            }
+        }
+    }
+
+    var barcode = '';
+    var item_name = '';
+    var addedBarcodes = {};
+
+    var typingTimer;
+    var doneTypingInterval = 50;
+
+    const tableBody = document.querySelector('tbody');
+    const notFound = document.getElementById('notFoundText');
+
+    // Disable continue button on loading page, when no items are scanned
+    document.getElementById("continue").disabled = true;
+
+    // autofocus input field on loading page
+    document.getElementById("barcodeInputField").focus();
+
+    // autofocus input field on every click everywhere on the page
+    document.addEventListener('click', function() {
+        document.getElementById("barcodeInputField").focus();
+    });
+
+    // Change value in dict if quantity is manually changed
+    document.addEventListener('input', function(event) {
+        // only if quantity of product is not higher than max quantity
+        if (event.target.tagName === 'INPUT') {
+            var barcode = event.target.getAttribute('data-barcode');
+                addedBarcodes[barcode] = parseInt(event.target.value);
+        }
+    });
+
+    // Whenever a barcode is scanned
+    document.getElementById("barcodeInputField").addEventListener('input', function() {
+        // Clear the previous timer
+        clearTimeout(typingTimer);
+
+        // Get barcode from input field
+        barcode = document.getElementById("barcodeInputField").value;
+
+        // Set a new timer to handle barcode input after a certain amount of time
+        typingTimer = setTimeout(function() {
+            console.log("Sending this barcode: ", barcode);
+
+            // Send the barcode to the server
+            fetch('api/return', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ barcode: barcode })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response from server:', data);
+
+                message = data.message;
+                if (message == "Product found") {
+                    // When barcode found in database, get name and quantity
+                    item_name = data.name;
+                    borrowed_quantity = data.quantity;
+                    quantity = addedBarcodes[barcode] || 1;
+
+                    console.log("borrowed_quantity: ", borrowed_quantity);
+                    console.log("quantity: ", quantity);
+
+                    // Check if quantity user wants to return is less than or equal to borrowed quantity
+                    if (borrowed_quantity >= quantity) {
+                        foundText(notFound);
+
+                        if (barcode in addedBarcodes) {
+                            // Increment quantity for existing barcode
+                            incrementQuantity(barcode, addedBarcodes, borrowed_quantity);
+                        } else {
+                            // Add new barcode to screen and dictionary
+                            addedBarcodes[barcode] = 1;
+                            addTableRow(barcode, item_name, borrowed_quantity);
+                        }
+                    }
+                    else {
+                        notFoundText(notFound, false, item_name);
+                        console.log("Quantity to return is higher than borrowed quantity");
+                    }
+
+                    // Clear the input field after processing
+                    barcode = '';
+                    document.getElementById("barcodeInputField").value = "";
+                }
+                else {
+                    // When barcode not found
+                    notFoundText(notFound, true);
+                    barcode = '';
+                    document.getElementById("barcodeInputField").value = "";
+                    console.log("Barcode not found");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }, doneTypingInterval);
+    });
+
+    document.getElementById("continue").addEventListener('click', function() {
+        console.log("continue clicked");
+        console.log("added barcodes 3: ", addedBarcodes);
+
+        // Send to blueprint in routes.py in webapp
+        fetch('api/return2', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            // Send last version of addedBarcodes to server
+           body: JSON.stringify({ addedBarcodes: addedBarcodes })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+{% endblock javascripts %}

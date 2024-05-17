@@ -1,7 +1,6 @@
 from flask import Blueprint
 from .ordered import Ordered
 from .order import Order
-from .category import Category
 from .product import Product
 from .borrowed import Borrowed
 from .product_category import ProductCategory

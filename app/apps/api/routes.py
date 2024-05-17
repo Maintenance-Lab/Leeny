@@ -27,24 +27,6 @@ class changeCardUID(Resource):
         card = data['card']
         new_uid = data['new_uid']
 
-        # try:
-        #     user = Users.query.filter_by(uid_1=new_uid).exists()
-        # except:
-        #     user = None
-        #     print('Card UID does not exist in database')
-
-        # try:
-        #     user = Users.query.filter_by(uid_2=new_uid).exists()
-        # except:
-        #     user = None
-        #     print('Card UID does not exist in database')
-
-        # try:
-        #     user = Users.query.filter_by(uid_3=new_uid).exists()
-        # except:
-        #     user = None
-        #     print('Card UID does not exist in database')
-
         # Controleren of er een gebruiker bestaat met uid_1 gelijk aan new_uid
         exists_1 = Users.query.filter_by(uid_1=new_uid).first() is not None
         # Controleren of er een gebruiker bestaat met uid_2 gelijk aan new_uid
@@ -114,6 +96,7 @@ class AuthenticateAdmin(Resource):
                 return {'authenticated': True, 'role': 'student'}
         else:
             return {'authenticated': False}
+
 
 @api.route('/borrow', methods=['POST'])
 class Borrow(Resource):
@@ -351,9 +334,9 @@ class AdminLogin(Resource):
 class GetOptions(Resource):
     def get(self):
         # Get all manufacturers, categories, and vendors
-        manufacturers = [manufacturer.name for manufacturer in Manufacturer.query.all()]
-        categories = [category.name for category in ProductCategory.query.all()]
-        vendors = [vendor.name for vendor in Vendor.query.all()]
+        manufacturers = [manufacturer.manufacturer_name for manufacturer in Manufacturer.query.all()]
+        categories = [category.category_name for category in ProductCategory.query.all()]
+        vendors = [vendor.vendor_name for vendor in Vendor.query.all()]
 
         # sort alphabetically
         manufacturers.sort()
@@ -373,40 +356,40 @@ class AddProduct(Resource):
     def post(self):
         data = request.get_json()
 
-        # Fetch or create Manufacturer
-        manufacturer_name = data.get('manufacturer')
-        manufacturer = Manufacturer.query.filter_by(name=manufacturer_name).first()
-        if not manufacturer:
-            manufacturer = Manufacturer(name=manufacturer_name)
-            db.session.add(manufacturer)
-
-        # Fetch or create ProductCategory
-        category_name = data.get('category')
-        category = ProductCategory.query.filter_by(name=category_name).first()
-        if not category:
-            category = ProductCategory(name=category_name)
-            db.session.add(category)
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(name=vendor_name)
-            db.session.add(vendor)
-
         # Convert price to float, replace comma with dot
-
+        url = data['url']
         price = data['price']
         if ',' in price:
             price = price.replace(',', '.')
         price = float(price)
+
+        # Fetch or create Manufacturer
+        manufacturer_name = data.get('manufacturer')
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if not manufacturer:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+
+        # Fetch or create ProductCategory
+        category_name = data.get('category')
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if not category:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+
+        # Fetch or create Vendor
+        vendor_name = data.get('vendor')
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=vendor_name, website=url)
+            db.session.add(vendor)
 
         # Add to database
         product = Product(title=data['title'],
                             barcode=data['barcode'],
                             price_when_bought=price,
                             description=data['description'],
-                            url=data['url'],
+                            url=url,
                             notes=data['notes'],
                             created_at_ts=datetime.now(),
                             manufacturer=manufacturer,
@@ -426,18 +409,19 @@ class UpdateProduct(Resource):
     def post(self):
         data = request.get_json()
 
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(name=vendor_name)
-            db.session.add(vendor)
-
         # Convert price to float, replace comma with dot
         price = data['price']
         if ',' in price:
             price = price.replace(',', '.')
         price = float(price)
+        url = data['url']
+
+        # Fetch or create Vendor
+        vendor_name = data.get('vendor')
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=vendor_name, website=url)
+            db.session.add(vendor)
 
         # Update product
         product = Product.query.filter_by(barcode=data['barcode']).first()
@@ -451,6 +435,61 @@ class UpdateProduct(Resource):
         product.quantity_unavailable = int(data['quantity_unavailable']) + og_quantity_unavailable
 
         db.session.commit()
+
+
+@api.route('/edit-product', methods=['GET', 'POST'])
+class EditProduct(Resource):
+    def post(self):
+        data = request.get_json()
+        print("ID VAN PRODUCT: ", data['product_id'])
+
+        # Retrieve or create IDs for manufacturer, category, and vendor
+        manufacturer_name = data['manufacturer']
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if manufacturer is None:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+            db.session.commit()
+        manufacturer_id = manufacturer.id
+
+        category_name = data['category']
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if category is None:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+            db.session.commit()
+        category_id = category.id
+
+        vendor_name = data['vendor']
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if vendor is None:
+            vendor = Vendor(vendor_name=vendor_name)
+            db.session.add(vendor)
+            db.session.commit()
+        vendor_id = vendor.id
+
+
+        # Change values in database
+        product = Product.query.filter_by(barcode=data['barcode']).first()
+        product.title = data['title']
+        product.barcode = data['barcode']
+        product.price_when_bought = data['price']
+        product.description = data['description']
+        product.url = data['url']
+        product.notes = data['notes']
+        product.quantity_total = data['quantity']
+        product.quantity_unavailable = data['quantity_unavailable']
+        product.manufacturer_id = manufacturer_id
+        product.category_id = category_id
+        product.vendor_id = vendor_id
+
+        # Commit to database
+        db.session.commit()
+
+        return {
+            'message': f'Product updated',
+            'success': True
+        }, 200
 
 
 @api.route('/product/', methods=['GET'])

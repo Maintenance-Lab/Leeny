@@ -1,0 +1,368 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Inventory {% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4" style="max-width: 700px; margin: 0 auto;">
+        <div class="card-body px-4 pt-4 pb-2">
+          <h1 class="text-center" >Add product to database</h1>
+            <!-- Step 1 -->
+            <div id="step-1" class="col-12">
+              <div class="row">
+                <div class="col-md-12 text-center">
+                  <div class="form-group mb-3 visually-hidden">
+                    <label for="barcode">Barcode</label>
+                    <input type="text" class="form-control" id="barcodeInputField" name="barcodeInputField" required>
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    <p style="font-size: 16px; margin-bottom: 5px;">Scan the barcode of the product</p>
+                    <img src="https://static.thenounproject.com/png/74445-200.png" alt="" style="max-width: 150px; margin: 0 auto;">
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 text-center">
+                <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+                <!-- <button type="button" class="btn btn-dark mt-3" onclick="showStep2()" style="width: 150px;">Continue</button> -->
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div id="step-2" class="col-12 d-none">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" class="form-control" id="product-name" name="product_name" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="price-bought">Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="text" class="form-control" id="price-bought" name="price_bought" step="0.01"  required>
+                    </div>
+                </div>
+                  <div class="form-group mb-3">
+                    <label for="url-bought">Website URL</label>
+                    <input type="url" class="form-control" id="url-bought" name="url_bought" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="category">Category</label>
+                    <input list="category-options" class="form-control" id="category" name="category" required>
+                    <datalist id="category-options">
+
+                    </datalist>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" onkeypress="allowNumbersOnly(event)" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="quantity-not-available">Quantity Not Available for Borrowing</label>
+                    <input type="number" class="form-control" id="quantity-not-available" name="quantity_not_available"value="0" onkeypress="allowNumbersOnly(event)" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="manufacturer">Manufacturer</label>
+                    <input list="manufacturer-options" class="form-control" id="manufacturer" name="manufacturer" required>
+                    <datalist id="manufacturer-options">
+
+                    </datalist>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="vendor">Vendor</label>
+                    <input list="vendor-options" class="form-control" id="vendor" name="vendor" required>
+                    <datalist id="vendor-options">
+
+                    </datalist>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="notes">Notes</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 text-center">
+                <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
+                <button type="submit" id="addProductButton" class="btn btn-dark mt-3" style="width: 150px;">Add Product</button>
+              </div>
+            </div>
+
+
+          <!-- Step 3 -->
+          <div id="step-3" class="col-12 d-none">
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <h4 id="product-title"></h4>
+                <p>This product already exists in the database. Add details to change</p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label for="quantity-to-add">Quantity to Add</label>
+                  <input type="number" class="form-control" id="quantity-to-add" name="quantity_to_add" value="1" onkeypress="allowNumbersOnly(event)" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="quantity-unavailable-to-add">Quantity Unavailable to Add</label>
+                  <input type="number" class="form-control" id="quantity-unavailable-to-add" name="quantity_unavailable_to_add" value="0" onkeypress="allowNumbersOnly(event)" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="latest-price">Latest Price</label>
+                  <div class="input-group">
+                      <span class="input-group-text">€</span>
+                      <input type="text" class="form-control" id="latest-price" name="latest_price" step="0.01"  required>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label for="vendor">Vendor</label>
+                  <input list="vendor-options" class="form-control" id="vendor" name="vendor" required>
+                  <datalist id="vendor-options">
+
+                  </datalist>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="latest-url">Latest Website URL</label>
+                  <input type="url" class="form-control" id="latest-url" name="latest_url" required>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 text-center">
+              <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep2()" style="width: 150px;">Back</button>
+              <button type="submit" id="updateProductButton" class="btn btn-dark mt-3" style="width: 150px;">Update</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    document.getElementById("price-bought").addEventListener('keypress', priceOnly);
+    document.getElementById("latest-price").addEventListener('keypress', priceOnly);
+
+    function priceOnly(e) {
+        const keyCode = e.keyCode || e.which;
+        const inputValue = e.target.value;
+
+        // Allow digits, backspace, and the first dot or comma
+        if ((keyCode < 48 || keyCode > 57) && keyCode !== 46 && keyCode !== 44 && keyCode !== 8) {
+            e.preventDefault();
+        }
+
+        // Prevent more than one dot or comma
+        if ((inputValue.includes('.') || inputValue.includes(',')) && (keyCode === 46 || keyCode === 44)) {
+            e.preventDefault();
+        }
+
+        // Limit to two decimal places
+        if ((inputValue.includes('.') || inputValue.includes(',')) && inputValue.split(/[.,]/)[1]?.length >= 2) {
+            e.preventDefault();
+        }
+    }
+
+    function allowNumbersOnly(event) {
+        const keyCode = event.keyCode || event.which;
+        if (keyCode < 48 || keyCode > 57) {
+            event.preventDefault();
+        }
+    }
+
+    function showStep1() {
+        document.getElementById('step-1').classList.remove('d-none');
+        document.getElementById('step-2').classList.add('d-none');
+        document.getElementById('step-3').classList.add('d-none');
+    }
+
+    function showStep2() {
+        document.getElementById('step-1').classList.add('d-none');
+        document.getElementById('step-2').classList.remove('d-none');
+        document.getElementById('step-3').classList.add('d-none');
+
+        fetch(`${window.location.origin}/api/get-options`)
+            .then(response => response.json())
+            .then(data => {
+                const { manufacturers, categories, vendors } = data;
+
+                populateDatalist('manufacturer-options', manufacturers);
+                populateDatalist('category-options', categories);
+                populateDatalist('vendor-options', vendors);
+            });
+    }
+
+    function showStep3(data) {
+        document.getElementById('step-1').classList.add('d-none');
+        document.getElementById('step-2').classList.add('d-none');
+        document.getElementById('step-3').classList.remove('d-none');
+
+        fetch(`${window.location.origin}/api/get-options`)
+            .then(response => response.json())
+            .then(data => {
+                const { manufacturers, categories, vendors } = data;
+                populateDatalist('vendor-options', vendors);
+            });
+    }
+
+    function populateDatalist(datalistId, options) {
+        const datalist = document.getElementById(datalistId);
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            datalist.appendChild(optionElement);
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById("barcodeInputField").focus();
+    });
+
+    document.addEventListener('click', function() {
+        document.getElementById("barcodeInputField").focus();
+    });
+
+    var typingTimer;
+    var doneTypingInterval = 100;
+    var currentBarcode = '';
+
+    document.getElementById("barcodeInputField").addEventListener('input', function() {
+        clearTimeout(typingTimer);
+
+        barcode = document.getElementById("barcodeInputField").value;
+
+        typingTimer = setTimeout(function() {
+            console.log("Sending this barcode: ", barcode);
+
+            fetch('api/borrow', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ barcode: barcode })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                currentBarcode = barcode;
+                console.log('Response from server:', data);
+
+                message = data.message;
+                if (message == "Product found") {
+                    console.log("Product found - naar step 3");
+                    showStep3(data);
+
+                    barcode = '';
+                    document.getElementById("barcodeInputField").value = "";
+                } else {
+                    console.log("Product not found");
+                    showStep2();
+
+                    barcode = '';
+                    document.getElementById("barcodeInputField").value = "";
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }, doneTypingInterval);
+    });
+
+    document.getElementById("addProductButton").addEventListener('click', function(e) {
+        e.preventDefault();
+        const title = document.getElementById("product-name").value;
+        const price = document.getElementById("price-bought").value;
+        const url = document.getElementById("url-bought").value;
+        const category = document.getElementById("category").value;
+        const description = document.getElementById("description").value;
+        const quantity = document.getElementById("quantity").value;
+        const quantity_unavailable = document.getElementById("quantity-not-available").value;
+        const manufacturer = document.getElementById("manufacturer").value;
+        const vendor = document.getElementById("vendor").value;
+        const notes = document.getElementById("notes").value;
+
+        fetch('api/add-product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                barcode: currentBarcode,
+                title: title,
+                price: price,
+                url: url,
+                category: category,
+                description: description,
+                quantity: quantity,
+                quantity_unavailable: quantity_unavailable,
+                manufacturer: manufacturer,
+                vendor: vendor,
+                notes: notes
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response from server:', data);
+            window.location.href = '/admin-inventory';
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    document.getElementById("updateProductButton").addEventListener('click', function(e) {
+        e.preventDefault();
+        const quantity = document.getElementById("quantity-to-add").value;
+        const quantity_unavailable = document.getElementById("quantity-unavailable-to-add").value;
+        const price = document.getElementById("latest-price").value;
+        const vendor = document.getElementById("vendor").value;
+        const url = document.getElementById("latest-url").value;
+
+        fetch('api/update-product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                barcode: currentBarcode,
+                quantity: quantity,
+                quantity_unavailable: quantity_unavailable,
+                price: price,
+                vendor: vendor,
+                url: url
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response from server:', data);
+            window.location.href = '/admin-inventory';
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+</script>
+{% endblock javascripts %}

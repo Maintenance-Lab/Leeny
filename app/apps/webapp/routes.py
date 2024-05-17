@@ -100,7 +100,6 @@ def post():
                 quantity = items[1]
 
                 if barcode.isdigit():
-
                     # get product name
                     product = Product.query.filter_by(barcode=barcode).first()
                     product_name = product.title
@@ -193,6 +192,25 @@ def borrow_confirm():
 # @login_required
 def home():
     return render_template('app/home.html', segment='home')
+
+
+@blueprint.route('/admin-dashboard')
+# @login_required
+def admin_dashboard():
+    return render_template('app/admin-dashboard.html', segment='admin-dashboard')
+
+
+@blueprint.route('/admin-inventory')
+# @login_required
+def admin_inventory():
+    return render_template('app/admin-inventory.html', segment='admin-inventory')
+
+
+@blueprint.route('/add-product')
+# @login_required
+def admin_add_product():
+    return render_template('app/add-product.html', segment='add-product')
+
 
 @blueprint.route('/inventory')
 # @login_required

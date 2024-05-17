@@ -71,7 +71,21 @@ class Borrow(Resource):
             'name': 'Product Name',
             'success': True
         }, 200
+    
 
+@api.route('/orders/add_to_cart', methods=['POST'])
+class AddToCart(Resource):
+    def post(self):
+        data = request.get_json()
+        item = Product.query.filter(Product.title.contains(data['item'])).first()
+        data['id'] = item.id
+        cart = session['cart']
+        cart.append(data)
+        session['cart'] = cart
+        print(session['cart'])
+        return {    
+            'success': True
+        }, 200
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):

@@ -15,7 +15,6 @@ mail = Mail(app)
 
 
 def send_email(to, subject, template):
-    print(subject, Config.MAIL_USERNAME, to, template)
     msg = Message(
         subject=subject,
         sender=Config.MAIL_USERNAME,

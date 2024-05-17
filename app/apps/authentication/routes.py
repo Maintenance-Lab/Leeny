@@ -455,7 +455,7 @@ def card_reader():
 def logout():
     logout_user()
     session.clear()
-    return redirect(url_for('authentication_blueprint.login'))
+    return redirect(url_for('authentication_blueprint.root'))
 
 
 # Errors

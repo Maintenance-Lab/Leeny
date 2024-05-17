@@ -29,13 +29,14 @@
                     </table>
                     <form method="POST">
                         <div class="text-center">
+                            <input type="hidden" name="borrow_data" id="borrowData">
                             <button type="submit" class="btn btn-dark w-50 mt-2 mb-4" id="continue" name="continue">Continue</button>
                         </div>
                     </form>
                 </div>
             </div>
             <div class="text-center mt-3">
-                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/dashboard">Cancel</a>
+                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/inventory">Cancel</a>
             </div>
         </div>
     </div>
@@ -119,7 +120,8 @@
             max: item_quantity,
             'data-barcode': barcode,
             id: barcode,
-            value: quantity
+            value: quantity,
+            onkeydown: 'preventKeyboardInput(event)'
         });
 
         quantityInput.addEventListener('focus', focused);
@@ -143,17 +145,7 @@
         addedBarcodes[barcode] = quantity;
     }
 
-    // // If item not found, display following text in notFoundText div
-    // function notFoundText(notFound) {
-    //     notFound.innerHTML = 'Item not found';
-    // }
-
-    // // If item found, display following text in notFoundText div
-    // function foundText(notFound) {
-    //     notFound.innerHTML = '';
-    // }
-
-    function notFoundText(notFound, available, item_name=null) {
+    function notFoundText(notFound, available, message, item_name=null) {
         if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
             // Remove existing content from notFound div
             while (notFound.firstChild) {
@@ -161,12 +153,7 @@
             }
 
             // Create a new text node with the message
-            let message;
-            if (available == true) {
-                message = 'Item not found';
-            } else {
-                message = 'Item not available for borrowing, pls return: ' + (item_name || '');
-            }
+            message = message + (item_name || '');
 
             // Append the text node to the notFound div
             const textNode = document.createTextNode(message);
@@ -182,6 +169,11 @@
             }
         }
     }
+
+    function preventKeyboardInput(event) {
+      event.preventDefault();
+    }
+
 
     var barcode = '';
     var item_name = '';
@@ -262,7 +254,7 @@
                     }
                     else {
                         // When quantity is 0
-                        notFoundText(notFound, false, item_name);
+                        notFoundText(notFound, false, "This item is out of stock: " + item_name);
                         console.log("Quantity is 0");
                     }
 
@@ -271,8 +263,8 @@
                     document.getElementById("barcodeInputField").value = "";
                 }
                 else {
-                    // When barcode not found
-                    notFoundText(notFound, true);
+                    // When barcode not found in database
+                    notFoundText(notFound, true, "Barcode not found ");
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                     console.log("Barcode not found");
@@ -286,23 +278,14 @@
         console.log("continue clicked");
         console.log("added barcodes 3: ", addedBarcodes);
 
-        // Send to blueprint in routes.py in webapp
-        fetch('api/borrow2', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+        // Convert the addedBarcodes dictionary to JSON string
+        var borrowDataString = JSON.stringify(addedBarcodes);
 
-            // Send last version of addedBarcodes to server
-           body: JSON.stringify({ addedBarcodes: addedBarcodes })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-        .catch(error => console.error('Error:', error));
+        // Set the JSON string as the value of the hidden input field
+        document.getElementById("borrowData").value = borrowDataString;
+
+        // Submit the form
+        document.getElementById("borrowForm").submit();
     });
 </script>
 

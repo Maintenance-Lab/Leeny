@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import time
+import random
 from datetime import datetime
 
 from flask_restx import Resource, Api
@@ -24,6 +25,11 @@ from apps.authentication.forms import *
 from apps.authentication.models import Users, Scanner
 
 from apps.authentication.util import verify_pass, generate_token
+
+from apps.scripts.email_verif import send_email
+
+from flask import Flask
+from flask_mail import Mail, Message
 
 # Bind API -> Auth BP
 api = Api(blueprint)
@@ -400,11 +406,7 @@ def card_reader():
     login_form = RfidLoginForm(request.form)
 
     if request.method == 'POST':
-
-        # read form data
-        # username = request.form['username'] or None
         uid = request.form['uid'] or None
-        # password = request.form['password'] or None
 
         # Locate user
         if uid:
@@ -436,7 +438,7 @@ def card_reader():
                                msg='No user found for this card',
                                form=login_form)
             # return redirect(url_for('authentication_blueprint.rfid_register'))
-        
+
         if user:
             login_user(user)
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')

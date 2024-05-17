@@ -125,13 +125,10 @@ class Borrow2(Resource):
         for items in addedBarcodes.items():
             print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
-            print("BARCODE: ", barcode)
             quantity = items[1]
 
             # If barcode is an int
-            # if barcode.isdigit():
-            if barcode != 'null':
-                print("BARCODE12: ", barcode)
+            if barcode.isdigit():
                 print("Barcode is an int")
                 # Add 1 to quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
@@ -161,33 +158,6 @@ class Borrow2(Resource):
         db.session.commit()
 
 
-@api.route('/authenticate_admin', methods=['POST'])
-class AuthenticateAdmin(Resource):
-    def post(self):
-        data = request.get_json()
-        uid = data['uid']
-
-        try:
-            user = Users.query.filter_by(uid_1=uid).first()
-        except:
-            try:
-                user = Users.query.filter_by(uid_2=uid).first()
-            except:
-                try:
-                    user = Users.query.filter_by(uid_3=uid).first()
-                except:
-                    user = None
-
-        if user:
-            print("User role: ", user.role)
-            if user.role == 'admin':
-                return {'authenticated': True, 'role': 'admin'}
-            else:
-                return {'authenticated': True, 'role': 'student'}
-        else:
-            return {'authenticated': False}
-
-
 @api.route('/return', methods=['POST'])
 class Return(Resource):
     def post(self):
@@ -204,10 +174,10 @@ class Return(Resource):
             # quantity for borrowed from user
             user_id = session['_user_id']
             borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+            quantity = borrow.quantity
 
             if borrow is not None:
                 # Product found
-                quantity = borrow.quantity
                 output = {
                     'barcode': barcode,
                     'name': title,
@@ -216,10 +186,10 @@ class Return(Resource):
                     'success': True
                 }
             else:
-                # Borrow not found
+                # Product not found
                 output = {
                     'barcode': barcode,
-                    'message': f'Borrow not found',
+                    'message': f'Product not found',
                     'success': False
                 }
         else:
@@ -245,12 +215,9 @@ class Return2(Resource):
 
         for items in return_data.items():
             barcode = items[0]
-            print("BARCODE3: ", barcode)
             quantity = items[1]
 
-            # if barcode.isdigit():
-            if barcode != 'null':
-                print("BARCODE32: ", barcode)
+            if barcode.isdigit():
                 # get product name
                 product = Product.query.filter_by(barcode=barcode).first()
                 product_name = product.title
@@ -267,13 +234,10 @@ class ReturnConfirm(Resource):
         for items in return_data.items():
             print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
-            print("BARCODE2: ", barcode)
             quantity = items[1]
 
             # If barcode is an int
-            # if barcode.isdigit():
-            if barcode != 'null':
-                print("BARCODE22: ", barcode)
+            if barcode.isdigit():
                 print("Barcode is an int")
                 # Subtract from quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()

@@ -97,12 +97,9 @@ def post():
 
             for items in borrow_data.items():
                 barcode = items[0]
-                print("Barcode4: ", barcode)
                 quantity = items[1]
 
-                # if barcode.isdigit():
-                if barcode != 'null':
-                    print("Barcode42: ", barcode)
+                if barcode.isdigit():
 
                     # get product name
                     product = Product.query.filter_by(barcode=barcode).first()
@@ -215,15 +212,6 @@ def admin_inventory():
 def admin_add_product():
     return render_template('app/add-product.html', segment='add-product')
 
-@blueprint.route('/borrows')
-# @login_required
-def admin_borrows():
-    return render_template('app/borrows.html', segment='borrows')
-
-@blueprint.route('/users')
-# @login_required
-def admin_users():
-    return render_template('app/users.html', segment='users')
 
 @blueprint.route('/inventory')
 # @login_required

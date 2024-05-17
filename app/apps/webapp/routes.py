@@ -368,15 +368,8 @@ def inventory_borrowed():
 
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
-<<<<<<< HEAD
     
     return render_template('app/htmx-results/borrowed-results.html', data=data)
-=======
-
-    # return render_template('app/inventory-results.html', data=data)
-
-    return render_template('app/borrowed-results.html', data=data)
->>>>>>> 019a71d28837cb6651e3a55f3e6f7bd1ff045ab8
 
 
 from datetime import datetime, timedelta
@@ -389,13 +382,10 @@ def orders_load(load):
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
 
-<<<<<<< HEAD
     if load == 1:
         user_id = session["_user_id"]
         all_objects = all_objects.filter(Users.id == user_id)
-        
-=======
->>>>>>> 019a71d28837cb6651e3a55f3e6f7bd1ff045ab8
+
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
 
     for item in data['data']:

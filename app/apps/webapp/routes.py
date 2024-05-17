@@ -185,7 +185,6 @@ def return_confirm():
     return render_template('app/return-confirm.html')
 
 
-
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
     return render_template('app/borrow-confirm.html')

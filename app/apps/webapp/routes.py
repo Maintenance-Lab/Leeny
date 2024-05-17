@@ -27,6 +27,7 @@ from apps.api.forms import *
 from sqlalchemy import update
 from sqlalchemy.inspection import inspect
 import json
+from datetime import datetime
 
 
 @blueprint.route('/start', methods=["GET", "POST"])
@@ -99,7 +100,7 @@ def post():
                 barcode = items[0]
                 quantity = items[1]
 
-                if barcode.isdigit():
+                if barcode != 'null':
                     # get product name
                     product = Product.query.filter_by(barcode=barcode).first()
                     product_name = product.title
@@ -397,6 +398,9 @@ def inventory_borrowed():
 
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
 
     # return render_template('app/inventory-results.html', data=data)
 

@@ -177,7 +177,7 @@ class Borrow2(Resource):
             quantity = items[1]
 
             # If barcode is an int
-            if barcode.isdigit():
+            if barcode != 'null':
                 print("Barcode is an int")
                 # Add 1 to quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
@@ -274,7 +274,7 @@ class Return2(Resource):
             barcode = items[0]
             quantity = items[1]
 
-            if barcode.isdigit():
+            if barcode != 'null':
                 # get product name
                 product = Product.query.filter_by(barcode=barcode).first()
                 product_name = product.title
@@ -294,7 +294,7 @@ class ReturnConfirm(Resource):
             quantity = items[1]
 
             # If barcode is an int
-            if barcode.isdigit():
+            if barcode != 'null':
                 print("Barcode is an int")
                 # Subtract from quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()

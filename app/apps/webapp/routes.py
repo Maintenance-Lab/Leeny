@@ -100,7 +100,6 @@ def post():
                 quantity = items[1]
 
                 if barcode.isdigit():
-
                     # get product name
                     product = Product.query.filter_by(barcode=barcode).first()
                     product_name = product.title

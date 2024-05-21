@@ -7,9 +7,9 @@
 <div class="container-fluid py-4">
   <div class="row">
     <div class="col-12">
-      <div class="card mb-4" style="max-width: 700px; margin: 0 auto;">
+      <div class="card mb-4" style="max-width: 900px; margin: 0 auto;">
         <div class="card-body px-4 pt-4 pb-2">
-          <h1 class="text-center" >Add product to database</h1>
+          <h1 class="text-center">Add product to database</h1>
             <!-- Step 1 -->
             <div id="step-1" class="col-12">
               <div class="row">
@@ -26,6 +26,7 @@
               </div>
               <div class="col-12 text-center">
                 <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+                <a onclick="showStep4()" class="btn btn-dark mt-3 me-2" style="width: 180px;">Enter Manually</a>
                 <!-- <button type="button" class="btn btn-dark mt-3" onclick="showStep2()" style="width: 150px;">Continue</button> -->
               </div>
             </div>
@@ -33,7 +34,7 @@
             <!-- Step 2 -->
             <div id="step-2" class="col-12 d-none">
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="form-group mb-3">
                     <label for="product-name">Product Name</label>
                     <input type="text" class="form-control" id="product-name" name="product_name" required>
@@ -45,10 +46,12 @@
                         <input type="text" class="form-control" id="price-bought" name="price_bought" step="0.01"  required>
                     </div>
                 </div>
-                  <div class="form-group mb-3">
-                    <label for="url-bought">Website URL</label>
-                    <input type="url" class="form-control" id="url-bought" name="url_bought" required>
-                  </div>
+				<div class="form-group mb-3">
+					<label for="url-bought">Website URL</label>
+					<div class="input-group">
+						<input type="text" class="form-control" value="https://www." id="url-bought" name="url_bought" required>
+					</div>
+				</div>
                   <div class="form-group mb-3">
                     <label for="category">Category</label>
                     <input list="category-options" class="form-control" id="category" name="category" required>
@@ -61,14 +64,14 @@
                     <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="form-group mb-3">
                     <label for="quantity">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" onkeypress="allowNumbersOnly(event)" required>
+                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" onkeypress="allowNumbersOnly(event)" required>
                   </div>
                   <div class="form-group mb-3">
                     <label for="quantity-not-available">Quantity Not Available for Borrowing</label>
-                    <input type="number" class="form-control" id="quantity-not-available" name="quantity_not_available"value="0" onkeypress="allowNumbersOnly(event)" required>
+                    <input type="number" class="form-control" id="quantity-not-available" min="0" name="quantity_not_available" value="0" onkeypress="allowNumbersOnly(event)" required>
                   </div>
                   <div class="form-group mb-3">
                     <label for="manufacturer">Manufacturer</label>
@@ -87,6 +90,20 @@
                   <div class="form-group mb-3">
                     <label for="notes">Notes</label>
                     <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group mb-3">
+                    <label for="barcode">Barcode</label>
+                    <input type="text" class="form-control" id="barcodeStep2" name="barcode" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="document">Document</label>
+                    <input type="file" class="form-control" id="document" name="document" accept=".pdf,.doc,.docx" required>
+                  </div>
+                  <div class="form-group mb-3">
+                    <label for="image">Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
                   </div>
                 </div>
               </div>
@@ -109,37 +126,56 @@
               <div class="col-md-6">
                 <div class="form-group mb-3">
                   <label for="quantity-to-add">Quantity to Add</label>
-                  <input type="number" class="form-control" id="quantity-to-add" name="quantity_to_add" value="1" onkeypress="allowNumbersOnly(event)" required>
+                  <input type="number" class="form-control required-field" id="quantity-to-add" name="quantity_to_add" min="1" value="1" onkeypress="allowNumbersOnly(event)" required>
                 </div>
                 <div class="form-group mb-3">
                   <label for="quantity-unavailable-to-add">Quantity Unavailable to Add</label>
-                  <input type="number" class="form-control" id="quantity-unavailable-to-add" name="quantity_unavailable_to_add" value="0" onkeypress="allowNumbersOnly(event)" required>
+                  <input type="number" class="form-control required-field" id="quantity-unavailable-to-add" name="quantity_unavailable_to_add" min="0" value="0" onkeypress="allowNumbersOnly(event)" required>
                 </div>
                 <div class="form-group mb-3">
                   <label for="latest-price">Latest Price</label>
                   <div class="input-group">
-                      <span class="input-group-text">€</span>
-                      <input type="text" class="form-control" id="latest-price" name="latest_price" step="0.01"  required>
+                    <span class="input-group-text">€</span>
+                    <input type="text" class="form-control required-field" id="latest-price" name="latest_price" step="0.01" required>
                   </div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group mb-3">
+                  <label for="barcode">Barcode</label>
+                  <input type="text" class="form-control required-field" id="barcodeStep3" name="barcode" required>
+                </div>
+                <div class="form-group mb-3">
                   <label for="vendor">Vendor</label>
-                  <input list="vendor-options" class="form-control" id="vendor" name="vendor" required>
+                  <input list="vendor-options" class="form-control required-field" id="vendor" name="vendor" required>
                   <datalist id="vendor-options">
-
                   </datalist>
                 </div>
                 <div class="form-group mb-3">
                   <label for="latest-url">Latest Website URL</label>
-                  <input type="url" class="form-control" id="latest-url" name="latest_url" required>
+                  <input type="url" class="form-control required-field" value="https://www." id="latest-url" name="latest_url" required>
                 </div>
               </div>
             </div>
             <div class="col-12 text-center">
-              <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep2()" style="width: 150px;">Back</button>
+              <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
               <button type="submit" id="updateProductButton" class="btn btn-dark mt-3" style="width: 150px;">Update</button>
+            </div>
+          </div>
+
+
+          <!-- Step 4 -->
+          <div id="step-4" class="col-12 d-none text-center">
+            <div style="margin-bottom: 10px;">
+              <p style="font-size: 16px; margin-bottom: 5px;">Enter the barcode of the product</p>
+              <img src="https://static.thenounproject.com/png/74445-200.png" alt="" style="max-width: 150px; margin: 0 auto;">
+            </div>
+            <div class="d-flex justify-content-center form-group">
+              <input type="text" class="form-control" id="barcodeInputFieldStep4" onkeyup="enableContinue('step4continue', 'barcodeInputFieldStep4')" name="barcodeInputField" style="width: 250px; text-align: left;" required>
+            </div>
+            <div class="col-12 text-center">
+              <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
+              <button id="step4continue" type="button" class="btn btn-dark mt-3" style="width: 150px;" onclick="checkBarcode('barcodeInputFieldStep4')" >Continue</button>
             </div>
           </div>
 
@@ -155,6 +191,76 @@
 <script>
     document.getElementById("price-bought").addEventListener('keypress', priceOnly);
     document.getElementById("latest-price").addEventListener('keypress', priceOnly);
+
+    // disable continue step 4 button
+    document.getElementById("step4continue").disabled = true;
+
+    function updateMaxQuantityNotAvailable() {
+		const quantity = document.getElementById("quantity").value;
+		const quantityNotAvailableInput = document.getElementById("quantity-not-available");
+
+		quantityNotAvailableInput.max = quantity;
+		validateQuantities();
+	}
+
+    function updateMaxQuantityUnavailableToAdd() {
+        const quantityToAdd = document.getElementById("quantity-to-add").value;
+        const quantityUnavailableToAddInput = document.getElementById("quantity-unavailable-to-add");
+
+        quantityUnavailableToAddInput.max = quantityToAdd;
+        validateQuantities();
+    }
+
+	// Attach event listeners to validate quantities
+	document.getElementById("quantity-not-available").addEventListener('input', validateQuantities);
+	document.getElementById("quantity-unavailable-to-add").addEventListener('input', validateQuantities);
+
+	// Initial validation call
+	validateQuantities();
+
+	// Attach event listeners to Quantity input fields
+	document.getElementById("quantity").addEventListener('input', updateMaxQuantityNotAvailable);
+	document.getElementById("quantity-to-add").addEventListener('input', updateMaxQuantityUnavailableToAdd);
+
+	// Initial call to set max attributes on page load
+	updateMaxQuantityNotAvailable();
+	updateMaxQuantityUnavailableToAdd();
+
+    function validateQuantities() {
+        const quantity = document.getElementById("quantity").value;
+        const quantityNotAvailable = document.getElementById("quantity-not-available").value;
+        const addProductButton = document.getElementById("addProductButton");
+
+        if (parseInt(quantityNotAvailable) > parseInt(quantity)) {
+            addProductButton.disabled = true;
+            document.getElementById("quantity-not-available").setCustomValidity("Quantity Not Available cannot be higher than Quantity.");
+        } else {
+            addProductButton.disabled = false;
+            document.getElementById("quantity-not-available").setCustomValidity("");
+        }
+
+        const quantityToAdd = document.getElementById("quantity-to-add").value;
+        const quantityUnavailableToAdd = document.getElementById("quantity-unavailable-to-add").value;
+        const updateProductButton = document.getElementById("updateProductButton");
+
+        if (parseInt(quantityUnavailableToAdd) > parseInt(quantityToAdd)) {
+            updateProductButton.disabled = true;
+            document.getElementById("quantity-unavailable-to-add").setCustomValidity("Quantity Not Available cannot be higher than Quantity.");
+        } else {
+            updateProductButton.disabled = false;
+            document.getElementById("quantity-unavailable-to-add").setCustomValidity("");
+        }
+    }
+
+    function enableContinue(button, inputField) {
+        const inputValue = document.getElementById(inputField).value.trim();
+        const continueButton = document.getElementById(button);
+        if (inputValue) {
+          continueButton.disabled = false; // Enable button if input is not empty
+        } else {
+          continueButton.disabled = true; // Otherwise, disable button
+        }
+    }
 
     function priceOnly(e) {
         const keyCode = e.keyCode || e.which;
@@ -187,12 +293,17 @@
         document.getElementById('step-1').classList.remove('d-none');
         document.getElementById('step-2').classList.add('d-none');
         document.getElementById('step-3').classList.add('d-none');
+        document.getElementById('step-4').classList.add('d-none');
     }
 
-    function showStep2() {
+    function showStep2(data) {
         document.getElementById('step-1').classList.add('d-none');
         document.getElementById('step-2').classList.remove('d-none');
         document.getElementById('step-3').classList.add('d-none');
+        document.getElementById('step-4').classList.add('d-none');
+
+        // Populate the barcode input field with the scanned value
+        document.getElementById('barcodeStep2').value = data.barcode;
 
         fetch(`${window.location.origin}/api/get-options`)
             .then(response => response.json())
@@ -209,6 +320,10 @@
         document.getElementById('step-1').classList.add('d-none');
         document.getElementById('step-2').classList.add('d-none');
         document.getElementById('step-3').classList.remove('d-none');
+        document.getElementById('step-4').classList.add('d-none');
+
+        // Populate the barcode input field with the scanned value
+        document.getElementById('barcodeStep3').value = data.barcode;
 
         fetch(`${window.location.origin}/api/get-options`)
             .then(response => response.json())
@@ -216,6 +331,13 @@
                 const { manufacturers, categories, vendors } = data;
                 populateDatalist('vendor-options', vendors);
             });
+    }
+
+    function showStep4() {
+        document.getElementById('step-1').classList.add('d-none');
+        document.getElementById('step-2').classList.add('d-none');
+        document.getElementById('step-3').classList.add('d-none');
+        document.getElementById('step-4').classList.remove('d-none');
     }
 
 
@@ -229,6 +351,49 @@
             optionElement.value = option;
             datalist.appendChild(optionElement);
         });
+    }
+
+    function checkBarcode(inputField) {
+        console.log("Checking barcode");
+        barcode = document.getElementById(inputField).value;
+
+        // convert all characters to uppercase
+        barcode = barcode.toUpperCase();
+
+        fetch('api/borrow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ barcode: barcode })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            currentBarcode = barcode;
+            console.log('Response from server:', data);
+
+            message = data.message;
+            if (message == "Product found") {
+                console.log("Product found - naar step 3");
+                showStep3(data);
+
+                barcode = '';
+                document.getElementById(inputField).value = "";
+            } else {
+                console.log("Product not found");
+                showStep2(data);
+
+                barcode = '';
+                document.getElementById(inputField).value = "";
+				currentBarcode = '';
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     document.getElementById("vendor").addEventListener('blur', function(e) {
@@ -264,122 +429,101 @@
 
         typingTimer = setTimeout(function() {
             console.log("Sending this barcode: ", barcode);
-
-            fetch('api/borrow', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ barcode: barcode })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                currentBarcode = barcode;
-                console.log('Response from server:', data);
-
-                message = data.message;
-                if (message == "Product found") {
-                    console.log("Product found - naar step 3");
-                    showStep3(data);
-
-                    barcode = '';
-                    document.getElementById("barcodeInputField").value = "";
-                } else {
-                    console.log("Product not found");
-                    showStep2();
-
-                    barcode = '';
-                    document.getElementById("barcodeInputField").value = "";
-                }
-            })
-            .catch(error => console.error('Error:', error));
+            checkBarcode("barcodeInputField");
         }, doneTypingInterval);
     });
 
-    document.getElementById("addProductButton").addEventListener('click', function(e) {
-        e.preventDefault();
-        const title = document.getElementById("product-name").value;
-        const price = document.getElementById("price-bought").value;
-        const url = document.getElementById("url-bought").value;
-        const category = document.getElementById("category").value;
-        const description = document.getElementById("description").value;
-        const quantity = document.getElementById("quantity").value;
-        const quantity_unavailable = document.getElementById("quantity-not-available").value;
-        const manufacturer = document.getElementById("manufacturer").value;
-        const vendor = document.getElementById("vendor").value;
-        const notes = document.getElementById("notes").value;
 
-        fetch('api/add-product', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                barcode: currentBarcode,
-                title: title,
-                price: price,
-                url: url,
-                category: category,
-                description: description,
-                quantity: quantity,
-                quantity_unavailable: quantity_unavailable,
-                manufacturer: manufacturer,
-                vendor: vendor,
-                notes: notes
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response from server:', data);
-            window.location.href = '/admin-inventory';
-        })
-        .catch(error => console.error('Error:', error));
-    });
+
+
+    document.getElementById("addProductButton").addEventListener('click', function(e) {
+		e.preventDefault();
+		if (document.getElementById("quantity-not-available").validity.valid) {
+			const title = document.getElementById("product-name").value;
+			const price = document.getElementById("price-bought").value;
+			const url = document.getElementById("url-bought").value;
+			const category = document.getElementById("category").value;
+			const description = document.getElementById("description").value;
+			const quantity = document.getElementById("quantity").value;
+			const quantity_unavailable = document.getElementById("quantity-not-available").value;
+			const manufacturer = document.getElementById("manufacturer").value;
+			const vendor = document.getElementById("vendor").value;
+			const notes = document.getElementById("notes").value;
+
+			fetch('api/add-product', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					barcode: currentBarcode,
+					title: title,
+					price: price,
+					url: url,
+					category: category,
+					description: description,
+					quantity: quantity,
+					quantity_unavailable: quantity_unavailable,
+					manufacturer: manufacturer,
+					vendor: vendor,
+					notes: notes
+				})
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log('Response from server:', data);
+				window.location.href = '/admin-inventory';
+			})
+			.catch(error => console.error('Error:', error));
+		}
+	});
+
 
     document.getElementById("updateProductButton").addEventListener('click', function(e) {
-        e.preventDefault();
-        const quantity = document.getElementById("quantity-to-add").value;
-        const quantity_unavailable = document.getElementById("quantity-unavailable-to-add").value;
-        const price = document.getElementById("latest-price").value;
-        const vendor = document.getElementById("vendor").value;
-        const url = document.getElementById("latest-url").value;
+		e.preventDefault();
+		if (document.getElementById("quantity-unavailable-to-add").validity.valid) {
+			const quantity = document.getElementById("quantity-to-add").value;
+			const quantity_unavailable = document.getElementById("quantity-unavailable-to-add").value;
+			const price = document.getElementById("latest-price").value;
+			const vendor = document.getElementById("vendor").value;
+			const url = document.getElementById("latest-url").value;
 
-        fetch('api/update-product', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                barcode: currentBarcode,
-                quantity: quantity,
-                quantity_unavailable: quantity_unavailable,
-                price: price,
-                vendor: vendor,
-                url: url
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response from server:', data);
-            window.location.href = '/admin-inventory';
-        })
-        .catch(error => console.error('Error:', error));
-    });
+			fetch('api/update-product', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					barcode: currentBarcode,
+					quantity: quantity,
+					quantity_unavailable: quantity_unavailable,
+					price: price,
+					vendor: vendor,
+					url: url
+				})
+			})
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Response was not ok');
+				}
+				return response.json();
+			})
+			.then(data => {
+				console.log('Response from server:', data);
+				window.location.href = '/admin-inventory';
+			})
+			.catch(error => console.error('Error:', error));
+		}
+	});
+
+	// Initial call to set max attributes on page load
+	updateMaxQuantityNotAvailable();
+	updateMaxQuantityUnavailableToAdd();
 
 </script>
 {% endblock javascripts %}

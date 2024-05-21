@@ -192,7 +192,8 @@ def return_confirm():
 
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
-    return render_template('app/borrow-confirm.html')
+    timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
+    return render_template('app/borrow-confirm.html', timestamp=timestamp)
 
 @blueprint.route('/home')
 # @login_required
@@ -260,10 +261,8 @@ def settings():
 
     if request.method == "POST":
         if "update_profile" in request.form:
-            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname']))
-            test2 = Users.query.filter_by(id=session['_user_id']).update(dict(email=request.form['email']))
-            test3 = Users.query.filter_by(id=session['_user_id']).update(dict(study=request.form['study']))
-            test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
+            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname'], email=request.form['email']\
+                                                                             , study=request.form['study'], faculty=request.form['faculty']))
             # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')

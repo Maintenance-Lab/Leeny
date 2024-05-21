@@ -50,7 +50,7 @@
 <script>
      // Calculate tomorrow's date
      var tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setDate(tomorrow.getDate() + 7);
 
     if (document.querySelector('.datepicker')) {
       flatpickr('.datepicker', {
@@ -58,12 +58,24 @@
         dateFormat: "U",
         altInput: true,
         altFormat: "d-m-Y",
-        defaultDate: tomorrow,
         minDate: "today",
-        maxDate: new Date().fp_incr(14),
+        maxDate: new Date().fp_incr(90),
+        // allowInput: true,
       });
     }
 
   </script>
+  <style>
+    div > div.flatpickr-days > div > span.flatpickr-day.today{
+      background: #ffffff !important;
+      color: black; 
+      border: 1px solid #67748e;
+      pointer-events: none;
+    }
+    div.flatpickr-innerContainer > div > div.flatpickr-days > div > span.flatpickr-day.selected{
+      background: #67748e !important;
+    }
+  </style>
 
 {% endblock javascripts %}
+

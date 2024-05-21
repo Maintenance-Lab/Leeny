@@ -7,10 +7,9 @@ class Order(db.Model):
     __tablename__ = 'order'
 
     # Primary key
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     # Foreign keys
-    ordered_id = db.Column(db.Integer, db.ForeignKey('ordered.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
     project = db.Column(db.String(255))
     students = db.Column(db.String(255))

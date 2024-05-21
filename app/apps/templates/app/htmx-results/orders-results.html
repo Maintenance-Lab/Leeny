@@ -1,22 +1,22 @@
 {% for item in data['data'] %}
-<tr>
-    <td>
-        <a href="/orders/{{item.id}}" class="w-100">
-            <div class="d-flex">
-                <u>{{item.id}}</u>
-            </div>
-        </a>
-    </td>
-    <td class="text-xs font-weight-bold mb-0">
-        {{ item.created_at_ts }}
-    </td>
-    <td class="text-xs font-weight-bold mb-0">
-        {{item.project}}
-    </td>
-    <td class="text-xs font-weight-bold mb-0">
-        {{item.fullname}}
-    </td>
-</tr>
+        <tr>
+            <td>
+                <a href="/orders/{{item.id}}" class="w-100">
+                    <div class="d-flex">
+                        <u class="text-sm text-dark">{{item.id}}</u>
+                    </div>
+                </a>
+            </td>
+            <td class="text-xs font-weight-bold mb-0">
+                {{ item.created_at_ts }}
+            </td>
+            <td class="text-dark text-sm font-weight-bold mb-0">
+                {{item.project}}
+            </td>
+            <td class="text-xs font-weight-bold mb-0">
+                {{item.fullname}}
+            </td>
+        </tr>
 {% endfor %}
 
 <script>

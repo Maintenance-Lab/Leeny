@@ -8,9 +8,39 @@
 {% block stylesheets %}
 <style>
 .dt-search {
-  margin-right: 20px;
+  margin-right: 28px;
   height: 29px;
+  position: absolute;
+  width: 191px;
+  top:-43px;
+  right:-34px;
+  border-radius: 0.5rem !important;
+  line-height: 2rem !important;
+
 }
+
+#dt-search-0 {
+  height: 40px;
+  width: 191px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d2d6da;
+  padding-left: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4rem;
+  color: #495057;
+  background-color: #ffffff !important;
+
+}
+
+div.dt-container.dt-empty-footer tbody > tr:last-child > * {
+    border-bottom: 0px solid rgba(0, 0, 0, 0) !important;
+}
+
+.dt-paging-button {
+  padding: 0.5em 0.2em !important;
+}
+
 .dt-search input {
   border-radius: 8px !important;
   padding: 3px 0px !important;
@@ -26,17 +56,26 @@
   background: transparent !important;
   border: 1px solid transparent !important;
 }
+
+div.dt-container {
+  margin-top: -15px;
+}
+
+#products-list_wrapper > div:last-of-type {
+      height: 57px;
+}
+
 </style>
 
 
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid">
+  <div class="container-fluid py-4">
     <div class="row">
         <div class="d-flex align-items-center justify-content-between">
             <h1>Orders</h1>
-            <div class="d-flex gap-4">
+            <div class="d-flex gap-3 mx-10">
               <div class="d-flex gap-2 " data-toggle="buttons">
                 <button class="btn btn-dark mb-0" hx-get="/orders/load/1" hx-trigger="click" hx-target="#results">My orders</button>
                 <button class="btn btn-light mb-0 active" hx-get="/orders/load/0" hx-trigger="click" hx-target="#results">All</button>
@@ -45,12 +84,12 @@
               <span hx-get="/orders/load/0" hx-trigger="load" hx-target="#results">
             </div>
           </div>
-      <div class="col-12">
+      <div class="col-12 pb-5">
         <div class="">
-          <div class="card-body px-0 pt-0 pb-2">
+          <div class=" px-0 pt-0 pb-2">
             <div class="p-0">
               <div class="dataTable-wrapper dataTable-loading">
-                <div class="dataTable-container">
+                <div class="dataTable-container card px-2 py-1">
                   <table class="table table-flush dataTable-table" id="products-list">
                     <thead class="thead-light">
                       <tr>
@@ -69,7 +108,7 @@
                       </tr>
                     </thead>
                     <tbody id="results">
-
+                      
                     </tbody>
                   </table>
                 </div>

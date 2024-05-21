@@ -151,10 +151,10 @@ def insert_dummy_data():
         ]
 
         order = [
-        Order(user_id=2, ordered_id=1, project="Uitleensysteem", students=""),
-        Order(user_id=1, ordered_id=2, project="Vriezer", students=""),
-        Order(user_id=3, ordered_id=3, project="Digital Twin", students=""),
-        Order(user_id=1, ordered_id=4, project="Vriezer", students="")
+        Order(user_id=2, project="Uitleensysteem", students=""),
+        Order(user_id=1, project="Vriezer", students=""),
+        Order(user_id=3, project="Digital Twin", students=""),
+        Order(user_id=1, project="Vriezer", students="")
         ]
 
         db.session.bulk_save_objects(vendors)

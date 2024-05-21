@@ -35,3 +35,18 @@ class Product(db.Model):
     manufacturer = db.relationship('Manufacturer', backref='product')
     category = db.relationship('ProductCategory', backref='product')
     vendor = db.relationship('Vendor', backref='product')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'barcode': self.barcode,
+            'price_when_bought': self.price_when_bought,
+            'description': self.description,
+            'url': self.url,
+            'documentation': self.documentation,
+            'notes': self.notes,
+            'manufacturer_id': self.manufacturer_id,
+            'category_id': self.category_id,
+            'vendor_id': self.vendor_id
+        }

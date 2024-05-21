@@ -17,11 +17,10 @@
                         <thead>
                             {% if data != [] %}
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-2">Item</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Quantity</th>
+                            <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Quantity</th>
                             {% else %}
                                 <div class="d-flex flex-column align-items-center">
-                                    <p class="mt-6 mb-0">Start by adding items</p>
-                                    <svg height="20px" fill="#67748e" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></svg>
+                                    <h5 class="mt-4 mb-0">Start adding items</h5>
                                 </div>
                             {% endif %}
 
@@ -33,7 +32,7 @@
                                 <td>
                                     {{item.item}}
                                 </td>
-                                <td>
+                                <td class="ps-0">
                                     {{item.quantity}}
                                 </td>
                                 <td>
@@ -54,15 +53,17 @@
                     
                     <div class="text-center">
                         {% if data != [] %}
-                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4" id="continue">Continue</button>
+                        <a href="/orders/new/confirm" class="btn btn-dark w-50 mt-2 mb-4">Continue</a>
                         {% endif %}
 
                     </div>
                 </div>
             </div>
+            {% if data != [] %}
             <form method="POST" class="text-center mt-3">
-                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Back</button>
+                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Cancel</button>
             </form>
+            {% endif %}
         </div>
     </div>
 

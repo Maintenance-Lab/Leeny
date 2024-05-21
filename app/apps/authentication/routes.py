@@ -130,6 +130,7 @@ def rfid_login():
         # Authenticated user
         if user:
             login_user(user)
+            session['fullname'] = user.fullname
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/login.html',
                                form=login_form)
@@ -242,6 +243,7 @@ def login():
         # if user is found, log in:
         if user:
             login_user(user)
+            session['fullname'] = user.fullname
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/login.html',
                                form=login_form)

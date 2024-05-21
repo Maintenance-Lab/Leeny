@@ -327,6 +327,7 @@ DOMstrings.stepsForm.addEventListener('click', e=>{
         // Get the values of previous steps
         const itemInputValue = document.getElementById('itemInput').value;
         const priceInputValue = document.getElementById('priceInput').value;
+        const urlInputValue = document.getElementById('urlInput').value;
         const quantityInputValue = document.getElementById('quantityInput').value;
         const categoryInputValue = document.getElementById('select2-category-select-container').textContent.trim();
         const manufacturerInputValue = document.getElementById('select2-manufacturer-select-container').textContent.trim();
@@ -336,6 +337,7 @@ DOMstrings.stepsForm.addEventListener('click', e=>{
         // Get the elements to populate in the "Confirm" step
         const confirmedItemElement = document.getElementById('confirmedItem');
         const confirmedPriceElement = document.getElementById('confirmedPrice');
+        const confirmedUrlElement = document.getElementById('confirmedUrl');
         const confirmedQuantityElement = document.getElementById('confirmedQuantity');
         const confirmedCategoryElement = document.getElementById('confirmedCategory');
         const confirmedManufacturerElement = document.getElementById('confirmedManufacturer');
@@ -344,6 +346,7 @@ DOMstrings.stepsForm.addEventListener('click', e=>{
 
         confirmedItemElement.textContent = itemInputValue;
         confirmedPriceElement.textContent = priceInputValue;
+        confirmedUrlElement.textContent = urlInputValue;
         confirmedQuantityElement.textContent = quantityInputValue;
         confirmedReasonElement.textContent = reasonInputValue;
 
@@ -375,16 +378,18 @@ const handleSubmit = () => {
     // Get the data from the rows
     const item = document.getElementById('itemInput').value;
     const price = document.getElementById('priceInput').value;
+    const url = document.getElementById('urlInput').value;
     const quantity = document.getElementById('quantityInput').value;
     const category = document.getElementById('select2-category-select-container').textContent.trim();
     const manufacturer = document.getElementById('select2-manufacturer-select-container').textContent.trim();
     const vendor = document.getElementById('select2-vendor-select-container').textContent.trim();
     const reason = document.getElementById('reasonInput').value;
 
-    // Example: Send the data to the server (replace with your actual submission logic)
+    // Send the data to the server
     const formData = {
         item: item,
         price: price,
+        url: url,
         quantity: quantity,
         category: category,
         manufacturer: manufacturer,

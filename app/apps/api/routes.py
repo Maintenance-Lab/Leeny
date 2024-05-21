@@ -651,7 +651,8 @@ class AddToCart(Resource):
     def post(self):
         data = request.get_json()
         item = Product.query.filter(Product.title.contains(data['item'])).first()
-        data['id'] = item.id
+        if item:
+            data['id'] = item.id
         cart = session['cart']
         cart.append(data)
         session['cart'] = cart

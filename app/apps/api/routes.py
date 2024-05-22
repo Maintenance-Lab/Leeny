@@ -67,35 +67,46 @@ class changeCardUID(Resource):
         return output, 200
 
 
-@api.route('/authenticate_admin', methods=['POST'])
+@api.route('/authenticate_admin', methods=['GET', 'POST'])
 class AuthenticateAdmin(Resource):
     def post(self):
         data = request.get_json()
-        uid = data['uid']
 
-        try:
-            user = Users.query.filter_by(uid_1=uid).first()
-        except Exception as e1:
-            print('Error when card scanning:', e1)
-        if user is None:
+        if data['uid']:
+            uid = data['uid']
             try:
-                user = Users.query.filter_by(uid_2=uid).first()
-            except Exception as e2:
-                print('Error when card scanning:', e2)
-        if user is None:
-            try:
-                user = Users.query.filter_by(uid_3=uid).first()
-            except Exception as e3:
-                print('Error when card scanning:', e3)
+                user = Users.query.filter_by(uid_1=uid).first()
+            except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_2=uid).first()
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
 
-        if user:
-            print("User role: ", user.role)
-            if user.role == 'admin':
-                return {'authenticated': True, 'role': 'admin'}
-            else:
-                return {'authenticated': True, 'role': 'student'}
-        else:
-            return {'authenticated': False}
+            if user:
+                print("User role: ", user.role)
+                if user.role == 'admin':
+                    return {'authenticated': True, 'role': 'admin'}
+                else:
+                    return {'authenticated': True, 'role': 'student'}
+
+        return {'authenticated': False}
+
+    def get(self):
+        user_id = session['_user_id']
+
+        user = Users.query.filter_by(id=user_id).first()
+        if user.role == 'admin':
+            return {'authenticated': True, 'role': 'admin'}
+
+        return {'authenticated': False}
+
 
 
 @api.route('/borrow', methods=['POST'])

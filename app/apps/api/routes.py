@@ -201,6 +201,15 @@ class Borrow2(Resource):
         db.session.commit()
 
 
+        # Send email to users
+        user_id = session['_user_id']
+        user = Users.query.filter_by(id=user_id).first()
+        email = user.email
+
+        html = render_template('app/email_overview.html')
+        send_email(email, "leeny test", html)
+
+
 @api.route('/return', methods=['POST'])
 class Return(Resource):
     def post(self):
@@ -353,51 +362,42 @@ class GetOptions(Resource):
             'vendors': vendors
         }
 
+@api.route('/manufacturer/dropdown', methods=['GET'])
+class GetManufacturers(Resource):
+    def get(self):
+        manufacturers = Manufacturer.query.all()
+        data = [{'id': m.id, 'name': m.manufacturer_name} for m in manufacturers]
+        return jsonify(data)
+
+@api.route('/category/dropdown', methods=['GET'])
+class GetCategories(Resource):
+    def get(self):
+        categories = ProductCategory.query.all()
+        data = [{'id': c.id, 'name': c.category_name} for c in categories]
+        return jsonify(data)
+
+@api.route('/vendor/dropdown', methods=['GET'])
+class GetVendors(Resource):
+    def get(self):
+        vendors = Vendor.query.all()
+        data = [{'id': v.id, 'name': v.vendor_name} for v in vendors]
+        return jsonify(data)
 
 @api.route('/add-product', methods=['POST'])
 class AddProduct(Resource):
     def post(self):
-        data = request.get_json()
+        data = request.form.to_dict(flat=True)
 
-        # Convert price to float, replace comma with dot
-        url = data['url']
-        price = data['price']
-        if ',' in price:
-            price = price.replace(',', '.')
-        price = float(price)
-
-        # Fetch or create Manufacturer
-        manufacturer_name = data.get('manufacturer')
-        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
-        if not manufacturer:
-            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
-            db.session.add(manufacturer)
-
-        # Fetch or create ProductCategory
-        category_name = data.get('category')
-        category = ProductCategory.query.filter_by(category_name=category_name).first()
-        if not category:
-            category = ProductCategory(category_name=category_name)
-            db.session.add(category)
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(vendor_name=vendor_name, website=url)
-            db.session.add(vendor)
-
-        # Add to database
         product = Product(title=data['title'],
                             barcode=data['barcode'],
-                            price_when_bought=price,
+                            price_when_bought=data['price'],
                             description=data['description'],
-                            url=url,
+                            url=data['url'],
                             notes=data['notes'],
                             created_at_ts=datetime.now(),
-                            manufacturer=manufacturer,
-                            category=category,
-                            vendor=vendor,
+                            manufacturer_id=data['manufacturer'],
+                            category_id=data['category'],
+                            vendor_id=data['vendor'],
                             quantity_total=data['quantity'],
                             quantity_unavailable=data['quantity_unavailable'],
                             quantity_borrowed='0',
@@ -406,39 +406,31 @@ class AddProduct(Resource):
         db.session.add(product)
         db.session.commit()
 
+        return {
+            'success': True
+        }
 
 @api.route('/update-product', methods=['POST'])
 class UpdateProduct(Resource):
     def post(self):
         data = request.get_json()
+        barcode = data['barcode']
 
-        # Convert price to float, replace comma with dot
-        price = data['price']
-        if ',' in price:
-            price = price.replace(',', '.')
-        price = float(price)
-        url = data['url']
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(vendor_name=vendor_name, website=url)
-            db.session.add(vendor)
+        # Get product by barcode
+        product = Product.query.filter_by(barcode=barcode).first()
 
         # Update product
-        product = Product.query.filter_by(barcode=data['barcode']).first()
-        og_quantity = product.quantity_total
-        og_quantity_unavailable = product.quantity_unavailable
+        current_quantity = product.quantity_total
+        current_quantity_unavailable = product.quantity_unavailable
 
-        product.price_when_bought = price
-        product.url = data['url']
-        product.vendor = vendor
-        product.quantity_total = int(data['quantity']) + og_quantity
-        product.quantity_unavailable = int(data['quantity_unavailable']) + og_quantity_unavailable
+        product.quantity_total = int(data['quantity']) + current_quantity
+        product.quantity_unavailable = int(data['quantity_unavailable']) + current_quantity_unavailable
 
         db.session.commit()
 
+        return {
+            'success': True
+        }
 
 @api.route('/edit-product', methods=['GET', 'POST'])
 class EditProduct(Resource):

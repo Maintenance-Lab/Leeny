@@ -210,7 +210,31 @@ def admin_inventory():
 @blueprint.route('/add-product')
 # @login_required
 def admin_add_product():
-    return render_template('app/add-product.html', segment='add-product')
+    form = AddProductForm()
+    return render_template('app/add-product.html', segment='add-product', form=form)
+
+@blueprint.route('/dropdown/manufacturer')
+def dropdown_manufacturer():
+    all_objects = Manufacturer.query.all()
+    data = [{'id': obj.id, 'name': obj.manufacturer_name} for obj in all_objects]
+    return jsonify(data)
+
+@blueprint.route('/dropdown/category')
+def dropdown_category():
+    all_objects = ProductCategory.query.all()
+    data = [{'id': obj.id, 'name': obj.category_name} for obj in all_objects]
+    return jsonify(data)
+
+@blueprint.route('/dropdown/vendor')
+def dropdown_vendor():
+    all_objects = Vendor.query.all()
+    data = [{'id': obj.id, 'name': obj.vendor_name} for obj in all_objects]
+    return jsonify(data)
+
+
+
+
+
 
 @blueprint.route('/edit-product/<int:id>')
 # @login_required
@@ -327,6 +351,137 @@ def order_info(order_id = None):
 
     return render_template('app/order-info.html', data=data, segment='orders')
 
+@blueprint.route('/orders/new', methods=["GET", "POST"])
+def new_order():
+    if request.method == 'POST':
+        flash({}, 'ConfirmOrder')
+
+    if 'cart' not in session:
+        session['cart'] = []
+    return render_template('app/new-order.html', data=session['cart'], segment='orders')
+
+@blueprint.route('/orders/clear_cart', methods=["GET", "POST"])
+def clear_cart():
+    if 'cart' in session:
+        [session.pop(key) for key in list(session.keys()) if key == 'cart']
+    return redirect(url_for("webapp_blueprint.orders"))
+
+
+@blueprint.route('/orders/new/confirm', methods=["GET", "POST"])
+def confirm_order():
+    form = confirmOrderForm(request.form)
+
+    if 'cart' not in session:
+        return redirect(url_for("webapp_blueprint.new_order"))
+
+    if request.method == 'POST':
+        if 'confirm' in request.form:
+            # Make new order in database
+            new_order = Order(
+                user_id = session['_user_id'],
+                project = request.form['project'],
+                students = request.form['students']
+            )
+            db.session.add(new_order)
+            db.session.commit()
+
+            current_order_id = new_order.id
+
+
+            for item in session['cart']:
+                if 'id' in item:
+                    item_query = Product.query.filter_by(id=item['id']).first().to_dict()
+                    new_ordered_item = Ordered(
+                        order_id = current_order_id,
+                        reason = item['reason'],
+                        quantity = item['quantity'],
+                        title = item_query['title'],
+                        price_when_bought = item_query['price_when_bought'],
+                        url = item_query['url'],
+                        product_id = item_query['id'],
+                        manufacturer_id = item_query['manufacturer_id'],
+                        vendor_id = item_query['vendor_id'],
+                        category_id = item_query['category_id']
+                        )
+
+                    db.session.add(new_ordered_item)
+                    db.session.commit()
+                else:
+                    # Get manufacturer/category/vendor id or create new entry
+                    manufacturer_name = item['manufacturer']
+                    manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+                    if not manufacturer:
+                        manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+                        db.session.add(manufacturer)
+
+                    category_name = item['category']
+                    category = ProductCategory.query.filter_by(category_name=category_name).first()
+                    if not category:
+                        category = ProductCategory(category_name=category_name)
+                        db.session.add(category)
+
+                    vendor_name = item['vendor']
+                    vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+                    if not vendor:
+                        vendor = Vendor(vendor_name=vendor_name)
+                        db.session.add(vendor)
+
+                    db.session.commit()
+
+                    vendor_id = vendor.id
+                    manufacturer_id = manufacturer.id
+                    category_id = category.id
+
+                    # Handle price field
+                    try:
+                        price = float(item['price'].replace(',', '.'))
+                    except:
+                        price = 0
+
+
+                    new_ordered_item = Ordered(
+                        order_id = current_order_id,
+                        reason = item['reason'],
+                        quantity = int(item['quantity']),
+                        title = item['item'],
+                        price_when_bought = price,
+                        url = item['url'],
+                        manufacturer_id = manufacturer_id,
+                        vendor_id = vendor_id,
+                        category_id = category_id
+                        )
+
+                db.session.add(new_ordered_item)
+            db.session.commit()
+
+            [session.pop(key) for key in list(session.keys()) if key == 'cart']
+
+            flash({'category':'success', 'title': 'Order submitted!', 'text': 'Your order has been submitted!'}, 'General')
+
+
+            return redirect(url_for("webapp_blueprint.orders"))
+        if 'back' in request.form:
+            return redirect(url_for("webapp_blueprint.new_order"))
+
+    return render_template('app/order-confirm.html', data=session['cart'], segment='orders', form=form)
+
+@blueprint.route('/orders/new/remove/<int:id>', methods=["GET", "POST"])
+def new_order_remove(id):
+    cart = session['cart']
+    session['cart'] = [item for item in cart if item['id'] != id]
+    return redirect(url_for('webapp_blueprint.new_order'))
+
+@blueprint.route('/orders/new/item')
+def new_order_item():
+    if 'cart' not in session:
+        return redirect(url_for("webapp_blueprint.new_order"))
+    return render_template('app/new-item.html', data=session['cart'], segment='orders')
+
+@blueprint.route('/orders/new/unknown')
+def new_order_item_unknown():
+    if 'cart' not in session:
+        return redirect(url_for("webapp_blueprint.new_order"))
+    return render_template('app/new-item-unknown.html', data=session['cart'], segment='orders')
 
 @blueprint.route('/<template>')
 # @login_required
@@ -397,7 +552,24 @@ def inventory_search():
                        'name': obj.manufacturer.manufacturer_name if obj.manufacturer else None} \
                         for obj in all_objects]}
 
-    return render_template('app/inventory-results.html', data=data)
+    return render_template('app/htmx-results/inventory-results.html', data=data)
+
+@blueprint.route('/inventory/search/small')
+def inventory_search_small():
+    q = request.args.get("q")
+
+    select_columns = [Product.id, Product.title, Manufacturer.manufacturer_name]
+
+    all_objects = Product.query \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
+    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+    .with_entities(*select_columns) \
+    .limit(4)
+
+    data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+
+    print(data)
+    return render_template('app/htmx-results/inventory-results-small.html', data=data)
 
 @blueprint.route('/inventory/borrowed')
 def inventory_borrowed():
@@ -443,4 +615,101 @@ def orders_load():
         else:
             item['created_at_ts'] = timestamp
 
-    return render_template('app/orders-results.html', data=data)
+    return render_template('app/htmx-results/orders-results.html', data=data)
+
+@blueprint.route('/orders/googlesearch/')
+def googlesearchURL():
+    q = request.args.get("q")
+    data = None
+
+    def is_valid_url(url):
+        try:
+            result = urlparse(url)
+            return all([result.scheme, result.netloc])  # Check if both scheme and netloc (domain) are present
+        except ValueError:
+            return False
+
+    def extract_price(text):
+        # Regular expression pattern to match prices
+        price_pattern = r'\b(?:\d{1,3}(?:[,\.]\d{3})*(?:[,\.]\d+)?|\d+(?:[,\.]\d+)?)\b'
+
+        # Find the first occurrence of a price in the text
+        match = re.search(price_pattern, text)
+
+        if match:
+            return match.group()
+        else:
+            return "No price found."
+
+
+    def get_url_data(url):
+        # Send a GET request to the URL
+        response = requests.get(url)
+
+        # Make data variable
+        data = {}
+
+        # Check if the request was successful (status code 200)
+        if response.status_code == 200:
+            # Parse the HTML content of the page using Beautiful Soup
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find the first <h1> tag in the parsed HTML
+            first_h1 = soup.find('h1')
+
+            # If <h1> tag is found, return its inner text
+            if first_h1:
+                data['title'] = first_h1.get_text().strip()
+
+            # Define a function to check if a class contains the word "price" and not "cart"
+            def contains_price_class(class_name):
+                return class_name and 'price' in class_name.lower() and not 'cart' in class_name.lower()
+
+            # Find the first element with a class containing the word "price"
+            element_with_price_class = soup.find(class_=contains_price_class)
+            if element_with_price_class:
+                price = extract_price(element_with_price_class.get_text().strip())
+                data['price'] = price
+
+            # print("Starting image retriever")
+            # data['image'] = get_largest_image(url)
+
+            return data
+        else:
+            return {"error":"Failed to retrieve page information. Please confirm correctness manually."}
+
+    if is_valid_url(q):
+        data = get_url_data(q)
+
+    return render_template('app/htmx-results/googlesearch-results.html', data=data)
+
+
+@blueprint.route('/manufacturer/dropdown/')
+def manufacturer_dropdown():
+    all_objects = Manufacturer.query.all()
+    data = [obj.manufacturer_name for obj in all_objects]
+
+    return render_template('app/htmx-results/manufacturer-dropdown.html', data=data)
+
+@blueprint.route('/category/dropdown/')
+def category_dropdown():
+    all_objects = ProductCategory.query.all()
+    data = [obj.category_name for obj in all_objects]
+
+    return render_template('app/htmx-results/category-dropdown.html', data=data)
+
+@blueprint.route('/vendor/dropdown/')
+def vendor_dropdown():
+    all_objects = Vendor.query.all()
+    data = [obj.vendor_name for obj in all_objects]
+
+    return render_template('app/htmx-results/vendor-dropdown.html', data=data)
+
+@blueprint.route('/get_user')
+def get_user():
+    try:
+        user = session['fullname']
+        return f'<p class="mb-0">{user}</p>'
+    except:
+        return ""
+

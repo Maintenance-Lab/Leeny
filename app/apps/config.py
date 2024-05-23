@@ -81,6 +81,8 @@ class Config(object):
     MAIL_PASSWORD = os.getenv("EMAIL_PASS")
     # GMAIL_PASSWORD = os.getenv("GMAIL_PASS")
 
+    BUDGET_LIMIT = 1000
+
 
 
 class ProductionConfig(Config):

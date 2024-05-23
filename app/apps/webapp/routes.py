@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse
 import re
 
 import requests
-from apps.config import API_GENERATOR
+from apps.config import Config
 from apps.webapp import blueprint
 from flask import current_app, flash, render_template, redirect, url_for, request, session, jsonify
 from flask_login import login_required, login_user
@@ -155,8 +155,7 @@ def borrow_date():
             print("Project: ", project)
 
             # If price > limit go to email verif
-            limit_price = 100
-            print("Borrow price: ", session['borrowPrice'])
+            limit_price = Config['BUDGET_LIMIT']
             if session['borrowPrice'] > limit_price:
                 # go to route email_verification
                 return redirect(url_for('authentication_blueprint.email_verification'))

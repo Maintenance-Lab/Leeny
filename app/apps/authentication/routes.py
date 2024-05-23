@@ -464,7 +464,7 @@ def email_verification():
     login_form = EmailForm(request.form)
     if request.method == 'GET':
         session['email_code'] = random.randint(1000, 9999)
-        html = render_template("app/email_send.html", confirm_code=session['email_code'])
+        html = render_template("app/email_verif_code.html", confirm_code=session['email_code'])
         send_email("robinalmekinders@gmail.com", "leeny test", html)
 
     if request.method == 'POST':
@@ -476,7 +476,7 @@ def email_verification():
         code = int(f'{code_1}{code_2}{code_3}{code_4}')
 
         if code == session['email_code']:
-            flash({'category':'success', 'title': 'Person Verified!', 'text': 'Your profile was verified'}, 'General')
+            flash({'category': 'success', 'title': 'Person Verified!', 'text': 'Your profile was verified'}, 'General')
             print(session)
             return redirect(url_for('webapp_blueprint.borrow_confirm'))
         return render_template('accounts/email_verification.html',

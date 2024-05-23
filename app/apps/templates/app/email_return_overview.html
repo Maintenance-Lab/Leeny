@@ -10,13 +10,12 @@
         <div style="background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; margin-bottom: 20px;">
             <h2>Borrow Overview</h2>
             <p>Dear {{ session.name }},</p>
-            <p>Here is a summary of the items you have borrowed from the Maintenance Lab for your project: {{ session.project }}</p>
+            <p>Here is a summary of the items you have retunred to the Maintenance Lab on {{returned_timestamp}} for your project: {{ session.project }}</p>
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr>
                         <th style="border: 1px solid #dddddd; background-color: #f2f2f2; text-align: left; padding: 8px;">Item</th>
                         <th style="border: 1px solid #dddddd; background-color: #f2f2f2; text-align: left; padding: 8px;">Quantity</th>
-                        <th style="border: 1px solid #dddddd; background-color: #f2f2f2; text-align: left; padding: 8px;">Return Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,7 +23,6 @@
                     <tr>
                         <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">{{ item }}</td>
                         <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">{{ quantity }}</td>
-                        <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">{{ timestamp }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

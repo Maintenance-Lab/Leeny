@@ -207,8 +207,9 @@ class Borrow2(Resource):
         user = Users.query.filter_by(id=user_id).first()
         email = user.email
 
+        borrowed_date = datetime.today().strftime('%d-%m-%Y')
         timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
-        html = render_template('app/email_overview.html', timestamp=timestamp)
+        html = render_template('app/email_borrow_overview.html', timestamp=timestamp, borrowed_date=borrowed_date)
         send_email(email, "Borrow overview", html)
 
 
@@ -315,6 +316,15 @@ class ReturnConfirm(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+        # Send email to users
+        user_id = session['_user_id']
+        user = Users.query.filter_by(id=user_id).first()
+        email = user.email
+
+        returned_timestamp = datetime.today().strftime('%d-%m-%Y')
+        html = render_template('app/email_return_overview.html', returned_timestamp=returned_timestamp)
+        send_email(email, "Return overview", html)
 
 
 @api.route('/admin-login', methods=['POST'])

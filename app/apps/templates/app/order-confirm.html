@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Confirm Order {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="position-absolute">
+    <h1>Confirm new order</h1>
+</div>
+
+<div class="container-fluid d-flex justify-content-center align-items-center gap-5" style="height: calc(100vh - 65px);">
+    <form method="POST" class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
+        <h5 class="text-center w-100">Order details</h5>
+        <div class="card text-left">
+            <div class="px-3 pt-2">
+                <label>Name of your Project</label>
+                {{ form.project(placeholder="Project", class="form-control") }}
+                <label>Names of other Students</label>
+                {{ form.students(placeholder="Student 1, Student 2, etc...", class="form-control") }}
+            </div>
+            <div class="table-responsive px-2" style="max-height: 360px;">
+                <table class="table align-items-center mb-0 px-2" style="min-height: 50px;">
+                    <thead>
+                        {% if data != [] %}
+                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-2">Item</th>
+                        <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Quantity</th>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+
+                        {% for item in data %}
+                        <tr>
+                            <td>
+                                {{item.item}}
+                            </td>
+                            <td class="ps-0">
+                                {{item.quantity}}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center mt-3 d-flex justify-content-center gap-5">
+            <a href="/orders/new" class="btn btn-outline-danger w-30 mt-2 mb-4 ">Back</a>
+            <button class="btn btn-outline-success w-30 mt-2 mb-4 " name="confirm">Confirm</button>
+        </div>
+    </form>
+</div>
+
+{% endblock content %}

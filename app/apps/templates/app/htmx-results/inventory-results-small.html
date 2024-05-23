@@ -1,0 +1,103 @@
+{% for item in data['data'] %}
+<tr>
+    <td style="padding-left: 24px;">
+        <h6 class="mb-0 text-sm">{{item.title}}</h6>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0">{{item.manufacturer_name}}</p>
+    </td>
+    <td class="align-right p-0" href="/item/{{item.id}}">
+        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
+            <div class="d-flex justify-content-end align-items-center">
+                <svg fill="#67748e" width="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
+            </div>
+        </a>
+    </td>
+    <td style="width:60px">
+        <a class="step3-btn"> 
+            <div class="btn btn-dark mb-0 py-1 px-3">
+                <svg height="20px" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>
+            </div>
+        </a>
+    </td>
+</tr>
+{% endfor %}
+
+<script>
+const goToStep3 = (buttonSelector) => {
+    const handleStep3Click = () => {
+        // Find the closest table row (tr) element
+    const closestRow = event.target.closest('tr');
+
+// Get all td elements within the closest row
+const tdElements = closestRow.querySelectorAll('td');
+
+// Initialize an object to store the row data
+var rowData = {};
+
+// Iterate over td elements to extract data
+tdElements.forEach((td, index) => {
+    rowData['column_' + index] = td.textContent.trim();
+});
+
+// Display rowData in HTML
+displayRowData(rowData);
+setActiveStep(1);
+setActivePanel(1);
+};
+
+// Reapply event listeners for step3-btn
+const reapplyEventListeners = () => {
+    const step3Btns = document.querySelectorAll(buttonSelector);
+    step3Btns.forEach(btn => {
+        btn.removeEventListener('click', handleStep3Click);
+        btn.addEventListener('click', handleStep3Click);
+    });
+};
+
+// Initial setup
+reapplyEventListeners();
+
+// Listen for htmx afterSwap event and reapply event listeners
+document.addEventListener('htmx:afterSwap', function (event) {
+    if (event.target.matches('#results')) {
+        reapplyEventListeners();
+    }
+});
+};
+// Function to display rowData in HTML
+const displayRowData = (rowData) => {
+    const displayDiv = document.getElementById('rowDataDisplay');
+    displayDiv.innerHTML = '';
+
+    // Create a <p> element to display rowData
+    const paragraphItem = document.createElement('p');
+    paragraphItem.id = 'item';
+    paragraphItem.classList.add('mb-0');
+
+    const paragraphManufacturer = document.createElement('p');
+    paragraphManufacturer.id = 'manufacturer';
+    paragraphManufacturer.classList.add('text-xs');
+    paragraphManufacturer.classList.add('font-weight-bold');
+    paragraphManufacturer.classList.add('mb-0');
+    
+
+    // Extract the values of the two columns from rowData
+    const paragraphItemValue = rowData['column_0'];
+    const paragraphManufacturerValue = rowData['column_1'];
+
+    // Set the inner HTML of the <p> element to contain the column values
+        paragraphItem.innerHTML = `${paragraphItemValue}`;
+        paragraphManufacturer.innerHTML = `${paragraphManufacturerValue}`;
+
+    // Append the <p> element to the display div
+    displayDiv.appendChild(paragraphItem);
+    displayDiv.appendChild(paragraphManufacturer);
+};
+
+
+
+// Call the function with the selector for your buttons
+goToStep3('.step3-btn');
+
+</script>

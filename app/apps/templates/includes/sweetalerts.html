@@ -130,8 +130,24 @@
             });
             </script>
         {% endif %}
-
-
+        {% if category == 'ConfirmOrder' %}
+            <script>
+                Swal.fire({
+                title: "",
+                text: "Are you sure you want to cancel this order?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "No, go back",
+                cancelButtonText: "Yes, cancel order",
+                }).then((result) => {
+                if (!result.isConfirmed) {
+                    window.location.href = "/orders/clear_cart";
+                }
+                });
+            </script>
+        {% endif %}
 
 {% endfor %}
 {% endif %}

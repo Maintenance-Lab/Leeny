@@ -1,0 +1,160 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Edit Product {% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4" style="max-width: 900px; margin: 0 auto;">
+        <div class="card-body px-4 pt-4 pb-2">
+          <h1 class="text-center">Edit product in database</h1>
+
+          <div class="col-12">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group mb-3">
+                  <label for="product-name">Product Name</label>
+                  <input type="text" class="form-control" id="product-name" name="product_name" value="{{ product['data'][0].title }}" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="price-bought">Price</label>
+                  <div class="input-group">
+                    <span class="input-group-text">€</span>
+                    <input type="text" class="form-control" id="price-bought" name="price_bought" value="{{ product['data'][0].price_when_bought }}" step="0.01" required>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="url-bought">Website URL</label>
+                  <input type="url" class="form-control" id="url-bought" name="url_bought" value="{{ product['data'][0].url }}" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="category">Category</label>
+                  <input list="category-options" class="form-control" id="category" name="category" value="{{ product['data'][0].category_name }}" required>
+                  <datalist id="category-options">
+                    <!-- Options will be populated by JavaScript -->
+                  </datalist>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="description">Description</label>
+                  <textarea class="form-control" id="description" name="description" rows="3">{{ product['data'][0].description }}</textarea>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group mb-3">
+                  <label for="quantity">Quantity total</label>
+                  <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product['data'][0].quantity_total }}" onkeypress="allowNumbersOnly(event)" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="quantity-not-available">Quantity Not Available for Borrowing</label>
+                  <input type="number" class="form-control" id="quantity-not-available" name="quantity_not_available" value="{{ product['data'][0].quantity_unavailable }}" onkeypress="allowNumbersOnly(event)" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="manufacturer">Manufacturer</label>
+                  <input list="manufacturer-options" class="form-control" id="manufacturer" name="manufacturer" value="{{ product['data'][0].manufacturer_name }}" required>
+                  <datalist id="manufacturer-options">
+                    <!-- Options will be populated by JavaScript -->
+                  </datalist>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="vendor">Vendor</label>
+                  <input list="vendor-options" class="form-control" id="vendor" name="vendor" value="{{ product['data'][0].vendor_name }}" required>
+                  <datalist id="vendor-options">
+                    <!-- Options will be populated by JavaScript -->
+                  </datalist>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="notes">Notes</label>
+                  <textarea class="form-control" id="notes" name="notes" rows="3">{{ product['data'][0].notes }}</textarea>
+                </div>
+
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group mb-3">
+                  <label for="barcode">Barcode</label>
+                  <input type="text" class="form-control" id="barcode" name="barcode" value="{{ product['data'][0].barcode }}" required>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="document">Document URL</label>
+                  <input type="url class="form-control" id="document" name="document">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 text-center">
+              <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+              <button type="submit" id="updateProductButton" class="btn btn-dark mt-3" style="width: 150px;">Update</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+  document.getElementById("updateProductButton").addEventListener('click', function() {
+    console.log("Button clicked")
+
+    fetch (`${window.location.origin}/api/edit-product`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        product_id: "{{ product['data'][0].id }}",
+        title: document.getElementById("product-name").value,
+        price: document.getElementById("price-bought").value,
+        url: document.getElementById("url-bought").value,
+        barcode: document.getElementById("barcode").value,
+        category: document.getElementById("category").value,
+        description: document.getElementById("description").value,
+        quantity: document.getElementById("quantity").value,
+        quantity_unavailable: document.getElementById("quantity-not-available").value,
+        manufacturer: document.getElementById("manufacturer").value,
+        vendor: document.getElementById("vendor").value,
+        notes: document.getElementById("notes").value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      if (data.success) {
+        window.location.href = "/admin-inventory";
+      }
+    })
+  });
+
+  document.addEventListener('DOMContentLoaded', populate);
+
+  function populate(){
+    fetch(`${window.location.origin}/api/get-options`)
+      .then(response => response.json())
+      .then(data => {
+        const { manufacturers, categories, vendors } = data;
+
+        populateDatalist('manufacturer-options', manufacturers);
+        populateDatalist('category-options', categories);
+        populateDatalist('vendor-options', vendors);
+      });
+  }
+
+  function populateDatalist(datalistId, options) {
+    const datalist = document.getElementById(datalistId);
+    datalist.innerHTML = '';
+    const uniqueOptions = Array.from(new Set(options));
+
+    uniqueOptions.forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option;
+      datalist.appendChild(optionElement);
+    });
+  }
+</script>
+{% endblock javascripts %}

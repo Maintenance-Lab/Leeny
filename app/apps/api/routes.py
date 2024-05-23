@@ -13,10 +13,149 @@ from werkzeug.datastructures import MultiDict
 from apps import db
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
+from apps.authentication.util import verify_pass
 from apps.scripts.email_verif import send_email
 
 
 api = Api(blueprint)
+
+@api.route('/changeCardUID', methods=['POST'])
+class changeCardUID(Resource):
+    def post(self):
+        data = request.get_json()
+        print("DATA ---------------------:", data)
+        card = data['card']
+        new_uid = data['new_uid']
+
+        # Controleren of er een gebruiker bestaat met uid_1 gelijk aan new_uid
+        exists_1 = Users.query.filter_by(uid_1=new_uid).first() is not None
+        # Controleren of er een gebruiker bestaat met uid_2 gelijk aan new_uid
+        exists_2 = Users.query.filter_by(uid_2=new_uid).first() is not None
+        # Controleren of er een gebruiker bestaat met uid_3 gelijk aan new_uid
+        exists_3 = Users.query.filter_by(uid_3=new_uid).first() is not None
+
+        # Print de resultaten
+        print(exists_1, exists_2, exists_3)
+
+        if not (exists_1 or exists_2 or exists_3):
+            # Get the user_id from the session
+            user_id = session['_user_id']
+            user = Users.query.filter_by(id=user_id).first()
+
+            # Change uid to new uid
+            if card == '1':
+                user.uid_1 = new_uid
+            elif card == '2':
+                user.uid_2 = new_uid
+            elif card == '3':
+                user.uid_3 = new_uid
+
+            # Save changes to database
+            db.session.commit()
+
+            output = {
+                'message': f'Card UID updated',
+                'success': True
+            }
+
+        else:
+            output = {
+                'message': f'Card UID already exists',
+                'success': False
+            }
+
+
+        return output, 200
+
+
+@api.route('/authenticate_admin', methods=['GET', 'POST'])
+class AuthenticateAdmin(Resource):
+    def post(self):
+        data = request.get_json()
+
+        if data['uid']:
+            uid = data['uid']
+            try:
+                user = Users.query.filter_by(uid_1=uid).first()
+            except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_2=uid).first()
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
+
+            if user:
+                print("User role: ", user.role)
+                if user.role == 'admin':
+                    return {'authenticated': True, 'role': 'admin'}
+                else:
+                    return {'authenticated': True, 'role': 'student'}
+
+        return {'authenticated': False}
+
+    def get(self):
+        user_id = session['_user_id']
+
+        user = Users.query.filter_by(id=user_id).first()
+        if user.role == 'admin':
+            return {'authenticated': True, 'role': 'admin'}
+
+        return {'authenticated': False}
+
+
+
+@api.route('/borrow', methods=['POST'])
+class Borrow(Resource):
+    def post(self):
+        # Get the barcode data from the request
+        data = request.get_json()
+        barcode = data['barcode']
+        print("BARCODE: ", barcode)
+
+        # Query the database for the product based on barcode
+        product = Product.query.filter_by(barcode=barcode).first()
+        print("PRODUCT: ", product)
+
+        if product is not None:
+            title = product.title
+            quantity_total = product.quantity_total
+            quantity_unavailable = product.quantity_unavailable
+            quantity_borrowed = product.quantity_borrowed
+
+            quantity = quantity_total - quantity_unavailable - quantity_borrowed
+
+            if quantity > 0:
+                # Product found
+                output = {
+                    'barcode': barcode,
+                    'name': title,
+                    'quantity': quantity,
+                    'message': f'Product found',
+                    'success': True
+                }
+            else:
+                # Product not available
+                output = {
+                    'barcode': barcode,
+                    'name': title,
+                    'message': f'Product not available',
+                    'success': False
+                }
+        else:
+            # Product not found
+            output = {
+                'barcode': barcode,
+                'message': f'Product not found',
+                'success': False
+            }
+
+        return output, 200
 
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
@@ -33,7 +172,7 @@ class Borrow2(Resource):
             quantity = items[1]
 
             # If barcode is an int
-            if barcode.isdigit():
+            if barcode != 'null':
                 print("Barcode is an int")
                 # Add 1 to quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
@@ -62,87 +201,15 @@ class Borrow2(Resource):
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
 
-        # Send email to user
+        
+        # Send email to users
         user_id = session['_user_id']
         user = Users.query.filter_by(id=user_id).first()
         email = user.email
 
-        html = render_template('app/borrow-confirm.html')
+        html = render_template('app/email_overview.html')
         send_email(email, "leeny test", html)
 
-
-
-@api.route('/authenticate_admin', methods=['POST'])
-class AuthenticateAdmin(Resource):
-    def post(self):
-        data = request.get_json()
-        uid = data['uid']
-
-        try:
-            user = Users.query.filter_by(uid_1=uid).first()
-        except:
-            try:
-                user = Users.query.filter_by(uid_2=uid).first()
-            except:
-                try:
-                    user = Users.query.filter_by(uid_3=uid).first()
-                except:
-                    user = None
-
-        if user:
-            print("User role: ", user.role)
-            if user.role == 'admin':
-                return {'authenticated': True, 'role': 'admin'}
-            else:
-                return {'authenticated': True, 'role': 'student'}
-        else:
-            return {'authenticated': False}
-
-
-@api.route('/borrow', methods=['POST'])
-class Borrow(Resource):
-    def post(self):
-        # Get the barcode data from the request
-        data = request.get_json()
-        barcode = data['barcode']
-
-        # Query the database for the product based on barcode
-        product = Product.query.filter_by(barcode=barcode).first()
-
-        if product is not None:
-            title = product.title
-            quantity_total = product.quantity_total
-            quantity_unavailable = product.quantity_unavailable
-            quantity_borrowed = product.quantity_borrowed
-
-            quantity = quantity_total - quantity_unavailable - quantity_borrowed
-
-            if quantity <= 0:
-                # Product not available
-                output = {
-                    'barcode': barcode,
-                    'name': title,
-                    'message': f'Product not available',
-                    'success': False
-                }
-
-            # Product found
-            output = {
-                'barcode': barcode,
-                'name': title,
-                'quantity': quantity,
-                'message': f'Product found',
-                'success': True
-        }
-        else:
-            # Product not found
-            output = {
-                'barcode': barcode,
-                'message': f'Product not found',
-                'success': False
-        }
-
-        return output, 200
 
 
 @api.route('/return', methods=['POST'])
@@ -204,7 +271,7 @@ class Return2(Resource):
             barcode = items[0]
             quantity = items[1]
 
-            if barcode.isdigit():
+            if barcode != 'null':
                 # get product name
                 product = Product.query.filter_by(barcode=barcode).first()
                 product_name = product.title
@@ -224,7 +291,7 @@ class ReturnConfirm(Resource):
             quantity = items[1]
 
             # If barcode is an int
-            if barcode.isdigit():
+            if barcode != 'null':
                 print("Barcode is an int")
                 # Subtract from quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
@@ -249,37 +316,355 @@ class ReturnConfirm(Resource):
         db.session.commit()
 
 
-@api.route('/borrow_rfid', methods=['POST'])
-class Borrow(Resource):
+@api.route('/admin-login', methods=['POST'])
+class AdminLogin(Resource):
     def post(self):
-        # Get rfid data from the request
         data = request.get_json()
-        uid = data['uid']
+        email = data['email']
+        password = data['password']
 
-        # Query the database for the product based on barcode
-        product = Product.query.filter_by(item_uid=uid).first()
-        title = product.title
-        quantity = product.quantity
+        user = Users.query.filter_by(email=email).first()
 
-        if product is not None:
-            # Product found
-            output = {
-                'uid': uid,
-                'name': title,
-                'quantity': quantity,
-                'message': f'Product found',
-                'success': True
-        }
+        if user is not None and user.role == 'admin':
+            if verify_pass(password, user.password):
+                session['_user_id'] = user.id
+                session['email'] = user.email
+                session['role'] = user.role
+
+                output = {
+                    'message': f'Login successful',
+                    'success': True
+                }
         else:
-            # Product not found
             output = {
-                'uid': uid,
-                'message': f'Product not found',
+                'message': f'Login failed',
                 'success': False
-        }
+            }
 
         return output, 200
 
+
+@api.route('/get-options')
+class GetOptions(Resource):
+    def get(self):
+        # Get all manufacturers, categories, and vendors
+        manufacturers = [manufacturer.manufacturer_name for manufacturer in Manufacturer.query.all()]
+        categories = [category.category_name for category in ProductCategory.query.all()]
+        vendors = [vendor.vendor_name for vendor in Vendor.query.all()]
+
+        # sort alphabetically
+        manufacturers.sort()
+        categories.sort()
+        vendors.sort()
+
+        return {
+            'success': True,
+            'manufacturers': manufacturers,
+            'categories': categories,
+            'vendors': vendors
+        }
+
+@api.route('/manufacturer/dropdown', methods=['GET'])
+class GetManufacturers(Resource):
+    def get(self):
+        manufacturers = Manufacturer.query.all()
+        data = [{'id': m.id, 'name': m.manufacturer_name} for m in manufacturers]
+        return jsonify(data)
+
+@api.route('/category/dropdown', methods=['GET'])
+class GetCategories(Resource):
+    def get(self):
+        categories = ProductCategory.query.all()
+        data = [{'id': c.id, 'name': c.category_name} for c in categories]
+        return jsonify(data)
+
+@api.route('/vendor/dropdown', methods=['GET'])
+class GetVendors(Resource):
+    def get(self):
+        vendors = Vendor.query.all()
+        data = [{'id': v.id, 'name': v.vendor_name} for v in vendors]
+        return jsonify(data)
+
+@api.route('/add-product', methods=['POST'])
+class AddProduct(Resource):
+    def post(self):
+        data = request.form.to_dict(flat=True)
+
+        product = Product(title=data['title'],
+                            barcode=data['barcode'],
+                            price_when_bought=data['price'],
+                            description=data['description'],
+                            url=data['url'],
+                            notes=data['notes'],
+                            created_at_ts=datetime.now(),
+                            manufacturer_id=data['manufacturer'],
+                            category_id=data['category'],
+                            vendor_id=data['vendor'],
+                            quantity_total=data['quantity'],
+                            quantity_unavailable=data['quantity_unavailable'],
+                            quantity_borrowed='0',
+                            )
+
+        db.session.add(product)
+        db.session.commit()
+
+        return {
+            'success': True
+        }
+
+@api.route('/update-product', methods=['POST'])
+class UpdateProduct(Resource):
+    def post(self):
+        data = request.get_json()
+        barcode = data['barcode']
+
+        # Get product by barcode
+        product = Product.query.filter_by(barcode=barcode).first()
+
+        # Update product
+        current_quantity = product.quantity_total
+        current_quantity_unavailable = product.quantity_unavailable
+
+        product.quantity_total = int(data['quantity']) + current_quantity
+        product.quantity_unavailable = int(data['quantity_unavailable']) + current_quantity_unavailable
+
+        db.session.commit()
+
+        return {
+            'success': True
+        }
+
+@api.route('/edit-product', methods=['GET', 'POST'])
+class EditProduct(Resource):
+    def post(self):
+        data = request.get_json()
+        print("ID VAN PRODUCT: ", data['product_id'])
+
+        # Retrieve or create IDs for manufacturer, category, and vendor
+        manufacturer_name = data['manufacturer']
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if manufacturer is None:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+            db.session.commit()
+        manufacturer_id = manufacturer.id
+
+        category_name = data['category']
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if category is None:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+            db.session.commit()
+        category_id = category.id
+
+        vendor_name = data['vendor']
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if vendor is None:
+            vendor = Vendor(vendor_name=vendor_name)
+            db.session.add(vendor)
+            db.session.commit()
+        vendor_id = vendor.id
+
+
+        # Change values in database
+        product = Product.query.filter_by(barcode=data['barcode']).first()
+        product.title = data['title']
+        product.barcode = data['barcode']
+        product.price_when_bought = data['price']
+        product.description = data['description']
+        product.url = data['url']
+        product.notes = data['notes']
+        product.quantity_total = data['quantity']
+        product.quantity_unavailable = data['quantity_unavailable']
+        product.manufacturer_id = manufacturer_id
+        product.category_id = category_id
+        product.vendor_id = vendor_id
+
+        # Commit to database
+        db.session.commit()
+
+        return {
+            'message': f'Product updated',
+            'success': True
+        }, 200
+
+
+@api.route('/get-options')
+class GetOptions(Resource):
+    def get(self):
+        # Get all manufacturers, categories, and vendors
+        manufacturers = [manufacturer.manufacturer_name for manufacturer in Manufacturer.query.all()]
+        categories = [category.category_name for category in ProductCategory.query.all()]
+        vendors = [vendor.vendor_name for vendor in Vendor.query.all()]
+
+        # sort alphabetically
+        manufacturers.sort()
+        categories.sort()
+        vendors.sort()
+
+        return {
+            'success': True,
+            'manufacturers': manufacturers,
+            'categories': categories,
+            'vendors': vendors
+        }
+
+
+@api.route('/add-product', methods=['POST'])
+class AddProduct(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Convert price to float, replace comma with dot
+        url = data['url']
+        price = data['price']
+        if ',' in price:
+            price = price.replace(',', '.')
+        price = float(price)
+
+        # Fetch or create Manufacturer
+        manufacturer_name = data.get('manufacturer')
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if not manufacturer:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+
+        # Fetch or create ProductCategory
+        category_name = data.get('category')
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if not category:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+
+        # Fetch or create Vendor
+        vendor_name = data.get('vendor')
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=vendor_name, website=url)
+            db.session.add(vendor)
+
+        # Add to database
+        product = Product(title=data['title'],
+                            barcode=data['barcode'],
+                            price_when_bought=price,
+                            description=data['description'],
+                            url=url,
+                            notes=data['notes'],
+                            created_at_ts=datetime.now(),
+                            manufacturer=manufacturer,
+                            category=category,
+                            vendor=vendor,
+                            quantity_total=data['quantity'],
+                            quantity_unavailable=data['quantity_unavailable'],
+                            quantity_borrowed='0',
+                            )
+
+        db.session.add(product)
+        db.session.commit()
+
+
+@api.route('/update-product', methods=['POST'])
+class UpdateProduct(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Convert price to float, replace comma with dot
+        price = data['price']
+        if ',' in price:
+            price = price.replace(',', '.')
+        price = float(price)
+        url = data['url']
+
+        # Fetch or create Vendor
+        vendor_name = data.get('vendor')
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=vendor_name, website=url)
+            db.session.add(vendor)
+
+        # Update product
+        product = Product.query.filter_by(barcode=data['barcode']).first()
+        og_quantity = product.quantity_total
+        og_quantity_unavailable = product.quantity_unavailable
+
+        product.price_when_bought = price
+        product.url = data['url']
+        product.vendor = vendor
+        product.quantity_total = int(data['quantity']) + og_quantity
+        product.quantity_unavailable = int(data['quantity_unavailable']) + og_quantity_unavailable
+
+        db.session.commit()
+
+
+@api.route('/edit-product', methods=['GET', 'POST'])
+class EditProduct(Resource):
+    def post(self):
+        data = request.get_json()
+        print("ID VAN PRODUCT: ", data['product_id'])
+
+        # Retrieve or create IDs for manufacturer, category, and vendor
+        manufacturer_name = data['manufacturer']
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if manufacturer is None:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+            db.session.commit()
+        manufacturer_id = manufacturer.id
+
+        category_name = data['category']
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if category is None:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+            db.session.commit()
+        category_id = category.id
+
+        vendor_name = data['vendor']
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if vendor is None:
+            vendor = Vendor(vendor_name=vendor_name)
+            db.session.add(vendor)
+            db.session.commit()
+        vendor_id = vendor.id
+
+
+        # Change values in database
+        product = Product.query.filter_by(barcode=data['barcode']).first()
+        product.title = data['title']
+        product.barcode = data['barcode']
+        product.price_when_bought = data['price']
+        product.description = data['description']
+        product.url = data['url']
+        product.notes = data['notes']
+        product.quantity_total = data['quantity']
+        product.quantity_unavailable = data['quantity_unavailable']
+        product.manufacturer_id = manufacturer_id
+        product.category_id = category_id
+        product.vendor_id = vendor_id
+
+        # Commit to database
+        db.session.commit()
+
+        return {
+            'message': f'Product updated',
+            'success': True
+        }, 200
+
+
+@api.route('/orders/add_to_cart', methods=['POST'])
+class AddToCart(Resource):
+    def post(self):
+        data = request.get_json()
+        item = Product.query.filter(Product.title.contains(data['item'])).first()
+        if item:
+            data['id'] = item.id
+        cart = session['cart']
+        cart.append(data)
+        session['cart'] = cart
+        print(session['cart'])
+        return {
+            'success': True
+        }, 200
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):

@@ -1,0 +1,26 @@
+{% for item in data['data'] %}
+<tr>
+    <td style="padding-left: 24px;">
+        <h6 class="mb-0 text-sm">{{item.title}}</h6>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0">{{item.name}}</p>
+    </td>
+
+    <td class="align-middle text-center text-sm">
+        {% if (item.quantity_total - item.quantity_borrowed) > 0 %}
+        <span class="badge badge-sm bg-gradient-success">{{item.quantity_total - item.quantity_borrowed}}/{{item.quantity_total}}</span>
+        {% else %}
+        <span class="badge badge-sm bg-gradient-danger">{{item.quantity_total - item.quantity_borrowed}}/{{item.quantity_total}}</span>
+        {% endif %}
+    </td>
+
+    <td class="align-right p-0" href="/item/{{item.id}}">
+        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
+            <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+            </div>
+        </a>
+    </td>
+</tr>
+{% endfor %}

@@ -8,5 +8,4 @@ class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     # Properties
-    name = db.Column(db.String(255), nullable=False)
-    website = db.Column(db.String(255))
+    vendor_name = db.Column(db.String(255), nullable=False)

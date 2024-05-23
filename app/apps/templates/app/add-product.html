@@ -1,0 +1,427 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Inventory {% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4" style="max-width: 900px; margin: 0 auto;">
+        <div class="card-body px-4 pt-4 pb-2">
+          <h1 class="text-center">Add product to database</h1>
+          <p class="text-center" id="topMessage"></p>
+
+            <!-- Step 1 -->
+            <div id="step-1" class="col-12">
+                <div class="row">
+                  <div class="col-md-12 text-center">
+                    <div class="form-group mb-3 visually-hidden">
+                      <label for="barcode">Barcode</label>
+                      <input type="text" class="form-control" id="barcodeInputField" name="barcodeInputField" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <p style="font-size: 16px; margin-bottom: 5px;">Scan the barcode of the product</p>
+                      <img src="https://static.thenounproject.com/png/74445-200.png" alt="" style="max-width: 150px; margin: 0 auto;">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 text-center">
+                  <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+                  <a onclick="showStep2()" class="btn btn-dark mt-3 me-2" style="width: 180px;">Enter Manually</a>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div id="step-2" class="col-12 d-none text-center">
+                <div style="margin-bottom: 10px;">
+                  <p style="font-size: 16px; margin-bottom: 5px;">Enter the barcode of the product</p>
+                  <img src="https://static.thenounproject.com/png/74445-200.png" alt="" style="max-width: 150px; margin: 0 auto;">
+                </div>
+                <div class="d-flex justify-content-center form-group">
+                  <input type="text" class="form-control" id="inputFieldStep2" onkeyup="enableContinue('step2', 'inputFieldStep2')" name="barcodeInputField" style="width: 250px; text-align: left;">
+                </div>
+                <div class="col-12 text-center">
+                  <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
+                  <button id="step2" type="button" class="btn btn-dark mt-3" style="width: 150px;" onclick="checkBarcode('inputFieldStep2')" >Continue</button>
+                </div>
+            </div>
+
+
+            <!-- Step 3 -->
+            <form method="post" action="api/add-product">
+              <div id="step-3" class="col-12 d-none text-center">
+                <div class="row">
+                  <!-- First Column -->
+                  <div class="col-md-4 text-center">
+                    <div class="form-group">
+                      <label for="title">Product Name</label>
+                      <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="barcode">Barcode</label>
+                      <input type="text" class="form-control" id="barcodeStep3" name="barcode" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="price">Price</label>
+                      <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="text" class="form-control" id="price" name="price" placeholder="50.00" required>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="description">Description</label>
+                      <textarea type="text" class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Second Column -->
+                  <div class="col-md-4 text-center">
+                    <div class="form-group">
+                      <label for="quantity">Quantity</label>
+                      <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="quantity_unavailable">Quantity Unavailable For Borrowing</label>
+                      <input type="number" class="form-control" id="quantity_unavailable" name="quantity_unavailable" min="0" value="0" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="url">Website URL</label>
+                      <input type="text" class="form-control" id="url" name="url" placeholder="www.example.com" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="notes">Notes</label>
+                      <textarea type="text" class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Third Column -->
+                  <div class="col-md-4 text-center">
+                    <div class="form-group">
+                      <label for="category">Category</label>
+                      <select id="categoryDropdown" class="form-control" name="category" required></select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="vendor">Vendor</label>
+                      <select id="vendorDropdown" class="form-control" name="vendor" required></select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="manufacturer">Manufacturer</label>
+                      <select id="manufacturerDropdown" class="form-control" name="manufacturer" required></select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="document_url">Document URL</label>
+                      <input type="text" class="form-control" id="document_url" name="document_url">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 text-center">
+                  <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
+                  <button type="submit" class="btn btn-dark mt-3" style="width: 150px;">Add Product</button>
+                </div>
+
+              </div>
+            </form>
+
+
+          <!-- Step 4 -->
+          <div id="step-4" class="col-12 d-none text-center">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Barcode</label>
+                        <p id="barcodeStep4"></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-start">Product Name</label>
+                        <p id="nameStep4"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="quantityToAdd">Quantity to Add</label>
+                        <input type="number" class="form-control" id="quantityToAdd" name="quantityToAdd" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantityUnavailableToAdd">Quantity Unavailable to Add</label>
+                        <input type="number" class="form-control" id="quantityUnavailableToAdd" name="quantityUnavailableToAdd" min="0" value="0" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep1()" style="width: 150px;">Back</button>
+                    <button type="button" class="btn btn-dark mt-3" onclick="updateProduct()">Update</button>
+                </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+    let currentBarcode = '';
+    document.getElementById('step2').disabled = true;
+    document.getElementById('topMessage').classList.add('text-danger');
+
+
+    // Scan barcode
+    function showStep1() {
+        console.log("showStep1");
+        document.getElementById('step-1').classList.remove('d-none');
+        document.getElementById('step-2').classList.add('d-none');
+        document.getElementById('step-3').classList.add('d-none');
+        document.getElementById('step-4').classList.add('d-none');
+
+        document.getElementById('topMessage').innerText = '';
+
+    }
+
+    // Enter barcode manually
+    function showStep2() {
+        document.getElementById('step-1').classList.add('d-none');
+        document.getElementById('step-2').classList.remove('d-none');
+        document.getElementById('step-3').classList.add('d-none');
+        document.getElementById('step-4').classList.add('d-none');
+
+        document.getElementById('topMessage').innerText = '';
+    }
+
+    // Product does not exist
+    function showStep3(barcode) {
+        document.getElementById('step-1').classList.add('d-none');
+        document.getElementById('step-2').classList.add('d-none');
+        document.getElementById('step-3').classList.remove('d-none');
+        document.getElementById('step-4').classList.add('d-none');
+
+        document.getElementById('barcodeStep3').value = barcode;
+        document.getElementById('topMessage').innerText = '';
+    }
+
+    // Product already exists
+    function showStep4(barcode, name) {
+        document.getElementById('step-1').classList.add('d-none');
+        document.getElementById('step-2').classList.add('d-none');
+        document.getElementById('step-3').classList.add('d-none');
+        document.getElementById('step-4').classList.remove('d-none');
+
+        document.getElementById('topMessage').innerText = '';
+
+        document.getElementById('barcodeStep4').innerText = barcode;
+        document.getElementById('nameStep4').innerText = name;
+    }
+
+    function loadDropdown(dropdownId, url) {
+        const dropdown = document.getElementById(dropdownId);
+        dropdown.innerHTML = '';
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    console.log('Adding item:', item);
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    dropdown.add(option);
+                });
+            })
+            .catch(error => console.error('Error loading dropdown:', error));
+    }
+
+    function checkBarcode(inputField) {
+        const barcode = document.getElementById(inputField).value.toUpperCase();
+
+        fetch('api/borrow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ barcode })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            if (data.message === "Product found") {
+                console.log("Product found")
+                showStep4(data.barcode, data.name);
+            } else {
+                showStep3(data.barcode);
+                currentBarcode = '';
+            }
+            document.getElementById(inputField).value = "";
+            currentBarcode = '';
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function enableContinue(button, inputField) {
+        const inputValue = document.getElementById(inputField).value.trim();
+        const continueButton = document.getElementById(button);
+
+        if (inputValue) {
+          continueButton.disabled = false;
+        } else {
+          continueButton.disabled = true;
+        }
+    }
+
+    // function isValidURL(url) {
+    //     var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+    //         '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+    //         '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+    //         '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+    //         '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+    //         '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+
+    //     return !!pattern.test(url);
+    // }
+
+    function addProduct() {
+        const form = document.querySelector('form');
+        const formData = new FormData(form);
+
+        fetch('api/add-product', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            if (data) {
+                window.location.href = '/admin-inventory';
+            }
+        })
+    }
+
+
+    function updateProduct() {
+        const quantityToAdd = document.getElementById('quantityToAdd').value;
+        const quantityUnavailableToAdd = document.getElementById('quantityUnavailableToAdd').value;
+
+        fetch('api/update-product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                barcode: document.getElementById('barcodeStep4').innerText,
+                quantity: quantityToAdd,
+                quantity_unavailable: quantityUnavailableToAdd
+            })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            if (data) {
+                window.location.href = '/admin-inventory';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Populate dropdowns
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDropdown('categoryDropdown', '/api/category/dropdown');
+        loadDropdown('vendorDropdown', '/api/vendor/dropdown');
+        loadDropdown('manufacturerDropdown', '/api/manufacturer/dropdown');
+    });
+
+    // Add event listener to price field to format input
+    document.getElementById('price').addEventListener('blur', function(event) {
+        let inputValue = event.target.value;
+
+        // Remove non-numeric characters and multiple decimal points
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+        inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+        // If the input ends with a decimal point followed by no digits, append '.00'
+        if (inputValue.endsWith('.')) {
+            inputValue += '00';
+        } else if (!inputValue.includes('.')) {
+            // If the input has no decimal point, append '.00'
+            inputValue += '.00';
+        }
+
+        event.target.value = inputValue;
+    });
+
+    document.getElementById('price').addEventListener('input', function(event) {
+        let inputValue = event.target.value;
+
+        // Remove non-numeric characters and multiple decimal points
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+        inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+        // Allow only 2 digits after the decimal point
+        const decimalIndex = inputValue.indexOf('.');
+        if (decimalIndex !== -1) {
+            const decimalPart = inputValue.substring(decimalIndex + 1);
+            if (decimalPart.length > 2) {
+                inputValue = inputValue.substring(0, decimalIndex + 3);
+            }
+        }
+
+        event.target.value = inputValue;
+    });
+
+    // Add event listener to quantity fields to allow only numbers
+    document.getElementById('quantity').addEventListener('input', function(event) {
+        const inputValue = event.target.value;
+        event.target.value = inputValue.replace(/\D/g, '');
+    });
+
+    document.getElementById('quantityToAdd').addEventListener('input', function(event) {
+        const inputValue = event.target.value;
+        event.target.value = inputValue.replace(/\D/g, '');
+    });
+
+    // Add event listener to allow quantity unavailable to only be less than or equal to quantity
+    document.getElementById('quantity_unavailable').addEventListener('input', function(event) {
+        const maxQuantity = parseInt(document.getElementById('quantity').value);
+        let inputValue = event.target.value;
+        if (isNaN(maxQuantity)) {
+            maxQuantity = 0;
+        }
+        inputValue = inputValue.replace(/\D/g, '');
+        event.target.value = Math.min(parseInt(inputValue), maxQuantity);
+    });
+
+    document.getElementById('quantityUnavailableToAdd').addEventListener('input', function(event) {
+        const maxQuantity = parseInt(document.getElementById('quantityToAdd').value);
+        let inputValue = event.target.value;
+        if (isNaN(maxQuantity)) {
+            maxQuantity = 0;
+        }
+        inputValue = inputValue.replace(/\D/g, '');
+        event.target.value = Math.min(parseInt(inputValue), maxQuantity);
+    });
+
+    // Send form on submit
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        addProduct();
+    });
+
+
+</script>
+{% endblock javascripts %}

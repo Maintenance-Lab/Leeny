@@ -15,112 +15,57 @@
                     <div class="col-12 col-lg-8 mx-auto mt-4 mb-sm-5 mb-3">
                         <div class="multisteps-form__progress">
                             <button class="multisteps-form__progress-btn js-active" type="button" title="Product Info">
-                                <span>1. Product Info</span>
+                                <span>1. Find Item</span>
                             </button>
-                            <button class="multisteps-form__progress-btn" type="button" title="Media">2. Media</button>
-                            <button class="multisteps-form__progress-btn" type="button" title="Socials">3.
-                                Socials</button>
-                            <button class="multisteps-form__progress-btn" type="button" title="Pricing">4.
-                                Pricing</button>
+                            <button class="multisteps-form__progress-btn" type="button" title="Socials">2. Details</button>
+                            <button class="multisteps-form__progress-btn" type="button" title="Pricing">3. Confirm</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-12 col-lg-8 m-auto">
+                <div class="row d-flex justify-content-center">
+                    <div class="col-12 col-lg-8">
                         <form class="multisteps-form__form mb-8">
 
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active"
                                 data-animation="FadeIn">
-                                <h5 class="font-weight-bolder">Product Information</h5>
+                                <h5 class="font-weight-bolder">Search item</h5>
                                 <div class="multisteps-form__content">
                                     <div class="row mt-3">
-                                        <div class="col-12 col-sm-6">
-                                            <label>Name</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="eg. Off-White" />
-                                        </div>
-                                        <div class="col-12 col-sm-6 mt-3 mt-sm-0">
-                                            <label>Weight</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="eg. 42" />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <label class="mt-4">Description</label>
-                                            <p class="form-text text-muted text-xs ms-1 d-inline">
-                                                (optional)
-                                            </p>
-                                            <div id="edit-deschiption" class="h-50">
-                                                <p>Some initial <strong>bold</strong> text</p>
+                                        <div class="col-12">
+                                            <input type="text" class="input form-control" placeholder="Search previously ordered items..." name="q" hx-get="/inventory/search/small" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
+                                            <div class="table-responsive p-0">
+                                                <table class="table align-items-center mb-0">
+                                                    <tbody id="results">
+
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
-                                        <div class="col-sm-6 mt-sm-0 mt-4">
-                                            <label class="mt-4">Category</label>
-                                            <select class="form-control" name="choices-category" id="choices-category">
-                                                <option value="Choice 1" selected>Clothing</option>
-                                                <option value="Choice 2">Real Estate</option>
-                                                <option value="Choice 3">Electronics</option>
-                                                <option value="Choice 4">Furniture</option>
-                                                <option value="Choice 5">Others</option>
-                                            </select>
-                                            <label>Sizes</label>
-                                            <select class="form-control" name="choices-sizes" id="choices-sizes">
-                                                <option value="Choice 1" selected>Medium</option>
-                                                <option value="Choice 2">Small</option>
-                                                <option value="Choice 3">Large</option>
-                                                <option value="Choice 4">Extra Large</option>
-                                                <option value="Choice 5">Extra Small</option>
-                                            </select>
-                                        </div>
                                     </div>
-                                    <div class="button-row d-flex mt-4">
-                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button"
-                                            title="Next">Next</button>
+                                    <div class="d-flex justify-content-end align-items-center text-center gap-3 mt-4">
+                                        <p class="m-0">Can't find what you need?</p>
+                                        <a class="btn bg-gradient-dark mb-0" href="/orders/new/unknown" type="button">Add item manually</a>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white"
-                                data-animation="FadeIn">
-                                <h5 class="font-weight-bolder">Media</h5>
-                                <div class="multisteps-form__content">
-                                    <div class="row mt-3">
-                                        <div class="col-12">
-                                            <label>Product images</label>
-                                            <div action="/file-upload" class="form-control dropzone" id="productImg">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="button-row d-flex mt-4">
-                                        <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button"
-                                            title="Prev">Prev</button>
-                                        <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button"
-                                            title="Next">Next</button>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white"
                                 data-animation="FadeIn">
-                                <h5 class="font-weight-bolder">Socials</h5>
+                                <h5 class="font-weight-bolder">Add details</h5>
+                                <div id="rowDataDisplay" class="d-flex gap-3 align-items-center"></div>
                                 <div class="multisteps-form__content">
                                     <div class="row mt-3">
                                         <div class="col-12">
-                                            <label>Shoppify Handle</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="@soft" />
+                                            <label>Quantity</label>
+                                            <input id="quantity" class="multisteps-form__input form-control" type="number"
+                                                placeholder="#" value="1" />
                                         </div>
                                         <div class="col-12 mt-3">
-                                            <label>Facebook Account</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="https://..." />
-                                        </div>
-                                        <div class="col-12 mt-3">
-                                            <label>Instagram Account</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="https://..." />
+                                            <label>Reason for this order:</label>
+                                            <input id="reason" class="multisteps-form__input form-control" type="text"
+                                                placeholder="e.g. 'Not in stock'" />
                                         </div>
                                     </div>
                                     <div class="row">
@@ -134,49 +79,28 @@
                                 </div>
                             </div>
 
-                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white h-100"
-                                data-animation="FadeIn">
-                                <h5 class="font-weight-bolder">Pricing</h5>
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">Confirm</h5>
                                 <div class="multisteps-form__content mt-3">
                                     <div class="row">
-                                        <div class="col-3">
-                                            <label>Price</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="99.00" />
-                                        </div>
-                                        <div class="col-4">
-                                            <label>Currency</label>
-                                            <select class="form-control" name="choices-sizes" id="choices-currency">
-                                                <option value="Choice 1" selected>USD</option>
-                                                <option value="Choice 2">EUR</option>
-                                                <option value="Choice 3">GBP</option>
-                                                <option value="Choice 4">CNY</option>
-                                                <option value="Choice 5">INR</option>
-                                                <option value="Choice 6">BTC</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-5">
-                                            <label>SKU</label>
-                                            <input class="multisteps-form__input form-control" type="text"
-                                                placeholder="71283476591" />
-                                        </div>
+                                        <div class="col-3">Item:</div>
+                                        <div class="col-9" id="confirmedItem"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Quantity:</div>
+                                        <div class="col-9" id="confirmedQuantity"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Reason for this order:</div>
+                                        <div class="col-9" id="confirmedReason"></div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-12">
-                                            <label class="mt-4 form-label">Tags</label>
-                                            <select class="form-control" name="choices-tags" id="choices-tags" multiple>
-                                                <option value="Choice 1" selected>In Stock</option>
-                                                <option value="Choice 2">Out of Stock</option>
-                                                <option value="Choice 3">Sale</option>
-                                                <option value="Choice 4">Black Friday</option>
-                                            </select>
+                                        <div class="button-row d-flex mt-4 col-12">
+                                            <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button"
+                                                title="Prev">Prev</button>
+                                            <button class="btn bg-gradient-dark ms-auto mb-0" id="submit" type="button"
+                                            title="Next">Confirm</button>
                                         </div>
-                                    </div>
-                                    <div class="button-row d-flex mt-4">
-                                        <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button"
-                                            title="Prev">Prev</button>
-                                        <button class="btn bg-gradient-dark ms-auto mb-0" type="button"
-                                            title="Send">Send</button>
                                     </div>
                                 </div>
                             </div>
@@ -193,5 +117,179 @@
 {% endblock content %}
 
 <!-- Specific JS goes HERE --> 
-{% block javascripts %}{% endblock %}
-<script src="https://demos.creative-tim.com/soft-ui-dashboard-pro/assets/js/plugins/multistep-form.js"></script>
+{% block javascripts %}
+<script>
+    const DOMstrings = {
+    stepsBtnClass: 'multisteps-form__progress-btn',
+    stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
+    stepsBar: document.querySelector('.multisteps-form__progress'),
+    stepsForm: document.querySelector('.multisteps-form__form'),
+    stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
+    stepFormPanelClass: 'multisteps-form__panel',
+    stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
+    stepPrevBtnClass: 'js-btn-prev',
+    stepNextBtnClass: 'js-btn-next'
+};
+const removeClasses = (elemSet,className)=>{
+    elemSet.forEach(elem=>{
+        elem.classList.remove(className);
+    }
+    );
+}
+;
+const findParent = (elem,parentClass)=>{
+    let currentNode = elem;
+    while (!currentNode.classList.contains(parentClass)) {
+        currentNode = currentNode.parentNode;
+    }
+    return currentNode;
+}
+;
+const getActiveStep = elem=>{
+    return Array.from(DOMstrings.stepsBtns).indexOf(elem);
+}
+;
+const setActiveStep = activeStepNum=>{
+    removeClasses(DOMstrings.stepsBtns, 'js-active');
+    DOMstrings.stepsBtns.forEach((elem,index)=>{
+        if (index <= activeStepNum) {
+            elem.classList.add('js-active');
+        }
+    }
+    );
+}
+;
+const getActivePanel = ()=>{
+    let activePanel;
+    DOMstrings.stepFormPanels.forEach(elem=>{
+        if (elem.classList.contains('js-active')) {
+            activePanel = elem;
+        }
+    }
+    );
+    return activePanel;
+}
+;
+const setActivePanel = activePanelNum=>{
+    removeClasses(DOMstrings.stepFormPanels, 'js-active');
+    DOMstrings.stepFormPanels.forEach((elem,index)=>{
+        if (index === activePanelNum) {
+            elem.classList.add('js-active');
+            setFormHeight(elem);
+        }
+    }
+    );
+}
+;
+const formHeight = activePanel=>{
+    const activePanelHeight = activePanel.offsetHeight;
+    // DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;
+    DOMstrings.stepsForm.style.height = `50vh`;
+}
+;
+const setFormHeight = ()=>{
+    const activePanel = getActivePanel();
+    formHeight(activePanel);
+}
+;
+DOMstrings.stepsBar.addEventListener('click', e=>{
+    const eventTarget = e.target;
+    if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+        return;
+    }
+    const activeStep = getActiveStep(eventTarget);
+    setActiveStep(activeStep);
+    setActivePanel(activeStep);
+}
+);
+DOMstrings.stepsForm.addEventListener('click', e=>{
+    const eventTarget = e.target;
+    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
+        return;
+    }
+    const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);
+    let activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
+    if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+        activePanelNum--;
+    } else {
+        activePanelNum++;
+    }
+    setActiveStep(activePanelNum);
+    setActivePanel(activePanelNum);
+
+    // Populate Confirm step
+    // Get the input fields from the previous steps
+    const itemInput = document.getElementById('item');
+    const quantityInput = document.getElementById('quantity');
+    const reasonInput = document.getElementById('reason');
+
+    // Get the elements to populate in the "Confirm" step
+    const confirmedItemElement = document.getElementById('confirmedItem');
+    const confirmedQuantityElement = document.getElementById('confirmedQuantity');
+    const confirmedReasonElement = document.getElementById('confirmedReason');
+
+    // Function to populate data in the "Confirm" step
+    const populateConfirmStep = () => {
+        // Get the values from the input fields/text
+        const item = itemInput.innerHTML;
+        const quantity = quantityInput.value;
+        const reason = reasonInput.value;
+
+        // Populate the elements in the "Confirm" step
+        confirmedItemElement.textContent = item;
+        confirmedQuantityElement.textContent = quantity;
+        confirmedReasonElement.textContent = reason;
+    };
+
+    // Call the function to populate data in the "Confirm" step
+populateConfirmStep();
+}
+);
+window.addEventListener('load', setFormHeight, false);
+window.addEventListener('resize', setFormHeight, false);
+
+// Function to handle submission when the "Next" button is clicked
+const handleSubmit = () => {
+    // Get the data from the rows
+    const item = document.getElementById('item').textContent.trim();
+    const quantity = document.getElementById('quantity').value;
+    const reason = document.getElementById('reason').value;
+
+    // Example: Send the data to the server (replace with your actual submission logic)
+    const formData = {
+        item: item,
+        quantity: quantity,
+        reason: reason
+    };
+    // Send formData to the server using fetch
+    fetch(`${window.location.origin}/api/orders/add_to_cart`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (!response.ok) {
+
+            throw new Error('Network response was not ok');
+        }
+        if (response.ok) {
+            // Redirect the user back upon successful response
+            window.location.href = '/orders/new'; 
+        }
+        return response.json();
+    })
+    .catch(error => {
+        // Handle error
+        console.error('Error:', error);
+    });
+};
+
+// Attach event listener to the "Next" button
+const submitButton = document.querySelector('#submit');
+submitButton.addEventListener('click', handleSubmit);
+
+</script>
+
+{% endblock %}

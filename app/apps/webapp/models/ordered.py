@@ -13,15 +13,16 @@ class Ordered(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id'))
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendor.id'))
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('productCategory.id'))
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
-    
+
 
     # Properties
     title = db.Column(db.String(255), nullable=False)
+    reason = db.Column(db.String(255))
     quantity = db.Column(db.Integer, nullable=False, default=1)
     url = db.Column(db.String(255))
-    price_when_bought = db.Column(db.Float, nullable=False)
+    price_when_bought = db.Column(db.Float)
     status = db.Column(db.Integer, default=1)
 
 

@@ -13,10 +13,10 @@
       <div class="d-flex align-items-center justify-content-between">
         <h1>Inventory</h1>
         <div class="d-flex gap-3">
-          <a class="btn btn-dark m-0" href="/borrow">Borrow an item</a>     
           <div>
             <input type="text" class="input form-control" placeholder="Search..." name="q" hx-get="/inventory/search" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
           </div>
+          <a class="btn btn-dark m-0" href="/add-product">Add items</a>
         </div>
       </div>
       <div class="col-12">
@@ -26,9 +26,9 @@
               <table class="table align-items-center mb-0">
                 <thead>
                   <tr>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 w-30">Item</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 w-25">Manufacturer</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 w-10">Available Quantity</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Item</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Manufacturer</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
                     <th class="text-secondary opacity-7"></th>
                   </tr>
                 </thead>
@@ -40,10 +40,10 @@
           </div>
         </div>
       </div>
-    </div>  
+    </div>
   </div>
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
+<!-- Specific JS goes HERE -->
 {% block javascripts %}{% endblock javascripts %}

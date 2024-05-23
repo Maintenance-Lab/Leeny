@@ -1,0 +1,48 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Borrow {% endblock title %}
+{% block content %}
+
+<section class="min-vh-100">
+  <div class="container mt-7">
+    <div class="row justify-content-center">
+      <div class="col-xl-6 col-lg-8 col-md-10">
+        <div class="card z-index-0">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div style="text-align: left;">
+                  <label style="display: block;">Name borrower</label>
+                  <div class="mb-3">
+                    <p style="margin: 0;">{{ session.name }}</p>
+                  </div>
+
+                  <label style="display: block;">Project</label>
+                  <div class="mb-3">
+                    <p style="margin: 0;">{{ session.project }}</p>
+                  </div>
+
+                  <label style="display: block;">Return Date</label>
+                  <div class="mb-3">
+                    <p style="margin: 0;">{{ session.estimated_return_date }}</p>
+                  </div>
+
+                  <label style="display: block;">Items</label>
+                  <ul style="list-style-type: none; padding-left: 0;">
+                    {% for item, quantity in session.addedProducts.items() %}
+                    <li style="margin-bottom: 5px;">
+                      <span style="display: inline-block; width: 50px;">{{ quantity }}</span>
+                      <span>{{ item }}</span>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}

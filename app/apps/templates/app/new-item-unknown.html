@@ -1,0 +1,492 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} New item {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="multisteps-form">
+                <div class="row">
+                    <div class="col-12 col-lg-8 mx-auto mt-4 mb-sm-5 mb-3">
+                        <div class="multisteps-form__progress">
+                            <button class="multisteps-form__progress-btn js-active" type="button" title="Product Info">
+                                <span>1. Item information</span>
+                            </button>
+                            <button class="multisteps-form__progress-btn" type="button" title="Socials">2. Details</button>
+                            <button class="multisteps-form__progress-btn" type="button" title="Pricing">3. Confirm</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row d-flex justify-content-center">
+                    <div class="col-12 col-lg-8">
+                        <form class="multisteps-form__form mb-8">
+
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active"
+                                data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">Add Item details</h5>
+                                <div class="multisteps-form__content">
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <label>URL</label>
+                                            <input id="urlInput" type="text" class="input form-control" placeholder="Paste URL..." name="q" hx-get="/orders/googlesearch" hx-trigger="keyup changed delay:500ms" hx-target="#results">
+                                        </div>
+                                        <div id="results">
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end align-items-center text-center mt-4">
+                                        <p class="mb-0 mx-2" id="loadingerror"></p>
+                                        <button class="btn bg-gradient-dark mb-0 js-btn-next disabled" type="button">Next</button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white"
+                                data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">Add details</h5>
+                                <div id="rowDataDisplay" class="d-flex gap-3 align-items-center"></div>
+                                <div class="multisteps-form__content">
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <label>Item</label>
+                                            <input id="itemInput" class="multisteps-form__input form-control" type="text"
+                                                placeholder="e.g. 'Raspberry pi 4'" />
+                                        </div>
+                                    <div class="col-4">
+                                        <label>Category:</label>
+                                        <div id="categoryDropdown">
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <label>Manufacturer:</label>
+                                        <div id="manufacturerDropdown">
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <label>Vendor:</label>
+                                        <div id="vendorDropdown">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label>Reason for this order:</label>
+                                        <input id="reasonInput" class="multisteps-form__input form-control" type="text"
+                                            placeholder="e.g. 'Not in stock'" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label>Price</label>
+                                        <input id="priceInput" class="multisteps-form__input form-control" type="text"
+                                            placeholder="€39,95" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label>Quantity</label>
+                                        <input id="quantityInput" class="multisteps-form__input form-control" type="number"
+                                            placeholder="#" value="1" />
+                                    </div>
+
+
+
+
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="button-row d-flex mt-2 col-12">
+                                            <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button"
+                                                title="Prev">Prev</button>
+                                            <button class="btn bg-gradient-dark ms-auto mb-0 js-btn-next" type="button"
+                                                title="Next">Next</button>
+                                        </div>
+                                    </div>
+                                    <span hx-get="/category/dropdown" hx-trigger="load" hx-target="#categoryDropdown">
+                                    <span hx-get="/manufacturer/dropdown" hx-trigger="load" hx-target="#manufacturerDropdown">
+                                    <span hx-get="/vendor/dropdown" hx-trigger="load" hx-target="#vendorDropdown">
+                                </div>
+                            </div>
+
+                            <div class="card multisteps-form__panel p-3 border-radius-xl bg-white" data-animation="FadeIn">
+                                <h5 class="font-weight-bolder">Confirm</h5>
+                                <div class="multisteps-form__content mt-3">
+                                    <div class="row">
+                                        <div class="col-3">Item:</div>
+                                        <div class="col-9" id="confirmedItem"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">URL:</div>
+                                        <div class="col-9" id="confirmedUrl"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Price:</div>
+                                        <div class="col-9" id="confirmedPrice"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Category:</div>
+                                        <div class="col-9" id="confirmedCategory"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Manufacturer:</div>
+                                        <div class="col-9" id="confirmedManufacturer"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Vendor:</div>
+                                        <div class="col-9" id="confirmedVendor"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Quantity:</div>
+                                        <div class="col-9" id="confirmedQuantity"></div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-3">Reason for this order:</div>
+                                        <div class="col-9" id="confirmedReason"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="button-row d-flex mt-4 col-12">
+                                            <button class="btn bg-gradient-secondary mb-0 js-btn-prev" type="button"
+                                                title="Prev">Prev</button>
+                                            <button class="btn bg-gradient-dark ms-auto mb-0" id="submit" type="button"
+                                            title="Next">Confirm</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+<script>
+    const DOMstrings = {
+    stepsBtnClass: 'multisteps-form__progress-btn',
+    stepsBtns: document.querySelectorAll(`.multisteps-form__progress-btn`),
+    stepsBar: document.querySelector('.multisteps-form__progress'),
+    stepsForm: document.querySelector('.multisteps-form__form'),
+    stepsFormTextareas: document.querySelectorAll('.multisteps-form__textarea'),
+    stepFormPanelClass: 'multisteps-form__panel',
+    stepFormPanels: document.querySelectorAll('.multisteps-form__panel'),
+    stepPrevBtnClass: 'js-btn-prev',
+    stepNextBtnClass: 'js-btn-next'
+};
+const removeClasses = (elemSet,className)=>{
+    elemSet.forEach(elem=>{
+        elem.classList.remove(className);
+    }
+    );
+}
+;
+const findParent = (elem,parentClass)=>{
+    let currentNode = elem;
+    while (!currentNode.classList.contains(parentClass)) {
+        currentNode = currentNode.parentNode;
+    }
+    return currentNode;
+}
+;
+const getActiveStep = elem=>{
+    return Array.from(DOMstrings.stepsBtns).indexOf(elem);
+}
+;
+const setActiveStep = activeStepNum=>{
+    removeClasses(DOMstrings.stepsBtns, 'js-active');
+    DOMstrings.stepsBtns.forEach((elem,index)=>{
+        if (index <= activeStepNum) {
+            elem.classList.add('js-active');
+        }
+    }
+    );
+}
+;
+const getActivePanel = ()=>{
+    let activePanel;
+    DOMstrings.stepFormPanels.forEach(elem=>{
+        if (elem.classList.contains('js-active')) {
+            activePanel = elem;
+        }
+    }
+    );
+    return activePanel;
+}
+;
+const setActivePanel = activePanelNum=>{
+    removeClasses(DOMstrings.stepFormPanels, 'js-active');
+    DOMstrings.stepFormPanels.forEach((elem,index)=>{
+        if (index === activePanelNum) {
+            elem.classList.add('js-active');
+            setFormHeight(elem);
+        }
+    }
+    );
+}
+;
+const formHeight = activePanel=>{
+    const activePanelHeight = activePanel.offsetHeight;
+    // DOMstrings.stepsForm.style.height = `${activePanelHeight}px`;
+    DOMstrings.stepsForm.style.height = `50vh`;
+}
+;
+const setFormHeight = ()=>{
+    const activePanel = getActivePanel();
+    formHeight(activePanel);
+}
+;
+DOMstrings.stepsBar.addEventListener('click', e=>{
+    const eventTarget = e.target;
+    if (!eventTarget.classList.contains(`${DOMstrings.stepsBtnClass}`)) {
+        return;
+    }
+    const activeStep = getActiveStep(eventTarget);
+    setActiveStep(activeStep);
+    setActivePanel(activeStep);
+
+    if (activeStep == 2) {
+        // Get the values of previous steps
+        const itemInputValue = document.getElementById('itemInput').value;
+        const urlInputValue = document.getElementById('urlInput').value;
+        const priceInputValue = document.getElementById('priceInput').value;
+        const quantityInputValue = document.getElementById('quantityInput').value;
+        const categoryInputValue = document.getElementById('select2-category-select-container').textContent.trim();
+        const manufacturerInputValue = document.getElementById('select2-manufacturer-select-container').textContent.trim();
+        const vendorInputValue = document.getElementById('select2-vendor-select-container').textContent.trim();
+        const reasonInputValue = document.getElementById('reasonInput').value;
+
+        // Get the elements to populate in the "Confirm" step
+        const confirmedItemElement = document.getElementById('confirmedItem');
+        const confirmedUrlElement = document.getElementById('confirmedUrl');
+        const confirmedPriceElement = document.getElementById('confirmedPrice');
+        const confirmedQuantityElement = document.getElementById('confirmedQuantity');
+        const confirmedCategoryElement = document.getElementById('confirmedCategory');
+        const confirmedManufacturerElement = document.getElementById('confirmedManufacturer');
+        const confirmedVendorElement = document.getElementById('confirmedVendor');
+        const confirmedReasonElement = document.getElementById('confirmedReason');
+
+        confirmedItemElement.textContent = itemInputValue;
+        confirmedUrlElement.textContent = urlInputValue;
+        confirmedPriceElement.textContent = priceInputValue;
+        confirmedQuantityElement.textContent = quantityInputValue;
+        confirmedReasonElement.textContent = reasonInputValue;
+
+        // Manually check if category, manufacturer and vendor selected
+        if (categoryInputValue == "Select Category..."){
+            confirmedCategoryElement.textContent = "Please go back and select a category";
+        } else {
+            confirmedCategoryElement.textContent = categoryInputValue;
+        }
+        if (manufacturerInputValue == "Select Manufacturer...") {
+            confirmedManufacturerElement.textContent = "Please go back and select a manufacturer";
+        } else {
+            confirmedManufacturerElement.textContent = manufacturerInputValue;
+        }
+        if (vendorInputValue == "Select Vendor...") {
+            confirmedVendorElement.textContent = "Please go back and select a vendor";
+        } else {
+            confirmedVendorElement.textContent = vendorInputValue;
+        }
+    }
+}
+);
+DOMstrings.stepsForm.addEventListener('click', e=>{
+    const eventTarget = e.target;
+    if (!(eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`) || eventTarget.classList.contains(`${DOMstrings.stepNextBtnClass}`))) {
+        return;
+    }
+    const activePanel = findParent(eventTarget, `${DOMstrings.stepFormPanelClass}`);
+    let activePanelNum = Array.from(DOMstrings.stepFormPanels).indexOf(activePanel);
+    if (eventTarget.classList.contains(`${DOMstrings.stepPrevBtnClass}`)) {
+        activePanelNum--;
+    } else {
+        activePanelNum++;
+    }
+    setActiveStep(activePanelNum);
+    setActivePanel(activePanelNum);
+
+    if (activePanelNum == 1) {
+        // Get the elements to populate in the "Details" step
+        const itemInput = document.getElementById('itemInput');
+        const priceInput = document.getElementById('priceInput');
+        itemInput.value = document.getElementById('itemURL').textContent.trim();
+        priceInput.value = document.getElementById('priceURL').textContent.trim();
+    }
+
+    if (activePanelNum == 2) {
+        // Get the values of previous steps
+        const itemInputValue = document.getElementById('itemInput').value;
+        const priceInputValue = document.getElementById('priceInput').value;
+        const urlInputValue = document.getElementById('urlInput').value;
+        const quantityInputValue = document.getElementById('quantityInput').value;
+        const categoryInputValue = document.getElementById('select2-category-select-container').textContent.trim();
+        const manufacturerInputValue = document.getElementById('select2-manufacturer-select-container').textContent.trim();
+        const vendorInputValue = document.getElementById('select2-vendor-select-container').textContent.trim();
+        const reasonInputValue = document.getElementById('reasonInput').value;
+
+        // Get the elements to populate in the "Confirm" step
+        const confirmedItemElement = document.getElementById('confirmedItem');
+        const confirmedPriceElement = document.getElementById('confirmedPrice');
+        const confirmedUrlElement = document.getElementById('confirmedUrl');
+        const confirmedQuantityElement = document.getElementById('confirmedQuantity');
+        const confirmedCategoryElement = document.getElementById('confirmedCategory');
+        const confirmedManufacturerElement = document.getElementById('confirmedManufacturer');
+        const confirmedVendorElement = document.getElementById('confirmedVendor');
+        const confirmedReasonElement = document.getElementById('confirmedReason');
+
+        confirmedItemElement.textContent = itemInputValue;
+        confirmedPriceElement.textContent = priceInputValue;
+        confirmedUrlElement.textContent = urlInputValue;
+        confirmedQuantityElement.textContent = quantityInputValue;
+        confirmedReasonElement.textContent = reasonInputValue;
+
+        // Manually check if category, manufacturer and vendor selected
+        if (categoryInputValue == "Select Category..."){
+            confirmedCategoryElement.textContent = "Please go back and select a category";
+        } else {
+            confirmedCategoryElement.textContent = categoryInputValue;
+        }
+        if (manufacturerInputValue == "Select Manufacturer...") {
+            confirmedManufacturerElement.textContent = "Please go back and select a manufacturer";
+        } else {
+            confirmedManufacturerElement.textContent = manufacturerInputValue;
+        }
+        if (vendorInputValue == "Select Vendor...") {
+            confirmedVendorElement.textContent = "Please go back and select a vendor";
+        } else {
+            confirmedVendorElement.textContent = vendorInputValue;
+        }
+    }
+}
+);
+
+window.addEventListener('load', setFormHeight, false);
+window.addEventListener('resize', setFormHeight, false);
+
+// Function to handle submission when the "Next" button is clicked
+const handleSubmit = () => {
+    // Get the data from the rows
+    const item = document.getElementById('itemInput').value;
+    const price = document.getElementById('priceInput').value;
+    const url = document.getElementById('urlInput').value;
+    const quantity = document.getElementById('quantityInput').value;
+    const category = document.getElementById('select2-category-select-container').textContent.trim();
+    const manufacturer = document.getElementById('select2-manufacturer-select-container').textContent.trim();
+    const vendor = document.getElementById('select2-vendor-select-container').textContent.trim();
+    const reason = document.getElementById('reasonInput').value;
+
+    // Send the data to the server
+    const formData = {
+        item: item,
+        price: price,
+        url: url,
+        quantity: quantity,
+        category: category,
+        manufacturer: manufacturer,
+        vendor: vendor,
+        reason: reason
+    };
+    // Send formData to the server using fetch
+    fetch(`${window.location.origin}/api/orders/add_to_cart`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (!response.ok) {
+
+            throw new Error('Network response was not ok');
+        }
+        if (response.ok) {
+            // Redirect the user back upon successful response
+            window.location.href = '/orders/new';
+        }
+        return response.json();
+    })
+    .catch(error => {
+        // Handle error
+        console.error('Error:', error);
+    });
+};
+
+const submitButton = document.querySelector('#submit');
+submitButton.addEventListener('click', handleSubmit);
+
+
+// URL logic
+var inputField = document.querySelector('input[name="q"]');
+var loadingMessage = document.getElementById('results');
+var nextButton = document.querySelector('.js-btn-next');
+
+
+function isValidURL(url) {
+    var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!pattern.test(url);
+}
+
+document.addEventListener('htmx:afterSettle', function(event) {
+    if (event.detail.target.id === 'results') {
+        if (isValidURL(inputField.value)) {
+            nextButton.classList.remove('disabled');
+        } else {
+            nextButton.classList.add('disabled');
+        }
+        setTimeout(function() {
+            nextButton.classList.remove('disabled');
+        }, 5000);
+    }
+});
+
+document.addEventListener('htmx:beforeSend', function(event) {
+    if (event.detail.target.id === 'results') {
+
+        if (isValidURL(inputField.value)) {
+            setTimeout(function() {
+                nextButton.classList.remove('disabled');
+                var timeoutMessage = document.getElementById('loadingerror');
+                timeoutMessage.innerHTML = "This is taking longer than expected... Click Next to continue manually."
+            }, 5000);
+        }
+    }
+});
+
+
+inputField.addEventListener('input', function() {
+    if (isValidURL(inputField.value)) {
+        loadingMessage.innerHTML = `
+        <div class="d-flex w-100 justify-content-center">
+        <svg width="100px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle fill="#67748E" stroke="#67748E" stroke-width="15" r="15" cx="40" cy="100"><animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate></circle><circle fill="#67748E" stroke="#67748E" stroke-width="15" r="15" cx="100" cy="100"><animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate></circle><circle fill="#67748E" stroke="#67748E" stroke-width="15" r="15" cx="160" cy="100"><animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;" keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate></circle></svg>
+        </div>`;
+    } else {
+        loadingMessage.innerHTML = ""
+    };
+
+});
+
+</script>
+
+<!-- Styles -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+{% endblock %}

@@ -216,7 +216,31 @@ def admin_inventory():
 @blueprint.route('/add-product')
 # @login_required
 def admin_add_product():
-    return render_template('app/add-product.html', segment='add-product')
+    form = AddProductForm()
+    return render_template('app/add-product.html', segment='add-product', form=form)
+
+@blueprint.route('/dropdown/manufacturer')
+def dropdown_manufacturer():
+    all_objects = Manufacturer.query.all()
+    data = [{'id': obj.id, 'name': obj.manufacturer_name} for obj in all_objects]
+    return jsonify(data)
+
+@blueprint.route('/dropdown/category')
+def dropdown_category():
+    all_objects = ProductCategory.query.all()
+    data = [{'id': obj.id, 'name': obj.category_name} for obj in all_objects]
+    return jsonify(data)
+
+@blueprint.route('/dropdown/vendor')
+def dropdown_vendor():
+    all_objects = Vendor.query.all()
+    data = [{'id': obj.id, 'name': obj.vendor_name} for obj in all_objects]
+    return jsonify(data)
+
+
+
+
+
 
 @blueprint.route('/edit-product/<int:id>')
 # @login_required
@@ -350,7 +374,7 @@ def confirm_order():
 
     if 'cart' not in session:
         return redirect(url_for("webapp_blueprint.new_order"))
-    
+
     if request.method == 'POST':
         if 'confirm' in request.form:
             # Make new order in database
@@ -380,7 +404,7 @@ def confirm_order():
                         vendor_id = item_query['vendor_id'],
                         category_id = item_query['category_id']
                         )
-                    
+
                     db.session.add(new_ordered_item)
                     db.session.commit()
                 else:
@@ -396,7 +420,7 @@ def confirm_order():
                     if not category:
                         category = ProductCategory(category_name=category_name)
                         db.session.add(category)
-                    
+
                     vendor_name = item['vendor']
                     vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
                     if not vendor:
@@ -404,7 +428,7 @@ def confirm_order():
                         db.session.add(vendor)
 
                     db.session.commit()
-                    
+
                     vendor_id = vendor.id
                     manufacturer_id = manufacturer.id
                     category_id = category.id
@@ -414,7 +438,7 @@ def confirm_order():
                         price = float(item['price'].replace(',', '.'))
                     except:
                         price = 0
-                    
+
 
                     new_ordered_item = Ordered(
                         order_id = current_order_id,
@@ -439,7 +463,7 @@ def confirm_order():
             return redirect(url_for("webapp_blueprint.orders"))
         if 'back' in request.form:
             return redirect(url_for("webapp_blueprint.new_order"))
-    
+
     return render_template('app/order-confirm.html', data=session['cart'], segment='orders', form=form)
 
 @blueprint.route('/orders/new/remove/<int:id>', methods=["GET", "POST"])
@@ -544,7 +568,7 @@ def inventory_search_small():
     .limit(4)
 
     data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
-    
+
     print(data)
     return render_template('app/htmx-results/inventory-results-small.html', data=data)
 
@@ -694,4 +718,4 @@ def get_user():
         return f'<p class="mb-0">{user}</p>'
     except:
         return ""
-                  
+

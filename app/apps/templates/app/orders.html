@@ -65,6 +65,61 @@ div.dt-container {
       height: 57px;
 }
 
+.toggleContainer {
+   position: relative;
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   width: fit-content;
+   border: 3px solid #344767;
+   border-radius: 20px;
+   background: #344767;
+   font-weight: bold;
+   color: #343434;
+   cursor: pointer;
+   align-self: center;
+   align-items:center;
+ }
+ .toggleContainer::before {
+   content: '';
+   position: absolute;
+   width: 50%;
+   height: 100%;
+   left: 0%;
+   border-radius:20px;
+   background: white;
+   transition: all 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer::before {
+    left: 50%;
+ }
+ .toggleContainer div {
+   padding: 6px;
+   text-align: center;
+   z-index: 1;
+ }
+ .toggleCheckbox {
+   display: none;
+ }
+
+ label, .form-label {
+  margin:0px !important; 
+ }
+ .toggleCheckbox:checked + .toggleContainer div:first-child{
+   color: white;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer div:last-child{
+   color: #344767;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:first-child{
+   color: #344767;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:last-child{
+   color: white;
+   transition: color 0.3s;
+ }
 </style>
 
 
@@ -75,11 +130,15 @@ div.dt-container {
     <div class="row">
         <div class="d-flex align-items-center justify-content-between">
             <h1>Orders</h1>
-            <div class="d-flex gap-3 mx-10">
-              <div class="d-flex gap-2 " data-toggle="buttons">
-                <button class="btn btn-dark mb-0" hx-get="/orders/load/1" hx-trigger="click" hx-target="#results">My orders</button>
-                <button class="btn btn-light mb-0 active" hx-get="/orders/load/0" hx-trigger="click" hx-target="#results">All</button>
-              </div>
+            <div class="d-flex gap-3 mx-10 align-items-center">
+              <div>
+                <input type="checkbox" id="toggle" class="toggleCheckbox"/>
+                <label for="toggle" class="toggleContainer">  
+                <div>All</div>
+                <div>My orders</div> 
+              </label> 
+            </div>
+
               <a class="btn btn-dark m-0" href="/orders/new">Start an order</a>
               <span hx-get="/orders/load/0" hx-trigger="load" hx-target="#results">
             </div>
@@ -123,4 +182,14 @@ div.dt-container {
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
+<script src="https://unpkg.com/htmx.org@1.6.1"></script>
+<script>
+  document.getElementById('toggle').addEventListener('change', function() {
+    var url = this.checked ? '/orders/load/1  ' : '/orders/load/0';
+    htmx.ajax('GET', url, { target: '#results' });
+  });
+
+  // Initial load
+  htmx.ajax('GET', '/orders/load/0', { target: '#results' });
+</script>
 {% endblock %}

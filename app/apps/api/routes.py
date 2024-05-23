@@ -64,38 +64,50 @@ class changeCardUID(Resource):
                 'success': False
             }
 
+
         return output, 200
 
 
-@api.route('/authenticate_admin', methods=['POST'])
+@api.route('/authenticate_admin', methods=['GET', 'POST'])
 class AuthenticateAdmin(Resource):
     def post(self):
         data = request.get_json()
-        uid = data['uid']
 
-        try:
-            user = Users.query.filter_by(uid_1=uid).first()
-        except Exception as e1:
-            print('Error when card scanning:', e1)
-        if user is None:
+        if data['uid']:
+            uid = data['uid']
             try:
-                user = Users.query.filter_by(uid_2=uid).first()
-            except Exception as e2:
-                print('Error when card scanning:', e2)
-        if user is None:
-            try:
-                user = Users.query.filter_by(uid_3=uid).first()
-            except Exception as e3:
-                print('Error when card scanning:', e3)
+                user = Users.query.filter_by(uid_1=uid).first()
+            except Exception as e1:
+                print('Error when card scanning:', e1)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_2=uid).first()
+                except Exception as e2:
+                    print('Error when card scanning:', e2)
+            if user is None:
+                try:
+                    user = Users.query.filter_by(uid_3=uid).first()
+                except Exception as e3:
+                    print('Error when card scanning:', e3)
 
-        if user:
-            print("User role: ", user.role)
-            if user.role == 'admin':
-                return {'authenticated': True, 'role': 'admin'}
-            else:
-                return {'authenticated': True, 'role': 'student'}
-        else:
-            return {'authenticated': False}
+            if user:
+                print("User role: ", user.role)
+                if user.role == 'admin':
+                    return {'authenticated': True, 'role': 'admin'}
+                else:
+                    return {'authenticated': True, 'role': 'student'}
+
+        return {'authenticated': False}
+
+    def get(self):
+        user_id = session['_user_id']
+
+        user = Users.query.filter_by(id=user_id).first()
+        if user.role == 'admin':
+            return {'authenticated': True, 'role': 'admin'}
+
+        return {'authenticated': False}
+
 
 
 @api.route('/borrow', methods=['POST'])
@@ -206,14 +218,17 @@ class Borrow2(Resource):
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
 
-        
+
         # Send email to users
         user_id = session['_user_id']
         user = Users.query.filter_by(id=user_id).first()
         email = user.email
 
-        html = render_template('app/email_overview.html')
-        send_email(email, "leeny test", html)
+        borrowed_date = datetime.today().strftime('%d-%m-%Y')
+        timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
+        html = render_template('app/email_borrow_overview.html', timestamp=timestamp, borrowed_date=borrowed_date)
+        send_email(email, "Borrow overview", html)
+
 
 
 @api.route('/return', methods=['POST'])
@@ -319,6 +334,15 @@ class ReturnConfirm(Resource):
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
 
+        # Send email to users
+        user_id = session['_user_id']
+        user = Users.query.filter_by(id=user_id).first()
+        email = user.email
+
+        returned_timestamp = datetime.today().strftime('%d-%m-%Y')
+        html = render_template('app/email_return_overview.html', returned_timestamp=returned_timestamp)
+        send_email(email, "Return overview", html)
+
 
 @api.route('/admin-login', methods=['POST'])
 class AdminLogin(Resource):
@@ -368,51 +392,42 @@ class GetOptions(Resource):
             'vendors': vendors
         }
 
+@api.route('/manufacturer/dropdown', methods=['GET'])
+class GetManufacturers(Resource):
+    def get(self):
+        manufacturers = Manufacturer.query.all()
+        data = [{'id': m.id, 'name': m.manufacturer_name} for m in manufacturers]
+        return jsonify(data)
+
+@api.route('/category/dropdown', methods=['GET'])
+class GetCategories(Resource):
+    def get(self):
+        categories = ProductCategory.query.all()
+        data = [{'id': c.id, 'name': c.category_name} for c in categories]
+        return jsonify(data)
+
+@api.route('/vendor/dropdown', methods=['GET'])
+class GetVendors(Resource):
+    def get(self):
+        vendors = Vendor.query.all()
+        data = [{'id': v.id, 'name': v.vendor_name} for v in vendors]
+        return jsonify(data)
 
 @api.route('/add-product', methods=['POST'])
 class AddProduct(Resource):
     def post(self):
-        data = request.get_json()
+        data = request.form.to_dict(flat=True)
 
-        # Convert price to float, replace comma with dot
-        url = data['url']
-        price = data['price']
-        if ',' in price:
-            price = price.replace(',', '.')
-        price = float(price)
-
-        # Fetch or create Manufacturer
-        manufacturer_name = data.get('manufacturer')
-        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
-        if not manufacturer:
-            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
-            db.session.add(manufacturer)
-
-        # Fetch or create ProductCategory
-        category_name = data.get('category')
-        category = ProductCategory.query.filter_by(category_name=category_name).first()
-        if not category:
-            category = ProductCategory(category_name=category_name)
-            db.session.add(category)
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(vendor_name=vendor_name, website=url)
-            db.session.add(vendor)
-
-        # Add to database
         product = Product(title=data['title'],
                             barcode=data['barcode'],
-                            price_when_bought=price,
+                            price_when_bought=data['price'],
                             description=data['description'],
-                            url=url,
+                            url=data['url'],
                             notes=data['notes'],
                             created_at_ts=datetime.now(),
-                            manufacturer=manufacturer,
-                            category=category,
-                            vendor=vendor,
+                            manufacturer_id=data['manufacturer'],
+                            category_id=data['category'],
+                            vendor_id=data['vendor'],
                             quantity_total=data['quantity'],
                             quantity_unavailable=data['quantity_unavailable'],
                             quantity_borrowed='0',
@@ -421,86 +436,57 @@ class AddProduct(Resource):
         db.session.add(product)
         db.session.commit()
 
+        return {
+            'success': True
+        }
 
 @api.route('/update-product', methods=['POST'])
 class UpdateProduct(Resource):
     def post(self):
         data = request.get_json()
+        barcode = data['barcode']
 
-        # Convert price to float, replace comma with dot
-        price = data['price']
-        if ',' in price:
-            price = price.replace(',', '.')
-        price = float(price)
-        url = data['url']
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(vendor_name=vendor_name, website=url)
-            db.session.add(vendor)
+        # Get product by barcode
+        product = Product.query.filter_by(barcode=barcode).first()
 
         # Update product
-        product = Product.query.filter_by(barcode=data['barcode']).first()
-        og_quantity = product.quantity_total
-        og_quantity_unavailable = product.quantity_unavailable
+        current_quantity = product.quantity_total
+        current_quantity_unavailable = product.quantity_unavailable
 
-        product.price_when_bought = price
-        product.url = data['url']
-        product.vendor = vendor
-        product.quantity_total = int(data['quantity']) + og_quantity
-        product.quantity_unavailable = int(data['quantity_unavailable']) + og_quantity_unavailable
+        product.quantity_total = int(data['quantity']) + current_quantity
+        product.quantity_unavailable = int(data['quantity_unavailable']) + current_quantity_unavailable
 
         db.session.commit()
 
+        return {
+            'success': True
+        }
 
 @api.route('/edit-product', methods=['GET', 'POST'])
 class EditProduct(Resource):
     def post(self):
+        # data = request.form.to_dict(flat=True)
         data = request.get_json()
-        print("ID VAN PRODUCT: ", data['product_id'])
+        print("DATA: ", data)
+        values = data['data']
 
-        # Retrieve or create IDs for manufacturer, category, and vendor
-        manufacturer_name = data['manufacturer']
-        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
-        if manufacturer is None:
-            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
-            db.session.add(manufacturer)
-            db.session.commit()
-        manufacturer_id = manufacturer.id
+        # Get product by id
+        product = Product.query.filter_by(id=data['id']).first()
 
-        category_name = data['category']
-        category = ProductCategory.query.filter_by(category_name=category_name).first()
-        if category is None:
-            category = ProductCategory(category_name=category_name)
-            db.session.add(category)
-            db.session.commit()
-        category_id = category.id
-
-        vendor_name = data['vendor']
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if vendor is None:
-            vendor = Vendor(vendor_name=vendor_name)
-            db.session.add(vendor)
-            db.session.commit()
-        vendor_id = vendor.id
+        product.title = values['title']
+        product.barcode = values['barcode']
+        product.price_when_bought = values['price']
+        product.description = values['description']
+        product.url = values['url']
+        product.notes = values['notes']
+        product.quantity_total = values['quantity']
+        product.quantity_unavailable = values['quantity_unavailable']
+        product.manufacturer_id = values['manufacturer']
+        product.category_id = values['category']
+        product.vendor_id = values['vendor']
 
 
-        # Change values in database
-        product = Product.query.filter_by(barcode=data['barcode']).first()
-        product.title = data['title']
-        product.barcode = data['barcode']
-        product.price_when_bought = data['price']
-        product.description = data['description']
-        product.url = data['url']
-        product.notes = data['notes']
-        product.quantity_total = data['quantity']
-        product.quantity_unavailable = data['quantity_unavailable']
-        product.manufacturer_id = manufacturer_id
-        product.category_id = category_id
-        product.vendor_id = vendor_id
-
+        print("Updaten ----------------------------------------------")
         # Commit to database
         db.session.commit()
 
@@ -529,148 +515,6 @@ class GetOptions(Resource):
             'categories': categories,
             'vendors': vendors
         }
-
-
-@api.route('/add-product', methods=['POST'])
-class AddProduct(Resource):
-    def post(self):
-        data = request.get_json()
-
-        # Convert price to float, replace comma with dot
-        url = data['url']
-        price = data['price']
-        if ',' in price:
-            price = price.replace(',', '.')
-        price = float(price)
-
-        # Fetch or create Manufacturer
-        manufacturer_name = data.get('manufacturer')
-        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
-        if not manufacturer:
-            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
-            db.session.add(manufacturer)
-
-        # Fetch or create ProductCategory
-        category_name = data.get('category')
-        category = ProductCategory.query.filter_by(category_name=category_name).first()
-        if not category:
-            category = ProductCategory(category_name=category_name)
-            db.session.add(category)
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(vendor_name=vendor_name, website=url)
-            db.session.add(vendor)
-
-        # Add to database
-        product = Product(title=data['title'],
-                            barcode=data['barcode'],
-                            price_when_bought=price,
-                            description=data['description'],
-                            url=url,
-                            notes=data['notes'],
-                            created_at_ts=datetime.now(),
-                            manufacturer=manufacturer,
-                            category=category,
-                            vendor=vendor,
-                            quantity_total=data['quantity'],
-                            quantity_unavailable=data['quantity_unavailable'],
-                            quantity_borrowed='0',
-                            )
-
-        db.session.add(product)
-        db.session.commit()
-
-
-@api.route('/update-product', methods=['POST'])
-class UpdateProduct(Resource):
-    def post(self):
-        data = request.get_json()
-
-        # Convert price to float, replace comma with dot
-        price = data['price']
-        if ',' in price:
-            price = price.replace(',', '.')
-        price = float(price)
-        url = data['url']
-
-        # Fetch or create Vendor
-        vendor_name = data.get('vendor')
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if not vendor:
-            vendor = Vendor(vendor_name=vendor_name, website=url)
-            db.session.add(vendor)
-
-        # Update product
-        product = Product.query.filter_by(barcode=data['barcode']).first()
-        og_quantity = product.quantity_total
-        og_quantity_unavailable = product.quantity_unavailable
-
-        product.price_when_bought = price
-        product.url = data['url']
-        product.vendor = vendor
-        product.quantity_total = int(data['quantity']) + og_quantity
-        product.quantity_unavailable = int(data['quantity_unavailable']) + og_quantity_unavailable
-
-        db.session.commit()
-
-
-@api.route('/edit-product', methods=['GET', 'POST'])
-class EditProduct(Resource):
-    def post(self):
-        data = request.get_json()
-        print("ID VAN PRODUCT: ", data['product_id'])
-
-        # Retrieve or create IDs for manufacturer, category, and vendor
-        manufacturer_name = data['manufacturer']
-        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
-        if manufacturer is None:
-            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
-            db.session.add(manufacturer)
-            db.session.commit()
-        manufacturer_id = manufacturer.id
-
-        category_name = data['category']
-        category = ProductCategory.query.filter_by(category_name=category_name).first()
-        if category is None:
-            category = ProductCategory(category_name=category_name)
-            db.session.add(category)
-            db.session.commit()
-        category_id = category.id
-
-        vendor_name = data['vendor']
-        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
-        if vendor is None:
-            vendor = Vendor(vendor_name=vendor_name)
-            db.session.add(vendor)
-            db.session.commit()
-        vendor_id = vendor.id
-
-
-        # Change values in database
-        product = Product.query.filter_by(barcode=data['barcode']).first()
-        product.title = data['title']
-        product.barcode = data['barcode']
-        product.price_when_bought = data['price']
-        product.description = data['description']
-        product.url = data['url']
-        product.notes = data['notes']
-        product.quantity_total = data['quantity']
-        product.quantity_unavailable = data['quantity_unavailable']
-        product.manufacturer_id = manufacturer_id
-        product.category_id = category_id
-        product.vendor_id = vendor_id
-
-        # Commit to database
-        db.session.commit()
-
-        return {
-            'message': f'Product updated',
-            'success': True
-        }, 200
-
 
 @api.route('/orders/add_to_cart', methods=['POST'])
 class AddToCart(Resource):

@@ -3,11 +3,14 @@
     <td style="padding-left: 24px;">
         <h6 class="mb-0 text-sm">{{item.title}}</h6>
     </td>
-    <td>
-        <p class="text-xs font-weight-bold mb-0">{{item.name}}</p>
+    <td class="ps-4">
+        {{item.manufacturer_name}}
     </td>
     <td class="align-middle text-center text-sm">
         {{item.quantity}}
+    </td>
+    <td class="align-middle text-center text-sm">
+        {{item.created_at_ts}} 
     </td>
     <td class="align-middle text-center text-sm">
         {{item.estimated_return_date}} 

@@ -64,7 +64,7 @@
 
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-4">
                                         <label>Manufacturer:</label>
                                         <div id="manufacturerDropdown">
@@ -93,10 +93,10 @@
                                             placeholder="#" value="1" />
                                     </div>
 
-                                        
 
-                                        
-                                        
+
+
+
                                     </div>
                                     <div class="row">
                                         <div class="button-row d-flex mt-2 col-12">
@@ -127,7 +127,7 @@
                                         <div class="col-3">Price:</div>
                                         <div class="col-9" id="confirmedPrice"></div>
                                     </div>
-                                    <div class="row mt-2">  
+                                    <div class="row mt-2">
                                         <div class="col-3">Category:</div>
                                         <div class="col-9" id="confirmedCategory"></div>
                                     </div>
@@ -169,7 +169,7 @@
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
+<!-- Specific JS goes HERE -->
 {% block javascripts %}
 <script>
     const DOMstrings = {
@@ -411,7 +411,7 @@ const handleSubmit = () => {
         }
         if (response.ok) {
             // Redirect the user back upon successful response
-            window.location.href = '/orders/new'; 
+            window.location.href = '/orders/new';
         }
         return response.json();
     })
@@ -467,7 +467,7 @@ document.addEventListener('htmx:beforeSend', function(event) {
     }
 });
 
-    
+
 inputField.addEventListener('input', function() {
     if (isValidURL(inputField.value)) {
         loadingMessage.innerHTML = `

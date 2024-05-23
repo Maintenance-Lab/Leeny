@@ -459,6 +459,32 @@ def card_reader():
                                form=login_form)
 
 
+@blueprint.route('/email_verification', methods=['GET', 'POST'])
+def email_verification():
+    login_form = EmailForm(request.form)
+    if request.method == 'GET':
+        session['email_code'] = random.randint(1000, 9999)
+        html = render_template("app/email_send.html", confirm_code=session['email_code'])
+        send_email("robinalmekinders@gmail.com", "leeny test", html)
+
+    if request.method == 'POST':
+        code_1 = request.form['code_1']
+        code_2 = request.form['code_2']
+        code_3 = request.form['code_3']
+        code_4 = request.form['code_4']
+
+        code = int(f'{code_1}{code_2}{code_3}{code_4}')
+
+        if code == session['email_code']:
+            flash({'category':'success', 'title': 'Person Verified!', 'text': 'Your profile was verified'}, 'General')
+            print(session)
+            return redirect(url_for('webapp_blueprint.borrow_confirm'))
+        return render_template('accounts/email_verification.html',
+                               msg='Invalid code',
+                               form=login_form)
+    return render_template('accounts/email_verification.html', form=login_form)
+
+
 @blueprint.route('/logout')
 def logout():
     logout_user()

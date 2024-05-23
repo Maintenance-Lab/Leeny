@@ -106,9 +106,13 @@ def post():
                 quantity = items[1]
 
                 if barcode != 'null':
-                    # get product name
-                    product = Product.query.filter_by(barcode=barcode).first()
-                    product_name = product.title
+                    try:
+                        # get product name
+                        product = Product.query.filter_by(barcode=barcode).first()
+                        product_name = product.title
+                    except AttributeError:
+                        product = Product.query.filter_by(id=barcode).first()
+                        product_name = product.title
 
                     addedProducts[product_name] = quantity
 
@@ -546,8 +550,22 @@ def inventory_search_small():
 
     data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
     
-    print(data)
     return render_template('app/htmx-results/inventory-results-small.html', data=data)
+
+@blueprint.route('/inventory/search/borrow')
+def inventory_search_borrow():
+    q = request.args.get("q")
+    select_columns = [Product.id, Product.title, Manufacturer.manufacturer_name, Product.quantity_borrowed, Product.quantity_total]
+
+    all_objects = Product.query \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
+    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+    .with_entities(*select_columns) \
+    .limit(4)
+
+    data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+    
+    return render_template('app/htmx-results/inventory-results-borrow.html', data=data)
 
 @blueprint.route('/inventory/borrowed')
 def inventory_borrowed():

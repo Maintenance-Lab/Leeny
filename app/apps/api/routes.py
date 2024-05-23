@@ -144,6 +144,23 @@ class Borrow(Resource):
             }
 
         return output, 200
+    
+@api.route('/borrow/add_to_cart', methods=['POST'])
+class borrow_add_to_cart(Resource):
+    def post(self):
+        data = request.get_json()
+        itemName = data['itemName']
+        product = Product.query.filter_by(title=itemName).first()
+        quantity = product.quantity_total - product.quantity_borrowed
+        data =[]
+        if 'borrow_cart' in session:
+            data = session['borrow_cart']
+
+        data.append({'title':product.title, 'id':product.id, 'quantity':quantity})
+        session['borrow_cart'] = data
+        return data, 200
+
+
 
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):

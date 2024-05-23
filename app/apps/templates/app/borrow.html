@@ -23,10 +23,13 @@
             <div class="card text-left">
                 <div class="table-responsive p-0 " style="max-height: 450px;">
                     <table class="table align-items-center mb-0 p-3">
-
-                    <tbody></tbody>
-
+                    <tbody>
+                    </tbody>
                     </table>
+                    <div class="text-center">
+                        <button class="btn btn-light w-50 mx-auto" id="no-barcode">No Barcode</button>
+                    </div>
+
                     <form method="POST">
                         <div class="text-center">
                             <input type="hidden" name="borrow_data" id="borrowData">
@@ -41,11 +44,10 @@
         </div>
     </div>
 
-
 {% endblock content %}
 
 {% block javascripts %}
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     function deleteRow(link) {
         // Find the closest row to the clicked link and delete
@@ -93,6 +95,7 @@
 
     function addTableRow(barcode, item_name, item_quantity, notFound) {
         // If item is scanned, enable continue button
+
         if (addedBarcodes != {}) {
             document.getElementById("continue").disabled = false;
         }
@@ -287,6 +290,107 @@
         // Submit the form
         document.getElementById("borrowForm").submit();
     });
+
+    
+    // Sweet alert
+
+    function openSearchModal() {
+    Swal.fire({
+        title: 'Search Items',
+        html: `
+            <div class="p-3">
+                <input id="search-input" type="text" class="input form-control" placeholder="Search items..." name="q" autocomplete="off">
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0">
+                        <tbody id="results">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `,
+        showCloseButton: true,
+        showCancelButton: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            const input = document.getElementById('search-input');
+            input.focus();
+
+            // Event listener to ensure focus is restored if lost
+            input.addEventListener('blur', () => {
+                setTimeout(() => input.focus(), 0);
+            });
+
+            $(document).ready(function() {
+        let debounceTimeout;
+
+        $('#search-input').on('keyup change', function() {
+            clearTimeout(debounceTimeout);
+            
+            debounceTimeout = setTimeout(() => {
+                var query = $(this).val();
+                $.ajax({
+                    url: '/inventory/search/borrow',
+                    type: 'GET',
+                    data: { q: query },
+                    success: function(response) {
+                        $('#results').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }, 250); // 250ms delay
+        });
+    });
+        },
+        willClose: () => {
+            const input = document.getElementById('search-input');
+            input.removeEventListener('blur', () => {
+                setTimeout(() => input.focus(), 0);
+            });
+        }
+    });
+};
+
+    document.getElementById('no-barcode').addEventListener('click', function() {
+        openSearchModal();
+        });
+
+        // Swal.fire({
+        // title: 'Search Items',
+        // html: `
+        //     <div class="p-3">
+        //         <input id="search-input" type="text" class="input form-control" placeholder="Search items..." name="q" hx-get="/inventory/search/borrow" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
+        //         <div class="table-responsive p-0">
+        //             <table class="table align-items-center mb-0">
+        //                 <tbody id="results">
+        //                 </tbody>
+        //             </table>
+        //         </div>
+        //     </div>
+        // `,
+        // showCloseButton: true,
+        // showCancelButton: false,
+        // showConfirmButton: false,
+        // didOpen: () => {
+        //     const input = document.getElementById('search-input');
+        //     input.focus();
+
+        //     // Event listener to ensure focus is restored if lost
+        //     input.addEventListener('blur', () => {
+        //         setTimeout(() => input.focus(), 0);
+        //     });
+
+        // },
+        // willClose: () => {
+        //     const input = document.getElementById('search-input');
+        //     input.removeEventListener('blur', () => {
+        //         setTimeout(() => input.focus(), 0);
+        //     });
+        // }
+        // });
+
+
 </script>
 
 {% endblock javascripts %}

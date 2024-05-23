@@ -79,7 +79,7 @@ def start():
                                    form=login_form)
 
     if current_user.is_authenticated:
-        return redirect(url_for('webapp_blueprint.index'))
+        return redirect(url_for('webapp_blueprint.start'))
     else:
         return render_template('app/start.html',
                                form=login_form)

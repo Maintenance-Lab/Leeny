@@ -11,84 +11,85 @@
         <div class="card-body px-4 pt-4 pb-2">
           <h1 class="text-center">Edit product in database</h1>
 
-          <div class="col-12">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group mb-3">
-                  <label for="product-name">Product Name</label>
-                  <input type="text" class="form-control" id="product-name" name="product_name" value="{{ product['data'][0].title }}" required>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="price-bought">Price</label>
-                  <div class="input-group">
-                    <span class="input-group-text">€</span>
-                    <input type="text" class="form-control" id="price-bought" name="price_bought" value="{{ product['data'][0].price_when_bought }}" step="0.01" required>
+          <!-- Step 3 -->
+          <form method="post" action="api/edit-product">
+              <div class="row">
+                <!-- First Column -->
+                <div class="col-md-4 text-center">
+                  <div class="form-group">
+                    <label for="title">Product Name</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ product['data'][0].title }}" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="barcode">Barcode</label>
+                    <input type="text" class="form-control" id="barcodeStep3" name="barcode" value="{{ product['data'][0].barcode }}" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="price">Price €</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="price" name="price" placeholder="50.00" value="{{ product['data'][0].price_when_bought }}" required>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea type="text" class="form-control" id="description" name="description" rows="3">{{ product['data'][0].description }}</textarea>
                   </div>
                 </div>
-                <div class="form-group mb-3">
-                  <label for="url-bought">Website URL</label>
-                  <input type="url" class="form-control" id="url-bought" name="url_bought" value="{{ product['data'][0].url }}" required>
+
+                <!-- Second Column -->
+                <div class="col-md-4 text-center">
+                  <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="{{ product['data'][0].quantity_total }}" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="quantity_unavailable">Quantity Unavailable For Borrowing</label>
+                    <input type="number" class="form-control" id="quantity_unavailable" name="quantity_unavailable" min="0" value="{{ product['data'][0].quantity_unavailable }}" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="url">Website URL</label>
+                    <input type="text" class="form-control" id="url" name="url" placeholder="www.example.com" value="{{ product['data'][0].url }}" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea type="text" class="form-control" id="notes" name="notes" rows="3">{{ product['data'][0].notes }}</textarea>
+                  </div>
                 </div>
-                <div class="form-group mb-3">
-                  <label for="category">Category</label>
-                  <input list="category-options" class="form-control" id="category" name="category" value="{{ product['data'][0].category_name }}" required>
-                  <datalist id="category-options">
-                    <!-- Options will be populated by JavaScript -->
-                  </datalist>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="description">Description</label>
-                  <textarea class="form-control" id="description" name="description" rows="3">{{ product['data'][0].description }}</textarea>
+
+                <!-- Third Column -->
+                <div class="col-md-4 text-center">
+                  <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="categoryDropdown" class="form-control" name="category" required></select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="vendor">Vendor</label>
+                    <select id="vendorDropdown" class="form-control" name="vendor" required></select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="manufacturer">Manufacturer</label>
+                    <select id="manufacturerDropdown" class="form-control" name="manufacturer" required></select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="document_url">Document URL</label>
+                    <input type="text" class="form-control" id="document_url" name="document_url" value="{{ product['data'][0].documentation}}">
+                  </div>
                 </div>
               </div>
 
-              <div class="col-md-4">
-                <div class="form-group mb-3">
-                  <label for="quantity">Quantity total</label>
-                  <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product['data'][0].quantity_total }}" onkeypress="allowNumbersOnly(event)" required>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="quantity-not-available">Quantity Not Available for Borrowing</label>
-                  <input type="number" class="form-control" id="quantity-not-available" name="quantity_not_available" value="{{ product['data'][0].quantity_unavailable }}" onkeypress="allowNumbersOnly(event)" required>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="manufacturer">Manufacturer</label>
-                  <input list="manufacturer-options" class="form-control" id="manufacturer" name="manufacturer" value="{{ product['data'][0].manufacturer_name }}" required>
-                  <datalist id="manufacturer-options">
-                    <!-- Options will be populated by JavaScript -->
-                  </datalist>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="vendor">Vendor</label>
-                  <input list="vendor-options" class="form-control" id="vendor" name="vendor" value="{{ product['data'][0].vendor_name }}" required>
-                  <datalist id="vendor-options">
-                    <!-- Options will be populated by JavaScript -->
-                  </datalist>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="notes">Notes</label>
-                  <textarea class="form-control" id="notes" name="notes" rows="3">{{ product['data'][0].notes }}</textarea>
-                </div>
-
+              <div class="col-12 text-center">
+                <button type="button" class="btn btn-dark mt-3 me-2" onclick="goBack()" style="width: 150px;">Back</button>
+                <button type="submit" class="btn btn-dark mt-3" style="width: 150px;">Edit Product</button>
               </div>
 
-              <div class="col-md-4">
-                <div class="form-group mb-3">
-                  <label for="barcode">Barcode</label>
-                  <input type="text" class="form-control" id="barcode" name="barcode" value="{{ product['data'][0].barcode }}" required>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="document">Document URL</label>
-                  <input type="url class="form-control" id="document" name="document">
-                </div>
-              </div>
-            </div>
+          </form>
 
-            <div class="col-12 text-center">
-              <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
-              <button type="submit" id="updateProductButton" class="btn btn-dark mt-3" style="width: 150px;">Update</button>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -99,62 +100,147 @@
 
 {% block javascripts %}
 <script>
-  document.getElementById("updateProductButton").addEventListener('click', function() {
-    console.log("Button clicked")
 
-    fetch (`${window.location.origin}/api/edit-product`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        product_id: "{{ product['data'][0].id }}",
-        title: document.getElementById("product-name").value,
-        price: document.getElementById("price-bought").value,
-        url: document.getElementById("url-bought").value,
-        barcode: document.getElementById("barcode").value,
-        category: document.getElementById("category").value,
-        description: document.getElementById("description").value,
-        quantity: document.getElementById("quantity").value,
-        quantity_unavailable: document.getElementById("quantity-not-available").value,
-        manufacturer: document.getElementById("manufacturer").value,
-        vendor: document.getElementById("vendor").value,
-        notes: document.getElementById("notes").value
+    function goBack() {
+      window.history.back();
+    }
+
+    function loadDropdown(dropdownId, url, selectedValue) {
+        const dropdown = document.getElementById(dropdownId);
+        dropdown.innerHTML = '';
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    if (item.name === selectedValue) {
+                        option.selected = true;
+                    }
+                    dropdown.add(option);
+                });
+            })
+            .catch(error => console.error('Error loading dropdown:', error));
+    }
+
+    function editProduct() {
+      const form = document.querySelector('form');
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      const product_id = "{{ product['data'][0].id }}";
+
+      fetch('/api/edit-product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: data,
+          id: product_id
+        })
+
       })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data);
-      if (data.success) {
-        window.location.href = "/admin-inventory";
-      }
-    })
-  });
-
-  document.addEventListener('DOMContentLoaded', populate);
-
-  function populate(){
-    fetch(`${window.location.origin}/api/get-options`)
       .then(response => response.json())
       .then(data => {
-        const { manufacturers, categories, vendors } = data;
+        if (data.success) {
+          Swal.fire({
+              title: "Product details successfully changed!",
+              html: "",
+              timer: 800,
+              timerProgressBar: true,
+              didOpen: () => {
+                  Swal.showLoading();
+                  const timer = Swal.getPopup().querySelector("c");
+                  timerInterval = setInterval(() => {
+                      timer.textContent = `${Swal.getTimerLeft()}`;
+                  }, 100);
+              },
+              willClose: () => {
+                  clearInterval(timerInterval);
+                }
+          })
+          .then(function (result) {
+              if (result.dismiss === Swal.DismissReason.timer) {
+                  goBack();
+              }
+          });
+        }
+      })
+    }
 
-        populateDatalist('manufacturer-options', manufacturers);
-        populateDatalist('category-options', categories);
-        populateDatalist('vendor-options', vendors);
-      });
-  }
+    // Populate dropdowns
+    document.addEventListener('DOMContentLoaded', function() {
+        const category = "{{ product['data'][0].category_name }}";
+        const vendor = "{{ product['data'][0].vendor_name }}";
+        const manufacturer = "{{ product['data'][0].manufacturer_name }}";
 
-  function populateDatalist(datalistId, options) {
-    const datalist = document.getElementById(datalistId);
-    datalist.innerHTML = '';
-    const uniqueOptions = Array.from(new Set(options));
-
-    uniqueOptions.forEach(option => {
-      const optionElement = document.createElement('option');
-      optionElement.value = option;
-      datalist.appendChild(optionElement);
+        loadDropdown('categoryDropdown', '/api/category/dropdown', category);
+        loadDropdown('vendorDropdown', '/api/vendor/dropdown', vendor);
+        loadDropdown('manufacturerDropdown', '/api/manufacturer/dropdown', manufacturer);
     });
-  }
+
+    // Add event listener to price field to format input
+    document.getElementById('price').addEventListener('blur', function(event) {
+        let inputValue = event.target.value;
+
+        // Remove non-numeric characters and multiple decimal points
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+        inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+        // If the input ends with a decimal point followed by no digits, append '.00'
+        if (inputValue.endsWith('.')) {
+            inputValue += '00';
+        } else if (!inputValue.includes('.')) {
+            // If the input has no decimal point, append '.00'
+            inputValue += '.00';
+        }
+
+        event.target.value = inputValue;
+    });
+
+    document.getElementById('price').addEventListener('input', function(event) {
+        let inputValue = event.target.value;
+
+        // Remove non-numeric characters and multiple decimal points
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+        inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+        // Allow only 2 digits after the decimal point
+        const decimalIndex = inputValue.indexOf('.');
+        if (decimalIndex !== -1) {
+            const decimalPart = inputValue.substring(decimalIndex + 1);
+            if (decimalPart.length > 2) {
+                inputValue = inputValue.substring(0, decimalIndex + 3);
+            }
+        }
+
+        event.target.value = inputValue;
+    });
+
+    // Add event listener to quantity fields to allow only numbers
+    document.getElementById('quantity').addEventListener('input', function(event) {
+        const inputValue = event.target.value;
+        event.target.value = inputValue.replace(/\D/g, '');
+    });
+
+    // Add event listener to allow quantity unavailable to only be less than or equal to quantity
+    document.getElementById('quantity_unavailable').addEventListener('input', function(event) {
+        const maxQuantity = parseInt(document.getElementById('quantity').value);
+        let inputValue = event.target.value;
+        if (isNaN(maxQuantity)) {
+            maxQuantity = 0;
+        }
+        inputValue = inputValue.replace(/\D/g, '');
+        event.target.value = Math.min(parseInt(inputValue), maxQuantity);
+    });
+
+    // Send form on submit
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        editProduct();
+    });
+
+
 </script>
 {% endblock javascripts %}

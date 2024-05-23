@@ -10,20 +10,15 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid py-4 pb-5">
-    <div class="row">
-      <div class="col-12">
-        <div class="">
-          <div class="">
-            <div class="card bg-gradient-white">
-              <div class="text-center">
-                <h2 class="my-4 ">Start Scanning</h2>
-                <a href="/borrow"><button class="btn btn-lg bg-gradient-info mx-2 mb-4" style="height: 100px">Borrow item(s)</button></a>
-                <a href="/return"><button class="btn btn-lg bg-gradient-info mx-2 mb-4" style="height: 100px">Return item(s)</button></a>
-              </div>
-            </div> 
+  <div class="container-fluid d-flex justify-content-center mt-6 w-75">
+    <div class="row py-4 pb-5">
+        <div class="card bg-gradient-white py-4 pb-5">
+          <div class="text-center">
+            <h2 class="my-4 ">Click a button to start</h2>
+            <a href="/borrow"><button class="btn btn-lg btn-dark mx-2 mb-4" style="height: 100px">Borrow items</button></a>
+            <a href="/return"><button class="btn btn-lg btn-dark mx-2 mb-4" style="height: 100px">Return items</button></a>
           </div>
-        </div>
+        </div> 
       </div>
     </div>
   </div>

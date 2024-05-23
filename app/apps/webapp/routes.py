@@ -62,6 +62,7 @@ def start():
                         print('Error when card scanning:', e3)
 
             if user:
+                session['fullname'] = user.fullname
                 login_user(user)
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 return render_template('app/start.html',
@@ -601,6 +602,8 @@ def inventory_borrowed():
     for item in data['data']:
         timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
         item['estimated_return_date'] = timestamp
+        timestamp2 = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
+        item['created_at_ts'] = timestamp2
 
     # return render_template('app/inventory-results.html', data=data)
 

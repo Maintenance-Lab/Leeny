@@ -212,6 +212,7 @@ def admin_dashboard():
 def admin_inventory():
     return render_template('app/admin-inventory.html', segment='admin-inventory')
 
+
 @blueprint.route('/add-product')
 # @login_required
 def admin_add_product():
@@ -236,11 +237,15 @@ def dropdown_vendor():
     data = [{'id': obj.id, 'name': obj.vendor_name} for obj in all_objects]
     return jsonify(data)
 
+
+
+
+
+
 @blueprint.route('/edit-product/<int:id>')
 # @login_required
 def admin_edit_product(id):
-    form = EditProductForm()
-    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
+    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable]
 
     all_objects = Product.query.filter(Product.id == id) \
         .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
@@ -250,7 +255,7 @@ def admin_edit_product(id):
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     print("DATA: ", data)
-    return render_template('app/edit-product.html', product=data, segment='edit-product', form=form)
+    return render_template('app/edit-product.html', product=data, segment='edit-product')
 
 
 @blueprint.route('/inventory')

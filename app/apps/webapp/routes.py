@@ -95,6 +95,7 @@ def post():
             # addedBarcodes = request.form["borrow_data"]
             addedProducts = {}
 
+            borrowPrice = 0
             for items in borrow_data.items():
                 barcode = items[0]
                 quantity = items[1]
@@ -106,8 +107,10 @@ def post():
                     product_name = product.title
 
                     addedProducts[product_name] = quantity
+                    borrowPrice += product.price_when_bought * quantity
 
             session["addedProducts"] = addedProducts
+            session['borrowPrice'] = borrowPrice
 
             return redirect(url_for('webapp_blueprint.borrow_date'))
 
@@ -146,10 +149,10 @@ def borrow_date():
             print("Return date: ", estimated_return_date)
             print("Project: ", project)
 
-            # If price > number go to email verif
-            limit_price = 1000
-            borrow_price = 1200
-            if borrow_price > limit_price:
+            # If price > limit go to email verif
+            limit_price = 100
+            print("Borrow price: ", session['borrowPrice'])
+            if session['borrowPrice'] > limit_price:
                 # go to route email_verification
                 return redirect(url_for('authentication_blueprint.email_verification'))
 

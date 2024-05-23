@@ -156,11 +156,11 @@ def borrow_date():
             print("Project: ", project)
 
             # If price > limit go to email verif
-            limit_price = 100
-            print("Borrow price: ", session['borrowPrice'])
-            if session['borrowPrice'] > limit_price:
-                # go to route email_verification
-                return redirect(url_for('authentication_blueprint.email_verification'))
+            # limit_price = 100
+            # print("Borrow price: ", session['borrowPrice'])
+            # if session['borrowPrice'] > limit_price:
+            #     # go to route email_verification
+            #     return redirect(url_for('authentication_blueprint.email_verification'))
 
             return redirect(url_for('webapp_blueprint.borrow_confirm'))
 

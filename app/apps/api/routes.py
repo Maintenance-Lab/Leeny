@@ -207,8 +207,9 @@ class Borrow2(Resource):
         user = Users.query.filter_by(id=user_id).first()
         email = user.email
 
-        html = render_template('app/email_overview.html')
-        send_email(email, "leeny test", html)
+        timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
+        html = render_template('app/email_overview.html', timestamp=timestamp)
+        send_email(email, "Borrow overview", html)
 
 
 

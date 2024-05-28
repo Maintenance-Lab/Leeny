@@ -12,7 +12,7 @@ class Product(db.Model):
 
     # Properties
     title = db.Column(db.String(255), nullable=False)
-    barcode = db.Column(db.String(255), nullable=False)
+    barcode = db.Column(db.String(255), nullable=True)
     price_when_bought = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
     url = db.Column(db.String(255))

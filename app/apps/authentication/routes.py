@@ -244,6 +244,7 @@ def login():
         if user:
             login_user(user)
             session['fullname'] = user.fullname
+            session['role'] = user.role
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/login.html',
                                form=login_form)

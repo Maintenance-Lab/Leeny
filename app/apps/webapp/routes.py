@@ -10,7 +10,7 @@ import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
 from flask import current_app, flash, render_template, redirect, url_for, request, session, jsonify
-from flask_login import login_required, login_user
+from flask_login import login_required, login_user, logout_user
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
@@ -37,6 +37,9 @@ from datetime import datetime
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
+    logout_user()
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+    
     login_form = LoginForm(request.form)
 
     if request.method == "POST":
@@ -212,7 +215,7 @@ def borrow_confirm():
 
 
 @blueprint.route('/home')
-# @login_required
+@login_required
 def home():
     return render_template('app/home.html', segment='home')
 
@@ -314,12 +317,8 @@ def settings():
 
 @blueprint.route('/item/<int:id>')
 def item(id):
-    api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
-    response = requests.get(url=api_url, timeout=1)
-    response.raise_for_status()
-
-    result = response.json()
-    return render_template('app/item.html', data=result, segment='inventory')
+    data = id
+    return render_template('app/item.html', data=data, segment='inventory')
 
 @blueprint.route('/new_item/')
 @blueprint.route('/item/<int:id>/edit')
@@ -603,16 +602,19 @@ def inventory_search_borrow():
 
 @blueprint.route('/inventory/borrowed')
 def inventory_borrowed():
-    user_id = session['_user_id']
-
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name]
 
     all_objects = Borrowed.query \
-    .filter(Borrowed.user_id == user_id) \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
     .with_entities(*select_columns)
 
+    try:
+        user_id = session['_user_id']
+        if user_id:
+            all_objects = all_objects.filter(Borrowed.user_id == user_id)
+    except:
+        pass
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     for item in data['data']:
@@ -625,6 +627,34 @@ def inventory_borrowed():
 
     return render_template('app/htmx-results/borrowed-results.html', data=data)
 
+
+
+@blueprint.route('/item/load/<int:id>')
+def item_load(id):
+    # Load product info
+    all_objects = Product.query.filter(Product.id == id)
+    data = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects][0]
+
+
+    # Load borrowed data
+    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
+
+    all_objects = Borrowed.query \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .filter(Borrowed.product_id == data['id']) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
+    .limit(5)
+
+    borrowdata = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+
+    for item in borrowdata['data']:
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
+        item['days_until_return'] = days_until_return
+    
+    return render_template('app/htmx-results/item-result.html', data=data, borrowdata=borrowdata)
 
 from datetime import datetime, timedelta
 
@@ -746,7 +776,11 @@ def vendor_dropdown():
 def get_user():
     try:
         user = session['fullname']
-        return f'<p class="mb-0">{user}</p>'
+        role = session['role']
+        if role == 'admin':
+            return f'<div class="d-flex align-items-center gap-2"><p class="badge sm-badge bg-gradient-success mb-0">ADMIN</p><p class="mb-0">{user}</p></div>'
+        else:
+            return f'<p class="mb-0">{user}</p>'
     except:
         return ""
 

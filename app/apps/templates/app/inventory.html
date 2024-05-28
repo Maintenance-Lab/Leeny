@@ -79,10 +79,14 @@
     <div class="row">
       <div class="d-flex align-items-center justify-content-between ">
         <h1>Inventory</h1>
-        <div class="d-flex gap-3">
-          <a class="btn btn-dark m-0 me-10" href="/borrow">Borrow an item</a>
+        <div class="d-flex gap-3 mx-10">
+          <a class="btn btn-dark m-0" href="/borrow">Borrow an item</a>
+          {% if session['role'] == 'admin' %}
+          <a class="btn btn-dark m-0" href="/add-product">Add items</a>  
+          {% endif %}
           <span hx-get="/inventory/search" hx-trigger="load" hx-target="#results">
-          </div>
+
+      </div>
       </div>
       <div class="col-12 pb-5">
         <div class="">
@@ -119,7 +123,6 @@
       </div>
     </div>  
   </div>
-
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->

@@ -1,4 +1,4 @@
-{% extends 'layouts/base-start.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %} Inventory {% endblock title %}
 
@@ -7,8 +7,8 @@
 <div class="container-fluid py-4">
   <div class="row">
     <div class="col-12">
-      <div class="card mb-4" style="max-width: 900px; margin: 0 auto;">
-        <div class="card-body px-4 pt-4 pb-2">
+      <div class="card mb-4 d-flex  mt-6" style="max-width: 900px; margin: 0 auto;">
+        <div class="card-body px-4 pt-4 pb-2 align-items-center">
           <h1 class="text-center">Add product to database</h1>
           <p class="text-center" id="topMessage"></p>
 
@@ -27,7 +27,7 @@
                   </div>
                 </div>
                 <div class="col-12 text-center">
-                  <a href="/admin-inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+                  <a href="/inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
                   <a onclick="showStep2()" class="btn btn-dark mt-3 me-2" style="width: 180px;">Enter Manually</a>
                 </div>
             </div>

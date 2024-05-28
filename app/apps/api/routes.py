@@ -594,19 +594,6 @@ class VendorRoute(Resource):
                 'success': True
             }, 200
 
-@api.route('/item/<int:id>', methods=['GET'])
-
-@api.route('/item/<int:id>', methods=['GET'])
-class ItemRoute(Resource):
-    def get(self, id):
-        all_objects = Product.query.filter(Product.id == id)
-        output = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects]
-        return {
-                'data': output,
-                'success': True
-            }, 200
-
-
 @api.route('/home/', methods=['GET'])
 class ProductRoute(Resource):
     def get(self):

@@ -13,7 +13,10 @@
       <div class="d-flex align-items-center justify-content-between">
         <h1>Inventory</h1>
         <div class="d-flex gap-3">
-          <a class="btn btn-dark m-0" href="/borrow">Borrow an item</a>     
+          <a class="btn btn-dark m-0" href="/borrow">Borrow an item</a>
+          {% if session['role'] == 'admin' %}
+          <a class="btn btn-dark m-0" href="/add-product">Add items</a>  
+          {% endif %}   
           <div>
             <input type="text" class="input form-control" placeholder="Search..." name="q" hx-get="/inventory/search" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
           </div>

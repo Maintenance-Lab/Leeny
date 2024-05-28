@@ -558,11 +558,9 @@ def get_segment(request):
 
 @blueprint.route('/inventory/search')
 def inventory_search():
-    q = request.args.get("q")
 
     all_objects = Product.query \
-    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
-    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id).limit(12)
+    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
 
     # Legacy code; moet nog vervangen worden met voorbeeld zoals in /inventory/borrowed
     data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \

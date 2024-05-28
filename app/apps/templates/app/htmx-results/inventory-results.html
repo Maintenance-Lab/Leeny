@@ -24,3 +24,25 @@
     </td>
 </tr>
 {% endfor %}
+
+<script>
+    new DataTable('#inventory-list', {
+      scrollX: false,
+      autoWidth: true,
+      lengthChange: false,
+      compact: true,
+      oLanguage: {
+        "sSearch": ""},
+      language:{
+        searchPlaceholder: 'Search...',
+        infoEmpty: "No items found",
+        zeroRecords: "No items found",
+        emptyTable: "No items found",
+      },
+      info: false,
+      infoEmpty: false,
+      pageLength: 8,
+      retrieve: true,
+      
+      });
+</script>

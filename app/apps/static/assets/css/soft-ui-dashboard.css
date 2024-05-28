@@ -5933,7 +5933,11 @@ fieldset:disabled .btn {
   color: #830866;
   background-color: #e9ecef;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(203, 12, 159, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(180, 180, 180, 0.25);
+}
+
+.page-link:focus-visible{
+  border: 10px;
 }
 
 .page-item:not(:first-child) .page-link {

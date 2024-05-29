@@ -323,7 +323,6 @@ def settings():
 
 @blueprint.route('/user/<int:id>', methods=["GET", "POST"])
 def user(id):
-    id = id
     create_account_form = CreateAccountForm(request.form)
     all_objects = Users.query.filter_by(id=id)
     data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
@@ -344,7 +343,28 @@ def user(id):
             db.session.commit()
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect((f'/user/{id}'))
-    return render_template('app/user.html', data=data, segment='users', id=id, form=create_account_form)
+        
+
+        # Load borrowed data
+    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
+
+    all_objects = Borrowed.query \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .join(Users, Users.id == Borrowed.user_id) \
+    .filter(Users.id == id) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
+    .limit(5)
+
+    borrowdata = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+    print(borrowdata)
+    for item in borrowdata['data']:
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
+        item['days_until_return'] = days_until_return
+
+    return render_template('app/user.html', data=data, segment='users', id=id, borrowdata=borrowdata, form=create_account_form)
 
 @blueprint.route('/item/<int:id>')
 def item(id):

@@ -520,6 +520,31 @@ class DeleteProduct(Resource):
             'message': f'Product Not Found',
             'success': False
             }, 200
+        
+@api.route('/delete-user', methods=['POST'])
+class DeleteUser(Resource):
+    def post(self):
+        data = request.get_json()
+        user = Users.query.filter_by(id=data['id']).first()
+        if user:
+            try:
+                db.session.delete(user)
+                db.session.commit()
+                return {
+                'message': f'User deleted',
+                'success': True
+                }, 200
+            except AssertionError:
+                return {
+                'message': f'User could not be deleted. This might be because the user is currently borrowing something.',
+                'success': False
+                }, 200
+            
+        else:
+            return {
+            'message': f'User Not Found',
+            'success': False
+            }, 200
 
 @api.route('/get-options')
 class GetOptions(Resource):

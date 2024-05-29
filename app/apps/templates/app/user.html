@@ -1,7 +1,7 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-  User Profile
+User Profile
 {% endblock %}
 
 <!-- Specific CSS goes HERE -->
@@ -11,74 +11,201 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="row">
-        <h1>User Profile</h1>
-        <div class="col-12">
-            <div class="card mb-4">
-              <div class="card-body px-4 pt-4 pb-3">
-                <form method="POST" action="">
-                    <div class="row" style="height:80px">
-                        <div class="col-md-4">
-                            <div class="form-group mb-2">
-                                <label>Full Name</label>
-                                {{ form.fullname(class="form-control", value=data.data[0].fullname) }}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group mb-2">
-                                <label>Email</label>
-                                {{ form.email(class="form-control", value=data.data[0].email) }}
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group mb-2">
-                                <label>Account created at:&nbsp; </label>
-                                <label>{{ data['data'][0].created_at_ts }}</label>
-                            </div>
-                            <div class="form-group mb-2">
-                                <label>Account updated at:</label>
-                                <label>{{ data['data'][0].updated_at_ts }}</label>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    <div class="row" style="height:80px">
-                        <div class="col-md-4">
-                            <div class="form-group mb-2">
-                                <label>Study</label>
-                                <div class="input-group">
-                                    <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
-                                    {{ form.study(class="form-control", value=data.data[0].study) }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group mb-2">
-                                <label>Faculty</label>
-                                <div class="input-group mb-2">
-                                    <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
-                                    {{ form.faculty(class="form-control", value=data.data[0].faculty) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Role</label>
-                                <div class="input-group mb-2">
-                                    <!-- <input class="form-control" type="text" placeholder="Success" value="{{ data.data[0].role }}" disabled/> -->
-                                    {{ form.role(class="form-control", value=data.data[0].role, required=False) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-center col-md-8">
-                        <button type="submit" name="update_profile" class="btn bg-gradient-dark my-4 mb-2">Save changes</button>
-                    </div>
-                </form>
+  <div class="row">
+    <h1>User Profile</h1>
+    <div class="col-8">
+      <div class="card mb-6">
+        <div class="card-body px-4 pt-4 pb-3">
+          <form method="POST" action="">
+            <div class="row" style="height:80px">
+              <div class="col-md-6">
+                <div class="form-group mb-2">
+                  <label>Full Name</label>
+                  {{ form.fullname(class="form-control", value=data.data[0].fullname) }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group mb-2">
+                  <label>Email</label>
+                  {{ form.email(class="form-control", value=data.data[0].email) }}
+                </div>
+              </div>
             </div>
+            <div class="row" style="height:80px">
+              <div class="col-md-6">
+                <div class="form-group mb-2">
+                  <label>Study</label>
+                  <div class="input-group">
+                    <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
+                    {{ form.study(class="form-control", value=data.data[0].study) }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group mb-2">
+                  <label>Faculty</label>
+                  <div class="input-group mb-2">
+                    <!-- <span class="input-group-text"><i class="ni ni-zoom-split-in"></i></span> -->
+                    {{ form.faculty(class="form-control", value=data.data[0].faculty) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Role</label>
+                  <div class="input-group mb-2">
+                    <!-- <input class="form-control" type="text" placeholder="Success" value="{{ data.data[0].role }}" disabled/> -->
+                    {{ form.role(class="form-control", value=data.data[0].role, required=False) }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 d-flex flex-column justify-content-center">
+                <label class="mb-0">Details</label>
+                <div class="form-group mb-0 mt-2 d-flex">
+                  <label class="mb-0 col-5">Account created at:</label>
+                  <label class="mb-0 col-7">{{ data['data'][0].created_at_ts }}</label>
+                </div>
+                <div class="form-group mb-0 d-flex">
+                  <label class="mb-0 col-5">Account last updated at:</label>
+                  <label class="mb-3 col-7">{{ data['data'][0].updated_at_ts }}</label>
+                </div>
+              </div>
+            </div>
+            <div class="text-center d-flex gap-3 col-md-12 justify-content-center">
+              <button type="button" class="btn btn-dark" style="width: 150px;" onclick="goBack()">Back</button>
+              <button type="button" class="btn btn-danger" style="width: 150px;" id="delete-btn">Delete User</button>
+              <button type="submit" name="update_profile" style="width: 150px;" class="btn btn-success">Save changes</button>
+            </div>
+          </form>
         </div>
+      </div>
+
     </div>
-</div>
-{% endblock %}
+    <div class="col-4">
+      <div class="card mb-6">
+        <div class="card-body px-4 pt-4 pb-3">
+          {% if borrowdata['data'] != [] %}
+        <label class="mx-0">Currently Borrowing</label>
+        <table class="table align-items-center mb-4">
+            <thead>
+                <tr>
+                    <th class="text-start text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 pe-4 ps-0 pb-2 pt-1">Project</th>
+                    <th class="text-start text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 pe-4 ps-0 pb-2 pt-1">Quantity</th>
+                    <th class="text-start text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 pe-4 ps-0 pb-2 pt-1">Return Date</th>
+                    <th class="text-start text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 pe-0 ps-0 pb-2 pt-1">Due in </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in borrowdata['data'] %}
+                    <tr>
+                        <td class="align-middle text-start text-sm pe-4 ps-0 mt-0"  style="width: 80%; word-wrap: break-word; white-space: normal;">
+                            {{item.project}}
+                        </td>
+                        <td class="align-middle text-start text-sm pe-4 ps-0 mt-0">
+                            {{item.quantity}}
+                        </td>
+
+                        <td class="align-middle text-start pe-2 ps-0">
+                            {{item.estimated_return_date}}
+                        </td>
+                        <td class="align-middle text-start ps-0">
+                            {% if item.days_until_return > 1 %}
+                            <p class="mb-0 text-xs">{{item.days_until_return}} days</p>
+                            {% elif item.days_until_return == 1 %}
+                            <p class="mb-0 text-xs">{{item.days_until_return}} day</p>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <label class="mx-0">Currently Borrowing</label><br/>
+    <label class="mx-0 text-xxs text-secondary">Not Borrowing Anything</label>
+
+    {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+
+  {% block javascripts %}
+  <script>
+
+    function goBack() {
+      window.history.back();
+    }
+
+
+    function deleteUser() {
+      Swal.fire({
+        title: "Do you really want to delete this user?",
+        icon: "warning",
+        showDenyButton: true,
+        showCancelButton: true,
+        showConfirmButton: false,
+        denyButtonText: `Delete`
+      }).then((result) => {
+        if (result.isDenied) {
+          fetch('/api/delete-user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: {{ id }}
+          })
+
+    })
+          .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            title: "User deleted!",
+            icon: "success",
+            html: "",
+            timer: 1200,
+            timerProgressBar: true,
+            didOpen: () => {
+              Swal.showLoading();
+              const timer = Swal.getPopup().querySelector("c");
+              timerInterval = setInterval(() => {
+                timer.textContent = `${Swal.getTimerLeft()}`;
+              }, 100);
+            },
+            willClose: () => {
+              clearInterval(timerInterval);
+            }
+          })
+            .then(function (result) {
+              if (result.dismiss === Swal.DismissReason.timer) {
+                window.location.replace("/users");
+
+              }
+            });
+        }
+        else {
+          Swal.fire({
+            title: "Error!",
+            text: data.message,
+            icon: "error",
+            showConfirmButton: true
+          });
+        }
+      });
+
+      }
+    })
+  }
+
+    document.getElementById('delete-btn').addEventListener('click', function (event) {
+      event.preventDefault();
+      deleteUser();
+    });
+  </script>
+  {% endblock javascripts %}

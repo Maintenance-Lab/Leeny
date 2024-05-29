@@ -133,16 +133,16 @@ def insert_dummy_data():
         ]
 
         borrowed = [
-            Borrowed(product_id=1, user_id=1, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=7)).timestamp()), project="Test"),
-            Borrowed(product_id=2, user_id=1, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=3)).timestamp()), project="Test"),
-            Borrowed(product_id=3, user_id=2, quantity=3, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=5)).timestamp()), project="Test"),
-            Borrowed(product_id=4, user_id=3, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=7)).timestamp()), project="Test"),
-            Borrowed(product_id=5, user_id=2, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=10)).timestamp()), project="Test"),
-            Borrowed(product_id=1, user_id=2, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=2)).timestamp()), project="Test"),
-            Borrowed(product_id=3, user_id=3, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=7)).timestamp()), project="Test"),
-            Borrowed(product_id=2, user_id=3, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=3)).timestamp()), project="Test"),
-            Borrowed(product_id=4, user_id=1, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=5)).timestamp()), project="Test"),
-            Borrowed(product_id=5, user_id=1, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=10)).timestamp()), project="Test"),
+            Borrowed(product_id=7, user_id=1, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=7)).timestamp()), project="Test"),
+            Borrowed(product_id=8, user_id=1, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=3)).timestamp()), project="Test"),
+            Borrowed(product_id=9, user_id=2, quantity=3, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=5)).timestamp()), project="Test"),
+            Borrowed(product_id=10, user_id=3, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=-7)).timestamp()), project="Test"),
+            Borrowed(product_id=11, user_id=2, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=10)).timestamp()), project="Test"),
+            Borrowed(product_id=12, user_id=2, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=2)).timestamp()), project="Test"),
+            Borrowed(product_id=13, user_id=3, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=7)).timestamp()), project="Test"),
+            Borrowed(product_id=14, user_id=3, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=0)).timestamp()), project="Test"),
+            Borrowed(product_id=15, user_id=1, quantity=1, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=-5)).timestamp()), project="Test"),
+            Borrowed(product_id=16, user_id=1, quantity=2, returned=0, estimated_return_date=int((datetime.now() + timedelta(days=-1)).timestamp()), project="Test"),
         ]
 
         ordered = [

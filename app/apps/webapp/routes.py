@@ -66,6 +66,7 @@ def start():
 
             if user:
                 session['fullname'] = user.fullname
+                session['role'] = user.role
                 login_user(user)
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 return render_template('app/start.html',

@@ -131,6 +131,8 @@ def rfid_login():
         if user:
             login_user(user)
             session['fullname'] = user.fullname
+            session['role'] = user.role
+
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/login.html',
                                form=login_form)
@@ -444,6 +446,9 @@ def card_reader():
 
         if user:
             login_user(user)
+            session['role'] = user.role
+            session['fullname'] = user.fullname
+
             flash({'text':'123', 'location': 'home', 'user': user.fullname}, 'Timer')
             return render_template('accounts/rfid_login.html',
                                form=login_form)

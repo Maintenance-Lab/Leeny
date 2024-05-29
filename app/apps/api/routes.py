@@ -247,10 +247,10 @@ class Return(Resource):
             # quantity for borrowed from user
             user_id = session['_user_id']
             borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-            quantity = borrow.quantity
 
             if borrow is not None:
                 # Product found
+                quantity = borrow.quantity
                 output = {
                     'barcode': barcode,
                     'name': title,
@@ -265,6 +265,7 @@ class Return(Resource):
                     'message': f'Product not found',
                     'success': False
                 }
+                
         else:
             # Product not found
             output = {

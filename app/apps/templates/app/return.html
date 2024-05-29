@@ -73,6 +73,24 @@
             quantityInput.value = currentQuantity + 1;
             addedBarcodes[barcode] = currentQuantity + 1;
         }
+        else {
+            Swal.fire({
+                                        title: "Already scanned this borrowed item",
+                                        html: "Ask an employee for help",
+                                        timer: 2200,
+                                        timerProgressBar: true,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                            const timer = Swal.getPopup().querySelector("c");
+                                            timerInterval = setInterval(() => {
+                                                timer.textContent = `${Swal.getTimerLeft()}`;
+                                            }, 100);
+                                        },
+                                        willClose: () => {
+                                            clearInterval(timerInterval);
+                                        }                           
+                                        })  
+        }
     }
 
     function createElement(tag, classes = [], attributes = {}, content = '') {
@@ -266,9 +284,46 @@
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                 }
-                else {
+                else if (message == "Product not found") {
                     // When barcode not found
-                    notFoundText(notFound, true, "Barcode not found ");
+                    Swal.fire({
+                                        title: "You didn't borrow this item",
+                                        html: "Ask an employee for help",
+                                        timer: 2200,
+                                        timerProgressBar: true,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                            const timer = Swal.getPopup().querySelector("c");
+                                            timerInterval = setInterval(() => {
+                                                timer.textContent = `${Swal.getTimerLeft()}`;
+                                            }, 100);
+                                        },
+                                        willClose: () => {
+                                            clearInterval(timerInterval);
+                                        }                           
+                                        })
+                    barcode = '';
+                    document.getElementById("barcodeInputField").value = "";
+                    console.log("Barcode not found");
+                }
+                else {
+                    // When barcode not found in database
+                    Swal.fire({
+                                        title: "Barcode not found",
+                                        html: "Ask an employee for help",
+                                        timer: 2200,
+                                        timerProgressBar: true,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                            const timer = Swal.getPopup().querySelector("c");
+                                            timerInterval = setInterval(() => {
+                                                timer.textContent = `${Swal.getTimerLeft()}`;
+                                            }, 100);
+                                        },
+                                        willClose: () => {
+                                            clearInterval(timerInterval);
+                                        }                           
+                                        })  
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                     console.log("Barcode not found");

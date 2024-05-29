@@ -4,11 +4,12 @@
 
 {% block content %}
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 mt-6">
   <div class="row">
     <div class="col-12">
       <div class="card mb-4" style="max-width: 900px; margin: 0 auto;">
         <div class="card-body px-4 pt-4 pb-2">
+          {% if session['role'] == 'admin' %}
           <h1 class="text-center">Edit product in database</h1>
 
           <!-- Step 3 -->
@@ -82,13 +83,17 @@
                 </div>
               </div>
 
-              <div class="col-12 text-center">
-                <button type="button" class="btn btn-dark mt-3 me-2" onclick="goBack()" style="width: 150px;">Back</button>
-                <button type="submit" class="btn btn-dark mt-3" style="width: 150px;">Edit Product</button>
+              <div class="col-12 text-center mt-3 d-flex gap-3 justify-content-center">
+                <button type="button" class="btn btn-dark" style="width: 150px;"  onclick="goBack()">Back</button>
+                <button type="button" class="btn btn-danger" style="width: 150px;" id="delete-btn">Delete Product</button>
+                <button type="submit" class="btn btn-success" style="width: 150px;">Save Changes</button>
               </div>
 
           </form>
-
+          {% else %}
+          <h1>Permission denied</h1>
+          <p>Please login as admin.</p>
+          {% endif %}
 
         </div>
       </div>
@@ -123,12 +128,12 @@
             })
             .catch(error => console.error('Error loading dropdown:', error));
     }
+    const product_id = "{{ product['data'][0].id }}";
 
     function editProduct() {
       const form = document.querySelector('form');
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
-      const product_id = "{{ product['data'][0].id }}";
 
       fetch('/api/edit-product', {
         method: 'POST',
@@ -146,8 +151,9 @@
         if (data.success) {
           Swal.fire({
               title: "Product details successfully changed!",
+              icon: "success",
               html: "",
-              timer: 800,
+              timer: 1200,
               timerProgressBar: true,
               didOpen: () => {
                   Swal.showLoading();
@@ -162,12 +168,73 @@
           })
           .then(function (result) {
               if (result.dismiss === Swal.DismissReason.timer) {
-                  goBack();
+				        window.location.replace("/reload/inventory");
               }
           });
         }
       })
     }
+
+  function deleteProduct() {
+    Swal.fire({
+      title: "Do you really want to delete this product?",
+      icon: "warning",
+      showDenyButton: true,
+      showCancelButton: true,
+      showConfirmButton: false,
+      denyButtonText: `Delete`
+    }).then((result) => {
+      if (result.isDenied) {
+        fetch('/api/delete-product', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: product_id
+          })
+
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              Swal.fire({
+                title: "Product deleted!",
+                icon: "success",
+                html: "",
+                timer: 1200,
+                timerProgressBar: true,
+                didOpen: () => {
+                  Swal.showLoading();
+                  const timer = Swal.getPopup().querySelector("c");
+                  timerInterval = setInterval(() => {
+                    timer.textContent = `${Swal.getTimerLeft()}`;
+                  }, 100);
+                },
+                willClose: () => {
+                  clearInterval(timerInterval);
+                }
+              })
+                .then(function (result) {
+                  if (result.dismiss === Swal.DismissReason.timer) {
+                    window.location.replace("/reload/inventory");
+
+                  }
+                });
+            }
+            else {
+              Swal.fire({
+                        title: "Error!",
+                        text: data.message,
+                        icon: "error",
+                        showConfirmButton: true
+                    });
+            }
+          });
+
+      }
+    })
+  }
 
     // Populate dropdowns
     document.addEventListener('DOMContentLoaded', function() {
@@ -239,6 +306,12 @@
     document.querySelector('form').addEventListener('submit', function(event) {
         event.preventDefault();
         editProduct();
+    });
+
+    document.getElementById('delete-btn').addEventListener('click', function(event) {
+      event.preventDefault();
+      deleteProduct();
+      console.log('delete')
     });
 
 

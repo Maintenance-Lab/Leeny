@@ -9,6 +9,7 @@
     <div class="col-12">
       <div class="card mb-4 d-flex  mt-6" style="max-width: 900px; margin: 0 auto;">
         <div class="card-body px-4 pt-4 pb-2 align-items-center">
+          {% if session['role'] == 'admin' %}
           <h1 class="text-center">Add product to database</h1>
           <p class="text-center" id="topMessage"></p>
 
@@ -162,7 +163,10 @@
                 </div>
             </div>
           </div>
-
+          {% else %}
+          <h1>Permission denied</h1>
+          <p>Please login as admin.</p>
+          {% endif %}
         </div>
       </div>
     </div>

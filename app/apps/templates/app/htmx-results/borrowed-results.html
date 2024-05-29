@@ -1,27 +1,283 @@
-{% for item in data['data'] %}
-<tr>
-    <td style="padding-left: 24px;">
-        <h6 class="mb-0 text-sm">{{item.title}}</h6>
-    </td>
-    <td class="ps-4">
-        {{item.manufacturer_name}}
-    </td>
-    <td class="align-middle text-center text-sm">
-        {{item.quantity}}
-    </td>
-    <td class="align-middle text-center text-sm">
-        {{item.created_at_ts}} 
-    </td>
-    <td class="align-middle text-center text-sm">
-        {{item.estimated_return_date}} 
-    </td>
+<div class=" px-0 pt-0 pb-2">
+    <div class="dataTable-wrapper dataTable-loading">
+      <div class="dataTable-container card px-2 py-1">
+        <table class="table table-flush dataTable-table dataTable" id="borrowed-list">
+          <thead>
+            <tr>
+              {% if session['role'] == 'admin' %}
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Item</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Borrowed by</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Borrow Date</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Return Date</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Due In</th>
+              <th class="text-secondary opacity-7"></th>
+              {% else %}
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Item</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Manufacturer</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Borrow Date</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Return Date</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Due In</th>
+              <th class="text-secondary opacity-7"></th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
 
-    <td class="align-right p-0" href="/item/{{item.id}}">
-        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
-            <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
-            </div>
-        </a>
-    </td>
-</tr>
-{% endfor %}
+            <!-- Admin table -->
+            {% if session['role'] == 'admin' %}
+
+                {% for item in data['data'] %}
+                <tr>
+                    <td style="padding-left: 24px;">
+                        <h6 class="mb-0 text-sm">{{item.title}}</h6>
+                    </td>
+                    <td class="ps-4 text-sm">
+                        {{item.fullname}}
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                        {{item.quantity}}
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                        {{item.created_at_ts}} 
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                        {{item.estimated_return_date}} 
+                    </td>
+                    <td class="align-middle text-center px-0 text-xs {% if item.days_until_return > 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if item.days_until_return > 1 %}
+                            {{item.days_until_return}} days
+                        {% elif item.days_until_return == 1 %}
+                            {{item.days_until_return}} day
+                        {% elif item.days_until_return < 0 %}
+                            {{item.days_until_return  }} days
+                        {% endif %}
+                    </td>
+                    <td class="align-right p-0" href="/item/{{item.id}}">
+                        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
+                            <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+                            </div>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <script>
+                    $(document).ready(function() {
+                        $.fn.dataTable.ext.order['#-days-pre'] = function (settings, col) {
+                            return function (a, b) {
+                                var x = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+                                var y = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+                                return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+                            };
+                        };
+                    });
+
+                    new DataTable('#borrowed-list', {
+                    scrollX: false,
+                    autoWidth: true,
+                    lengthChange: false,
+                    compact: true,
+                    oLanguage: {
+                        "sSearch": ""},
+                    language:{
+                        searchPlaceholder: 'Search...',
+                        infoEmpty: "No items found",
+                        zeroRecords: "No items found",
+                        emptyTable: "No items found",
+                    },
+                    info: false,
+                    infoEmpty: false,
+                    pageLength: 8,
+                    retrieve: true,
+                    columnDefs: [
+                        {target: 3, sortable: false},
+                        {target: 4, sortable: false},
+                        {target: 6, sortable: false},
+                        { type: '#-days', target: 5 }
+                        ],
+                    });
+
+                    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                        "#-days-pre": function (a) {
+                            return parseInt(a.replace(/[^-0-9]/g, '')) || 0;
+                        },
+
+                        "#-days-asc": function (a, b) {
+                            return a - b;
+                        },
+
+                        "#-days-desc": function (a, b) {
+                            return b - a;
+                        }
+                    });
+                </script>
+
+            {% else %}
+                <!-- Student table -->
+                {% for item in data['data'] %}
+                <tr>
+                    <td style="padding-left: 24px;">
+                        <h6 class="mb-0 text-sm">{{item.title}}</h6>
+                    </td>
+                    <td class="ps-4 text-sm">
+                        {{item.manufacturer_name}}
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                        {{item.quantity}}
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                        {{item.created_at_ts}} 
+                    </td>
+
+                    <td class="align-middle text-center text-sm">
+                        {{item.estimated_return_date}} 
+                    </td>
+                    <td class="align-middle text-center px-0 text-xs {% if item.days_until_return > 0 %}text-success{% else %}text-danger{% endif %}"
+                        >
+                        {% if item.days_until_return > 1 %}
+                            {{item.days_until_return}} days
+                        {% elif item.days_until_return == 1 %}
+                            {{item.days_until_return}} day
+                        {% elif item.days_until_return < 0 %}
+                            {{item.days_until_return  }} days
+                        {% endif %}
+                    </td>
+                    <td class="align-right p-0" href="/item/{{item.id}}">
+                        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
+                            <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+                            </div>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <script>
+                    $(document).ready(function() {
+                    $.fn.dataTable.ext.order['#-days-pre'] = function (settings, col) {
+                        return function (a, b) {
+                            var x = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+                            var y = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+                            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+                        };
+                    };
+                });
+            
+                new DataTable('#borrowed-list', {
+                  scrollX: false,
+                  autoWidth: true,
+                  lengthChange: false,
+                  compact: true,
+                  oLanguage: {
+                    "sSearch": ""},
+                  language:{
+                    searchPlaceholder: 'Search...',
+                    infoEmpty: "No items found",
+                    zeroRecords: "No items found",
+                    emptyTable: "No items",
+                  },
+                  info: false,
+                  infoEmpty: false,
+                  pageLength: 8,
+                  retrieve: true,
+                  columnDefs: [
+                    {target: 3, sortable: false},
+                    {target: 4, sortable: false},
+                    {target: 6, sortable: false},
+                    { type: '#-days', target: 5 }
+                    ],
+                  });
+            
+                  // Define a custom sorting type
+                jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                    "#-days-pre": function (a) {
+                        return parseInt(a.replace(/[^-0-9]/g, '')) || 0;
+                    },
+            
+                    "#-days-asc": function (a, b) {
+                        return a - b;
+                    },
+            
+                    "#-days-desc": function (a, b) {
+                        return b - a;
+                    }
+                });
+                </script>
+            {% endif %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+
+<style>
+    .dt-search {
+    margin-right: 28px;
+    height: 29px;
+    position: absolute;
+    width: 191px;
+    top:-43px;
+    right:-34px;
+    border-radius: 0.5rem !important;
+    line-height: 2rem !important;
+  
+  }
+  
+  #borrowed-list_wrapper > div:nth-child(1) > div.col-md-auto.ms-auto > div > input {
+    height: 40px;
+    width: 191px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d2d6da;
+    padding-left: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.4rem;
+    color: #495057;
+    background-color: #ffffff !important;
+  
+  }
+  
+  div.dt-container.dt-empty-footer tbody > tr:last-child > * {
+      border-bottom: 0px solid rgba(0, 0, 0, 0) !important;
+  }
+  
+  .dt-paging-button {
+    padding: 0.5em 0.2em !important;
+  }
+  
+  .dt-search input {
+    border-radius: 8px !important;
+    padding: 3px 0px !important;
+    text-indent: 10px !important;
+  }
+  
+  .page-item.active .page-link {
+    background-color: #344767 !important;
+    border-color: #344767 !important;
+  }
+  
+  .dt-paging .dt-paging-button:hover {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+  }
+
+  #inventory-list_wrapper > div:nth-child(3) > div.col-md-auto.ms-auto > div > ul > li:nth-child(5) {
+    background: transparent !important;
+    border-color: #344767 !important; 
+    border: 1px solid transparent !important;
+  }
+  
+  div.dt-container {
+    margin-top: -15px;
+  }
+  
+  #inventory-list_wrapper > div:last-of-type {
+        height: 57px;
+  }
+</style>
+

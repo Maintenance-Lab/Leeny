@@ -275,7 +275,7 @@ def admin_edit_product(id):
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     print("DATA: ", data)
-    return render_template('app/edit-product.html', product=data, segment='edit-product', form=form)
+    return render_template('app/edit-product.html', product=data, form=form)
 
 
 @blueprint.route('/inventory')
@@ -349,23 +349,6 @@ def user(id):
 def item(id):
     data = id
     return render_template('app/item.html', data=data, segment='inventory')
-
-@blueprint.route('/new_item/')
-@blueprint.route('/item/<int:id>/edit')
-# @login_required
-def new_item(id = None):
-    result=None
-    try:
-        api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
-        response = requests.get(url=api_url, timeout=1)
-        response.raise_for_status()
-
-        result = response.json()
-
-    except:
-        pass
-
-    return render_template('app/new-item.html', data=result, segment='inventory')
 
 @blueprint.route('/orders/<int:order_id>')
 def order_info(order_id = None):
@@ -630,30 +613,43 @@ def inventory_search_borrow():
     
     return render_template('app/htmx-results/inventory-results-borrow.html', data=data)
 
-@blueprint.route('/inventory/borrowed')
-def inventory_borrowed():
-    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name]
+@blueprint.route('/inventory/borrowed/<int:load>')
+def inventory_borrowed(load):
+    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name, Users.fullname]
 
     all_objects = Borrowed.query \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
-    .with_entities(*select_columns)
+    .join(Users, Users.id == Borrowed.user_id) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
+    
+    if load == 1:   
+        all_objects = all_objects.filter(Borrowed.estimated_return_date < datetime.now().timestamp())
+
 
     try:
         user_id = session['_user_id']
-        if user_id:
+        role = session['role']
+        if user_id and role != 'admin':
             all_objects = all_objects.filter(Borrowed.user_id == user_id)
     except:
         pass
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     for item in data['data']:
+        sort_ts = item['estimated_return_date']
         timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
-        item['estimated_return_date'] = timestamp
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
         timestamp2 = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
+
+        item['sort_ts'] = sort_ts
+        item['estimated_return_date'] = timestamp
         item['created_at_ts'] = timestamp2
+        item['days_until_return'] = days_until_return
 
     # return render_template('app/inventory-results.html', data=data)
+    print(data)
 
     return render_template('app/htmx-results/borrowed-results.html', data=data)
 
@@ -683,7 +679,7 @@ def item_load(id):
         timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
         item['estimated_return_date'] = timestamp
         item['days_until_return'] = days_until_return
-    
+
     return render_template('app/htmx-results/item-result.html', data=data, borrowdata=borrowdata)
 
 from datetime import datetime, timedelta
@@ -825,3 +821,7 @@ def users_search():
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
 
     return render_template('app/htmx-results/users-results.html', data=data)
+
+@blueprint.route('/reload/<string:route>') # Used to reload pages after changing content
+def reload_route(route):
+    return redirect(url_for(f'webapp_blueprint.{route}'))

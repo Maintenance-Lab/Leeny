@@ -495,7 +495,31 @@ class EditProduct(Resource):
             'message': f'Product updated',
             'success': True
         }, 200
-
+    
+@api.route('/delete-product', methods=['POST'])
+class DeleteProduct(Resource):
+    def post(self):
+        data = request.get_json()
+        product = Product.query.filter_by(id=data['id']).first()
+        if product:
+            try:
+                db.session.delete(product)
+                db.session.commit()
+                return {
+                'message': f'Product deleted',
+                'success': True
+                }, 200
+            except AssertionError:
+                return {
+                'message': f'Product could not be deleted. This might be because the product is currently being borrowed.',
+                'success': False
+                }, 200
+            
+        else:
+            return {
+            'message': f'Product Not Found',
+            'success': False
+            }, 200
 
 @api.route('/get-options')
 class GetOptions(Resource):

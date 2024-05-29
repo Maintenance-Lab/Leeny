@@ -285,6 +285,12 @@ def inventory():
     # Add pagination
     return render_template('app/inventory.html', segment='inventory')
 
+@blueprint.route('/users')
+# @login_required
+def users():
+    # Add pagination
+    return render_template('app/users.html', segment='users')
+
 @blueprint.route('/orders')
 # @login_required
 def orders():
@@ -315,6 +321,30 @@ def settings():
 
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
+@blueprint.route('/user/<int:id>', methods=["GET", "POST"])
+def user(id):
+    id = id
+    create_account_form = CreateAccountForm(request.form)
+    all_objects = Users.query.filter_by(id=id)
+    data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
+    
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
+        item['created_at_ts'] = timestamp
+    
+    for item in data['data']:
+        timestamp2 = datetime.fromtimestamp(item['updated_at_ts']).strftime('%d-%m-%Y')
+        item['updated_at_ts'] = timestamp2
+    
+    if request.method == "POST":
+        if "update_profile" in request.form:
+            test = Users.query.filter_by(id=id).update(dict(fullname=request.form['fullname'], email=request.form['email']\
+                                                                             , study=request.form['study'], faculty=request.form['faculty']))
+            test5 = Users.query.filter_by(id=id).update(dict(role=request.form['role']))
+            db.session.commit()
+            flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
+            return redirect((f'/user/{id}'))
+    return render_template('app/user.html', data=data, segment='users', id=id, form=create_account_form)
 
 @blueprint.route('/item/<int:id>')
 def item(id):
@@ -780,6 +810,18 @@ def get_user():
             return f'<p class="mb-0">{user}</p>'
     except:
         return ""
+
+@blueprint.route('/users/search')
+def users_search():
+
+    form = EditProductForm()
+    select_columns = [Users.id, Users.fullname, Users.email, Users.study, Users.faculty, Users.role]
+
+    all_objects = Users.query.with_entities(*select_columns)
+
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+
+    return render_template('app/htmx-results/users-results.html', data=data)
 
 @blueprint.route('/reload/<string:route>') # Used to reload pages after changing content
 def reload_route(route):

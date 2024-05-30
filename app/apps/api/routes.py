@@ -520,6 +520,37 @@ class DeleteProduct(Resource):
             'message': f'Product Not Found',
             'success': False
             }, 200
+        
+
+@api.route('/delete-order', methods=['POST'])
+class DeleteOrder(Resource):
+    def post(self):
+        data = request.get_json()
+        order = Order.query.filter_by(id=data['id']).first()
+        if order:
+            if order.user_id == data['user_id'] or data['role'] == 'admin':
+                try:
+                    db.session.delete(order)
+                    db.session.commit()
+                    return {
+                    'message': f'Order deleted',
+                    'success': True
+                    }, 200
+                except AssertionError:
+                    return {
+                    'message': f'Order could not be deleted.',
+                    'success': False
+                    }, 200
+            else:
+                return {
+                'message': f'No Permission to delete this order',
+                'success': False
+                }, 200
+        else:
+            return {
+            'message': f'Order Not Found',
+            'success': False
+            }, 200
 
 @api.route('/get-options')
 class GetOptions(Resource):
@@ -551,7 +582,6 @@ class AddToCart(Resource):
         cart = session['cart']
         cart.append(data)
         session['cart'] = cart
-        print(session['cart'])
         return {
             'success': True
         }, 200

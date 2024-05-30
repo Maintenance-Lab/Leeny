@@ -12,21 +12,15 @@
     <div class="container-fluid d-flex justify-content-center align-items-center gap-5" style="height: calc(100vh - 65px);">
         <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
             <div class="card text-left">
-                <div class="table-responsive p-0 " style="max-height: 360px;">
-                    <table class="table align-items-center mb-0 p-2" style="min-height: 50px;">
+                <div id="table-scroll" class="table-responsive p-0" style="max-height: 400px; overflow-x:hidden">
+                    {% if data %}
+                    <table class="table align-items-center mb-0 p-2">
                         <thead>
-                            {% if data != [] %}
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-2">Item</th>
                             <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Quantity</th>
-                            {% else %}
-                                <div class="d-flex flex-column align-items-center">
-                                    <h5 class="mt-4 mb-0">Start adding items</h5>
-                                </div>
-                            {% endif %}
-
+                            <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0"></th>
                         </thead>
                         <tbody>
-
                             {% for item in data %}
                             <tr>
                                 <td>
@@ -36,15 +30,21 @@
                                     {{item.quantity}}
                                 </td>
                                 <td>
-                                    <a href="/orders/new/remove/{{item.id}}">
+                                    <a href="/orders/new/remove/{{loop.index - 1}}">
                                         <svg width="10px" fill="#67748e" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
                                     </a>
                                 </td>
                             </tr>
                             {% endfor %}
-                            
                         </tbody>
                     </table>
+                    {% else %}
+                    <div class="d-flex flex-column align-items-center">
+                        <h5 class="mt-4 mb-0">Start adding items</h5>
+                        <p class="mb-3 mt-2 text-xs">They will appear here.</p>
+                    </div>
+                    {% endif %}
+
                     <div class="d-flex justify-content-center">
                         <a href="/orders/new/item" class="btn btn-light">
                             Add{% if data != [] %} next{% endif %} Item
@@ -66,6 +66,35 @@
             {% endif %}
         </div>
     </div>
+    
+<script>
+    // Initialize Perfect Scrollbar
+    document.addEventListener('DOMContentLoaded', function() {
+    const ps = new PerfectScrollbar('#table-scroll');
+    });
+</script>
+
+<style>
+    .ps {
+      overflow: hidden !important;
+    }
+
+    .ps__rail-x,
+    .ps__rail-y {
+      opacity: 1 !important;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ps__thumb-x,
+    .ps__thumb-y {
+      opacity: 1 !important;
+      background-color: #aaa;
+    }
+
+    .ps .ps__rail-y.ps--clicking {
+    background-color: #ffffff;
+    }
+  </style>
 
 
 {% endblock content %}

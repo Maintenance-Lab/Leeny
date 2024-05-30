@@ -354,7 +354,6 @@ def item(id):
 @blueprint.route('/orders/<int:order_id>')
 def order_info(order_id = None):
 
-    select_columns = [column.name for column in inspect(Order).c]
     all_objects = Ordered.query.filter(Ordered.order_id == order_id).all()
     result = []
 
@@ -364,21 +363,23 @@ def order_info(order_id = None):
             obj_dict[column] = getattr(obj, column)
         result.append(obj_dict)
 
-    result_order = []
-    order_object = Order.query.filter(Order.id == order_id).first()
-    for obj in [order_object]:
-        obj_dict = {}
-        for column in obj.__table__.columns.keys():
-            obj_dict[column] = getattr(obj, column)
-        result_order.append(obj_dict)
 
-    data = {'data': result,'order_data':result_order[0]}
+    select_columns = [Order.id, Order.created_at_ts, Order.user_id, Users.fullname, Order.project, Order.students, Order.user_id, Order.created_at_ts, Order.updated_at_ts]
+    all_objects = Order.query.filter(Order.id == order_id) \
+    .join(Users, Users.id == Order.user_id, isouter = True) \
+    .with_entities(*select_columns) \
+    .first()
+        
+    order_data = [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in [all_objects]][0]
+
+    data = {'data': result,'order_data':order_data}
 
     for item in data['data']:
-        timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
         item['created_at_ts'] = timestamp
 
-    data['order_data']['created_at_ts'] = datetime.fromtimestamp(data['order_data']['created_at_ts']).date()
+
+    data['order_data']['created_at_ts'] = datetime.fromtimestamp(data['order_data']['created_at_ts']).strftime('%d-%m-%Y')
 
     return render_template('app/order-info.html', data=data, segment='orders')
 
@@ -496,10 +497,11 @@ def confirm_order():
 
     return render_template('app/order-confirm.html', data=session['cart'], segment='orders', form=form)
 
-@blueprint.route('/orders/new/remove/<int:id>', methods=["GET", "POST"])
-def new_order_remove(id):
+@blueprint.route('/orders/new/remove/<int:index>', methods=["GET", "POST"])
+def new_order_remove(index):
     cart = session['cart']
-    session['cart'] = [item for item in cart if item['id'] != id]
+    cart.pop(index)
+    session['cart'] = cart
     return redirect(url_for('webapp_blueprint.new_order'))
 
 @blueprint.route('/orders/new/item')
@@ -685,15 +687,15 @@ def item_load(id):
 
 from datetime import datetime, timedelta
 
-@blueprint.route('/orders/load/<int:load>')
-def orders_load(load):
+@blueprint.route('/orders/load/<int:output>')
+def orders_load(output):
 
-    select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project]
+    select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project, Order.user_id]
     all_objects = Order.query \
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
 
-    if load == 1:
+    if output == 1:
         user_id = session["_user_id"]
         all_objects = all_objects.filter(Users.id == user_id)
 
@@ -708,8 +710,27 @@ def orders_load(load):
             item['created_at_ts'] = 'Today'
         else:
             item['created_at_ts'] =  timestamp
+    
+    if session.get('_user_id') != None:
+        user_id=session['_user_id']
+    else:
+        user_id = None
 
-    return render_template('app/htmx-results/orders-results.html', data=data)
+    return render_template('app/htmx-results/orders-results.html', data=data, user_id=user_id)
+
+@blueprint.route('/ordered/load/<int:id>')
+def ordered_load(id):
+    all_objects = Ordered.query.filter(Ordered.id == id).all()
+    data = []
+
+    for obj in all_objects:
+        obj_dict = {}
+        for column in obj.__table__.columns.keys():
+            obj_dict[column] = getattr(obj, column)
+        data.append(obj_dict)    
+
+    return render_template('app/htmx-results/ordered-info.html', data=data[0])
+
 
 @blueprint.route('/orders/googlesearch/')
 def googlesearchURL():

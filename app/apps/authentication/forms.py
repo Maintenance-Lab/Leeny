@@ -60,7 +60,6 @@ class RfidCreateAccountForm(FlaskForm):
 
 # login and registration
 
-
 class LoginForm(FlaskForm):
     uid_1 = StringField('uid_1',
                         id='uid_1_login',

@@ -262,20 +262,21 @@
                                         },
                                         willClose: () => {
                                             clearInterval(timerInterval);
-                                        }                           
-                                        })  
+                                        }
+                                        })
                             }
                             else{
                                 // Increment quantity for existing barcode
                                 incrementQuantity(barcode, addedBarcodes);
                             }
-                        } 
+                        }
                         else {
                             // Add new barcode to screen and dictionary
                             addedBarcodes[barcode] = 1;
                             addTableRow(barcode, item_name, item_quantity);
                         }
                     }
+                    document.getElementById("barcodeInputField").value = "";
                 }
                 else if (message == "Product not available"){
                         // When quantity is 0
@@ -293,13 +294,13 @@
                             },
                             willClose: () => {
                                 clearInterval(timerInterval);
-                            }                           
-                            })  
+                            }
+                            })
                         console.log("Quantity is 0");
                         // Clear the input field after processing
                         barcode = '';
                         document.getElementById("barcodeInputField").value = "";
-                } 
+                }
                 else {
                     // When barcode not found in database
                     Swal.fire({
@@ -316,8 +317,8 @@
                                         },
                                         willClose: () => {
                                             clearInterval(timerInterval);
-                                        }                           
-                                        })  
+                                        }
+                                        })
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
                     console.log("Barcode not found");
@@ -341,7 +342,7 @@
         document.getElementById("borrowForm").submit();
     });
 
-    
+
     // Sweet alert
 
     function openSearchModal() {
@@ -375,7 +376,7 @@
 
         $('#search-input').on('keyup change', function() {
             clearTimeout(debounceTimeout);
-            
+
             debounceTimeout = setTimeout(() => {
                 var query = $(this).val();
                 $.ajax({

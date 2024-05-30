@@ -28,7 +28,6 @@ from apps.api.forms import *
 from sqlalchemy import update
 from sqlalchemy.inspection import inspect
 from googlesearch import search
-from bs4 import BeautifulSoup
 from apps.webapp.imagescraper import get_largest_image
 
 import json
@@ -132,6 +131,36 @@ def post():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
+@blueprint.route('/card-forgotten', methods=["GET", "POST"])
+def card_forgotten():
+    logout_user()
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+    
+    login_form = CreateAccountForm(request.form)
+    
+    if request.method == "POST":
+        if "email_login" in request.form:
+            email = request.form['email']
+            print("test--------------------------------------")
+            if email:
+                try:
+                    user = Users.query.filter_by(email=email).first()
+                except:
+                    flash({'category':'danger', 'title': 'Incorrect Email!', 'text': 'Your Email is incorrect or unknown'}, 'General')
+
+            
+            if user:
+                print('user') 
+                session['fullname'] = user.fullname
+                session['role'] = user.role
+                login_user(user)
+                # flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
+                flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'admin-login')
+                return render_template('app/card_forgotten.html', form=login_form)
+            else:      
+                flash({'category':'warning', 'title': 'Incorrect email!', 'text': 'Try again using another email'}, 'General')
+
+    return render_template('app/card_forgotten.html', form=login_form)
 
 @blueprint.route('/borrow-date', methods=["GET","POST"])
 # @login_required
@@ -323,7 +352,6 @@ def settings():
 
 @blueprint.route('/user/<int:id>', methods=["GET", "POST"])
 def user(id):
-    id = id
     create_account_form = CreateAccountForm(request.form)
     all_objects = Users.query.filter_by(id=id)
     data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
@@ -344,7 +372,28 @@ def user(id):
             db.session.commit()
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect((f'/user/{id}'))
-    return render_template('app/user.html', data=data, segment='users', id=id, form=create_account_form)
+        
+
+        # Load borrowed data
+    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
+
+    all_objects = Borrowed.query \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .join(Users, Users.id == Borrowed.user_id) \
+    .filter(Users.id == id) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
+    .limit(5)
+
+    borrowdata = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+    print(borrowdata)
+    for item in borrowdata['data']:
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
+        item['days_until_return'] = days_until_return
+
+    return render_template('app/user.html', data=data, segment='users', id=id, borrowdata=borrowdata, form=create_account_form)
 
 @blueprint.route('/item/<int:id>')
 def item(id):

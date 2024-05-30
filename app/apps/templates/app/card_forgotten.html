@@ -1,0 +1,36 @@
+{% extends 'layouts/base-start.html' %}
+
+{% block title %} Forgot your card? {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+  <div class="container-fluid d-flex justify-content-center align-items-center vh-100">
+        <div class="card py-5 col-lg-4 col-md-6 col-sm-10">
+            <h3 class="mb-lg-4 text-center">Forgot your card?</h3>
+            <hr class="mx-7 my-3">
+            <!-- form for the sweetalert -->
+            <form class="mx-7 mt-4 mb-3" method="POST">
+              <label class="text-left">Login with your email</label>
+              <div class="mb-3">
+                {{ form.email(class="form-control", placeholder="Email") }}
+                <!-- <input type="email" id="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon"> -->
+              </div>
+              <div class="d-flex justify-content-center">
+                <a href="/start" class="btn btn-outline-danger me-3">Back</a>
+                <button type="submit" name="email_login" id="scan-card" class="btn btn-dark">Submit</button>
+              </div>
+            </form>
+
+        </div>
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+
+{% endblock javascripts %}

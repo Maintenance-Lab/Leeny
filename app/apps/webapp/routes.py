@@ -28,7 +28,6 @@ from apps.api.forms import *
 from sqlalchemy import update
 from sqlalchemy.inspection import inspect
 from googlesearch import search
-from bs4 import BeautifulSoup
 from apps.webapp.imagescraper import get_largest_image
 
 import json
@@ -132,6 +131,36 @@ def post():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
+@blueprint.route('/card-forgotten', methods=["GET", "POST"])
+def card_forgotten():
+    logout_user()
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+    
+    login_form = CreateAccountForm(request.form)
+    
+    if request.method == "POST":
+        if "email_login" in request.form:
+            email = request.form['email']
+            print("test--------------------------------------")
+            if email:
+                try:
+                    user = Users.query.filter_by(email=email).first()
+                except:
+                    flash({'category':'danger', 'title': 'Incorrect Email!', 'text': 'Your Email is incorrect or unknown'}, 'General')
+
+            
+            if user:
+                print('user') 
+                session['fullname'] = user.fullname
+                session['role'] = user.role
+                login_user(user)
+                # flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
+                flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'admin-login')
+                return render_template('app/card_forgotten.html', form=login_form)
+            else:      
+                flash({'category':'warning', 'title': 'Incorrect email!', 'text': 'Try again using another email'}, 'General')
+
+    return render_template('app/card_forgotten.html', form=login_form)
 
 @blueprint.route('/borrow-date', methods=["GET","POST"])
 # @login_required

@@ -4,7 +4,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 
 {% block content %}
-    <div class="container-fluid d-flex justify-content-center align-items-center vh-100 gap-5">
+    <div class="container-fluid d-flex justify-content-center align-items-center vh-10 mt-8 gap-5">
         <div class="py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <h3 class="mb-2">Scan your items</h3>
             <div class="visually-hidden">
@@ -17,32 +17,42 @@
                     </div>
                   </td>
             </tr>
+
+            <div class="container-fluid d-flex text-center justify-content-center align-items-center">
+                <form method="POST">
+                    <input type="hidden" name="borrow_data" id="borrowData">
+                    <button type="submit" class="btn btn-dark mt-2 mb-4" id="continue" name="continue">Continue</button>
+                </form>
+                <a type="button" class="btn btn-outline-danger ms-3 mt-2 mb-4 " href="/inventory" onclick="clearBarcode()">Cancel</a>
+            </div>
+
         </div>
         <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
             <div id="notFoundText"></div>
+
             <div class="card text-left">
                 <div class="table-responsive p-0 " style="max-height: 450px;">
                     <table class="table align-items-center mb-0 p-3">
-                    <tbody>
+                        <thead class="mt-n2" style="height: 5px">
+                            <tr >
+                              <th ><h6>Product</h6></th>
+                              <th><h6>Quantity</h6></th>
+                            </tr>
+                        </thead>
+                    <tbody id="tableBody">
                     </tbody>
                     </table>
-                    <div class="text-center">
-                        <button class="btn btn-light w-50 mx-auto" id="no-barcode">Can't find a Barcode?    </button>
-                    </div>
-
-                    <form method="POST">
-                        <div class="text-center">
-                            <input type="hidden" name="borrow_data" id="borrowData">
-                            <button type="submit" class="btn btn-dark w-50 mt-2 mb-4" id="continue" name="continue">Continue</button>
-                        </div>
-                    </form>
                 </div>
             </div>
+
             <div class="text-center mt-3">
-                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/inventory">Cancel</a>
+                <button class="btn btn-light w-50 mx-auto" id="no-barcode">Can't find a Barcode?    </button>
             </div>
+
         </div>
+
     </div>
+
 
 {% endblock content %}
 
@@ -94,8 +104,19 @@
     }
 
     function addTableRow(barcode, item_name, item_quantity, notFound) {
-        // If item is scanned, enable continue button
+        // Select the table body
+        body = document.getElementById('tableBody');
 
+        // Get all items in the table body
+        items = body.querySelectorAll('tr');
+        console.log("items: ", items);
+        // if item not in items
+        if (item_name in items) {
+            console.log("item already in items");
+            return;
+        }
+
+        // If item is scanned, enable continue button
         if (addedBarcodes != {}) {
             document.getElementById("continue").disabled = false;
         }
@@ -177,51 +198,9 @@
       event.preventDefault();
     }
 
-
-    var barcode = '';
-    var item_name = '';
-    var addedBarcodes = {};
-
-    var typingTimer;
-    var doneTypingInterval = 50;
-
-    const tableBody = document.querySelector('tbody');
-    const notFound = document.getElementById('notFoundText');
-
-    // Disable continue button on loading page, when no items are scanned
-    document.getElementById("continue").disabled = true;
-
-    // autofocus input field on loading page
-    document.getElementById("barcodeInputField").focus();
-
-    // autofocus input field on every click everywhere on the page
-    document.addEventListener('click', function() {
-        document.getElementById("barcodeInputField").focus();
-    });
-
-    // Change value in dict if quantity is manually changed
-    document.addEventListener('input', function(event) {
-        // only if quantity of product is not higher than max quantity
-        if (event.target.tagName === 'INPUT') {
-            var barcode = event.target.getAttribute('data-barcode');
-                addedBarcodes[barcode] = parseInt(event.target.value);
-        }
-    });
-
-    // Whenever a barcode is scanned
-    document.getElementById("barcodeInputField").addEventListener('input', function() {
-        // Clear the previous timer
-        clearTimeout(typingTimer);
-
-        // Get barcode from input field
-        barcode = document.getElementById("barcodeInputField").value;
-
-        // Set a new timer to handle barcode input after a certain amount of time
-        typingTimer = setTimeout(function() {
-            console.log("Sending this barcode: ", barcode);
-
-            // Send the barcode to the server
-            fetch('api/borrow', {
+    function addBarcode(barcode) {
+        // Send the barcode to the server
+        fetch('api/borrow', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -325,6 +304,95 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+    }
+
+    function clearBarcode() {
+        fetch('api/clear_barcode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+    }
+
+    var barcode = '';
+    var item_name = '';
+    var addedBarcodes = {};
+
+    var typingTimer;
+    var doneTypingInterval = 50;
+
+    const tableBody = document.querySelector('tbody');
+    const notFound = document.getElementById('notFoundText');
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Select the table body
+        body = document.getElementById('tableBody');
+
+        // Get all items in the table body
+        items = body.querySelectorAll('tr');
+        console.log("items: ", items);
+
+        fetch('api/get_barcode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response from server:', data);
+            barcodes = data.barcodes;
+
+        for (const barcode of barcodes) {
+            addBarcode(barcode);
+        }
+        });
+    })
+
+    // Disable continue button on loading page, when no items are scanned
+    document.getElementById("continue").disabled = true;
+
+    // autofocus input field on loading page
+    document.getElementById("barcodeInputField").focus();
+
+    // autofocus input field on every click everywhere on the page
+    document.addEventListener('click', function() {
+        document.getElementById("barcodeInputField").focus();
+    });
+
+    // Change value in dict if quantity is manually changed
+    document.addEventListener('input', function(event) {
+        // only if quantity of product is not higher than max quantity
+        if (event.target.tagName === 'INPUT') {
+            var barcode = event.target.getAttribute('data-barcode');
+                addedBarcodes[barcode] = parseInt(event.target.value);
+        }
+    });
+
+    // Whenever a barcode is scanned
+    document.getElementById("barcodeInputField").addEventListener('input', function() {
+        // Clear the previous timer
+        clearTimeout(typingTimer);
+
+        // Get barcode from input field
+        barcode = document.getElementById("barcodeInputField").value;
+
+        // Set a new timer to handle barcode input after a certain amount of time
+        typingTimer = setTimeout(function() {
+            console.log("Sending this barcode: ", barcode);
+            addBarcode(barcode);
         }, doneTypingInterval);
     });
 

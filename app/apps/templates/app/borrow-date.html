@@ -98,20 +98,6 @@
         });
     });
 
-    function clearBarcode() {
-        fetch('api/clear_barcode', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-    }
   </script>
   <style>
     div > div.flatpickr-days > div > span.flatpickr-day.today{

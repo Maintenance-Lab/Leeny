@@ -19,11 +19,11 @@
             </tr>
 
             <div class="container-fluid d-flex text-center justify-content-center align-items-center">
+                <a type="button" class="btn btn-outline-danger  mt-2 mb-4 " href="/inventory" onclick="clearBarcode();clearProjectDate();">Cancel</a>
                 <form method="POST">
                     <input type="hidden" name="borrow_data" id="borrowData">
-                    <button type="submit" class="btn btn-dark mt-2 mb-4" id="continue" name="continue">Continue</button>
+                    <button type="submit" class="btn btn-dark ms-3 mt-2 mb-4" id="continue" name="continue">Continue</button>
                 </form>
-                <a type="button" class="btn btn-outline-danger ms-3 mt-2 mb-4 " href="/inventory" onclick="clearBarcode()">Cancel</a>
             </div>
 
         </div>
@@ -107,14 +107,14 @@
         // Select the table body
         body = document.getElementById('tableBody');
 
-        // Get all items in the table body
-        items = body.querySelectorAll('tr');
-        console.log("items: ", items);
-        // if item not in items
-        if (item_name in items) {
-            console.log("item already in items");
-            return;
-        }
+        // // Get all items in the table body
+        // items = body.querySelectorAll('tr');
+        // console.log("items: ", items);
+        // // if item not in items
+        // if (item_name in items) {
+        //     console.log("item already in items");
+        //     return;
+        // }
 
         // If item is scanned, enable continue button
         if (addedBarcodes != {}) {
@@ -321,6 +321,21 @@
         })
     }
 
+    function clearProjectDate() {
+        fetch('api/clear_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+    }
+
     var barcode = '';
     var item_name = '';
     var addedBarcodes = {};
@@ -354,10 +369,11 @@
         .then(data => {
             console.log('Response from server:', data);
             barcodes = data.barcodes;
+            clearBarcode();
+            for (const barcode of barcodes) {
+                addBarcode(barcode);
+            }
 
-        for (const barcode of barcodes) {
-            addBarcode(barcode);
-        }
         });
     })
 

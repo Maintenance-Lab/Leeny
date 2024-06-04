@@ -119,10 +119,16 @@ class GetBarcode(Resource):
 class ClearBarcode(Resource):
     def post(self):
         session['barcodes'] = []
-        session['project'] = ''
-        session['estimated_return_date'] = ''
         print("Barcodes cleared")
         return {'message': 'Barcodes cleared'}, 200
+
+@api.route('/clear_project_date', methods=['POST'])
+class ClearProjectDate(Resource):
+    def post(self):
+        session['project'] = ''
+        session['estimated_return_date'] = ''
+        print("Project date cleared")
+        return {'message': 'Project date cleared'}, 200
 
 @api.route('/get_project_date', methods=['POST'])
 class GetProjectDate(Resource):
@@ -139,13 +145,14 @@ class Borrow(Resource):
         barcode = data['barcode']
         print("BARCODE: ", barcode)
 
-        if 'barcodes' not in session:
-            session['barcodes'] = []
+        # if 'barcodes' not in session:
+        #     session['barcodes'] = []
 
-        barcodes = session['barcodes']
-        session['barcodes'] = barcodes + [barcode]
-
-        print("Adding barcode to session: ", session['barcodes'])
+        # # Add barcode to session
+        # barcodes = session['barcodes']
+        # print("BARCODES BEFORE APPENDING: ", barcodes)
+        # session['barcodes'] = barcodes + [barcode]
+        # print("BARCODES AFTER APPENDING: ", session['barcodes'])
 
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()

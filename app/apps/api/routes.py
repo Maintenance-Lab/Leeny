@@ -359,6 +359,7 @@ class AdminLogin(Resource):
                 session['_user_id'] = user.id
                 session['email'] = user.email
                 session['role'] = user.role
+                session['fullname'] = user.fullname
 
                 output = {
                     'message': f'Login successful',

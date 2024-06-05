@@ -156,7 +156,7 @@ def card_forgotten():
                 login_user(user)
                 # flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'admin-login')
-                return render_template('app/card_forgotten.html', form=login_form)
+                return render_template('app/card_forgotten.html', email = request.form['email'])
             else:      
                 flash({'category':'warning', 'title': 'Incorrect email!', 'text': 'Try again using another email'}, 'General')
 
@@ -254,13 +254,6 @@ def home():
 # @login_required
 def admin_dashboard():
     return render_template('app/admin-dashboard.html', segment='admin-dashboard')
-
-
-@blueprint.route('/admin-inventory')
-# @login_required
-def admin_inventory():
-    return render_template('app/admin-inventory.html', segment='admin-inventory')
-
 
 @blueprint.route('/add-product')
 # @login_required

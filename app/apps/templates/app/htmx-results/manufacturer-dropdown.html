@@ -1,7 +1,7 @@
 <select id="manufacturer-select" class="form-select" aria-label="Default select example">
     <option value="" selected disabled>Select Manufacturer...</option>
-    {% for name in data %}
-    <option value="{{ name }}">{{ name }}</option>
+    {% for manufacturer in data %}
+    <option value="{{ manufacturer[1] }}">{{ manufacturer[1] }}</option>
     {% endfor %}
 </select>
 
@@ -11,6 +11,18 @@
             placeholder: "Select Manufacturer...",
             tags: true
         });
+    });
+
+    {% if value != -1 %}
+    $('#manufacturer-select').val("{{value}}").trigger('change');
+    {% endif %}
+
+    $('#manufacturer-select').on('change', function() {
+        try{
+            handleInputChange();
+        } catch (error) {
+            
+        }
     });
 </script>
 

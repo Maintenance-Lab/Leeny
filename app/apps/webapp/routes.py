@@ -707,8 +707,6 @@ def inventory_borrowed(load):
         item['created_at_ts'] = timestamp2
         item['days_until_return'] = days_until_return
 
-    # return render_template('app/inventory-results.html', data=data)
-    print(data)
 
     return render_template('app/htmx-results/borrowed-results.html', data=data)
 
@@ -717,9 +715,17 @@ def inventory_borrowed(load):
 @blueprint.route('/item/load/<int:id>')
 def item_load(id):
     # Load product info
-    all_objects = Product.query.filter(Product.id == id)
-    data = [{'id': obj.id, **ProductForm(obj=obj).data} for obj in all_objects][0]
+    select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total, 
+                      Product.price_when_bought, Product.description, Product.url, Product.documentation, Product.notes,
+                      Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
 
+    all_objects = Product.query.filter(Product.id == id) \
+        .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+        .join(ProductCategory, ProductCategory.id == Product.category_id) \
+        .join(Vendor, Vendor.id == Product.vendor_id) \
+        .with_entities(*select_columns)
+
+    data = [{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects][0]
 
     # Load borrowed data
     select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
@@ -775,17 +781,27 @@ def orders_load(output):
     return render_template('app/htmx-results/orders-results.html', data=data, user_id=user_id)
 
 @blueprint.route('/ordered/load/<int:id>')
-def ordered_load(id):
-    all_objects = Ordered.query.filter(Ordered.id == id).all()
-    data = []
+@blueprint.route('/ordered/load/<int:id>/<int:load>')
+def ordered_load(id, load=0):
+                      
+    select_columns = [Ordered.id, Ordered.product_id, Ordered.title, Ordered.price_when_bought, Ordered.url,
+                      Ordered.reason, Ordered.quantity, Ordered.status,
 
-    for obj in all_objects:
-        obj_dict = {}
-        for column in obj.__table__.columns.keys():
-            obj_dict[column] = getattr(obj, column)
-        data.append(obj_dict)
+                      Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
 
-    return render_template('app/htmx-results/ordered-info.html', data=data[0])
+
+    all_objects = Ordered.query \
+        .join(Manufacturer, Manufacturer.id == Ordered.manufacturer_id, isouter = True) \
+        .join(ProductCategory, ProductCategory.id == Ordered.category_id, isouter = True) \
+        .join(Vendor, Vendor.id == Ordered.vendor_id, isouter = True) \
+        .filter(Ordered.id == id)\
+        .with_entities(*select_columns) \
+        .all()
+    
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+
+
+    return render_template('app/htmx-results/ordered-info.html', data=data['data'][0], load=load)
 
 
 @blueprint.route('/orders/googlesearch/')
@@ -854,27 +870,30 @@ def googlesearchURL():
 
     return render_template('app/htmx-results/googlesearch-results.html', data=data)
 
-
 @blueprint.route('/manufacturer/dropdown/')
-def manufacturer_dropdown():
+@blueprint.route('/manufacturer/dropdown/<string:preselect>')
+def manufacturer_dropdown(preselect=-1):
     all_objects = Manufacturer.query.all()
-    data = [obj.manufacturer_name for obj in all_objects]
+    data = [[obj.id, obj.manufacturer_name] for obj in all_objects]
 
-    return render_template('app/htmx-results/manufacturer-dropdown.html', data=data)
+    return render_template('app/htmx-results/manufacturer-dropdown.html', data=data, value=preselect)
 
 @blueprint.route('/category/dropdown/')
-def category_dropdown():
+@blueprint.route('/category/dropdown/<string:preselect>')
+def category_dropdown(preselect=-1):
     all_objects = ProductCategory.query.all()
-    data = [obj.category_name for obj in all_objects]
+    data = [[obj.id, obj.category_name] for obj in all_objects]
 
-    return render_template('app/htmx-results/category-dropdown.html', data=data)
+    return render_template('app/htmx-results/category-dropdown.html', data=data, value=preselect)
 
 @blueprint.route('/vendor/dropdown/')
-def vendor_dropdown():
+@blueprint.route('/vendor/dropdown/<string:preselect>')
+def vendor_dropdown(preselect=-1):
     all_objects = Vendor.query.all()
-    data = [obj.vendor_name for obj in all_objects]
+    data = [[obj.id, obj.vendor_name] for obj in all_objects]
 
-    return render_template('app/htmx-results/vendor-dropdown.html', data=data)
+
+    return render_template('app/htmx-results/vendor-dropdown.html', data=data, value=preselect)
 
 @blueprint.route('/get_user')
 def get_user():

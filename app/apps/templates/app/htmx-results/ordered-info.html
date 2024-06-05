@@ -1,45 +1,197 @@
-<div class=" card p-3" style="height: inherit;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mt-lg-0 mt-4">{{ data.title }}</h3>
-        {% if session['role'] == 'admin' %} 
-        <a id="edit-product-button" href="/edit-product/{{data.id}}" class="btn btn-dark w-25 mb-0">Edit Product</a>
-        {% endif %}
-    </div>
 
-    <div class="d-flex align-items-center gap-3">
-        <div>
-            <label class="mb-0 mt-3 mx-0">Purchase price</label><br>
-            <h7>${{ data.price_when_bought }}</h7> <br>
+    {% if session['role'] != 'admin' %} 
+    <div class=" card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mt-lg-0 mt-4">{{ data.title }}</h3>
+        </div>
+        <div class="d-flex gap-3 container">
+            <div class="col-6">
+                <div class="d-flex align-items-center gap-3">
+                    <div>
+                        <label class="mt-3 mx-0">Purchase price</label><br>
+                        <h7>${{ data.price_when_bought }}</h7> <br>
+                    </div>
+                    <div>
+                        <label class="mt-3 mx-0">Quantity</label><br>
+                        <h7>{{ data.quantity }}</h7> <br>
+                    </div>
+                </div>
+                <div style="word-wrap:break-word">
+                    <label class="mt-2 mx-0 ">Purchase URL</label>
+                    <p class="text-sm mb-2"><a href="{{ data.url }}">{{ data.url }}</a></p> 
+                </div>
+                <div style="word-wrap:break-word">
+                    <label class="mt-2 mx-0 ">Reason for purchase</label><br>
+                    <h7 class="text-sm mb-2">{{ data.reason }}</h7><br>
+                </div>
+            </div>
+            <div class="col-6">
+                    <label class="mt-3 mx-0">Category</label><br>
+                    <h7 class="text-sm mb-2">{{ data.category_name }}</h7><br>
+
+                    <label class="mt-2 mx-0 ">Manufacturer</label><br>
+                    <h7 class="text-sm mb-2">{{ data.manufacturer_name }}</h7><br>
+
+                    <label class="mt-2 mx-0 ">Vendor</label><br>
+                    <h7 class="text-sm mb-2">{{ data.vendor_name }}</h7> <br>
+
+            </div>
         </div>
     </div>
-
-    <label class="mt-4 mx-0">Description</label>
-    <p class="text-sm mb-2">
-        {{ data.description }}
-    </p>
-    <div class="container d-flex gap-3 p-0">
-
-    <div class="container d-flex flex-column p-0 w-50">
-        <div style="word-wrap:break-word">
-            <label class="mt-2 mx-0 ">Purchased at</label>
-            <p class="text-sm mb-2"><a href="{{ data.url }}">{{ data.url }}</a></p> 
+    {% else %}
+    <div class="d-flex flex-column gap-3">
+    <div class=" card p-3" style="max-height: 100px !important;">
+        <div class="ms-4 me-2">
+            <label >Status</label>
+            <select class="form-control" id="dropdown">
+                <option value=-1 {% if data.status == -1 %}selected{% endif %}>Cancelled</option>
+                <option value=1 {% if data.status == 1 %}selected{% endif %}>Waiting for approval</option>
+                <option value=2 {% if data.status == 2 %}selected{% endif %}>In transit</option>
+                <option value=3 {% if data.status == 3 %}selected{% endif %}>Delivered</option>
+                <option value=4 {% if data.status == 4 %}selected{% endif %}>Finished</option>
+            </select>
         </div>
-        {% if data.documentation %}
-        <div style="word-wrap:break-word">
-            <label class="mt-2 mx-0 ">Documents</label>
-            <p class="text-sm mb-2"><a href="{{ data.url }}">{{ data.documentation }}</a></p>
-        </div>
-        {% endif %}
-        {% if data.notes %}
-        <div style="word-wrap:break-word">
-           <label class="mt-2 mx-0 ">Notes</label>
-           <p class="text-sm mb-2">{{ data.notes }}</p>
-        </div>
-        {% endif %}
+        
     </div>
+    <div class=" card p-3">
 
-
+    <div class="ms-4 me-2" id="item-form">
+        <label for="itemInput">Title</label><br>
+        <input type="text" id="itemInput" class="form-control" value="{{ data.title }}">
     </div>
-    <!-- Other details can be added here -->
+    <div class="d-flex gap-3 container" id="item-form">
+        <div class="col-6">
+            <div class="d-flex align-items-center gap-3">
+                <div>
+                    <label for="price-input">Purchase price</label><br>
+                    <input type="text" id="price-input" class="form-control" value="€ {{ data.price_when_bought }}">
+                </div>
+                <div>
+                    <label for="quantity-input">Quantity</label><br>
+                    <input type="number" id="quantity-input" class="form-control" value="{{ data.quantity }}">
+                </div>
+            </div>
+            <div style="word-wrap:break-word">
+                <label for="purchase-url-input">Purchase URL</label>
+                <input type="text" id="purchase-url-input" class="form-control" value="{{ data.url }}">
+            </div>
+            <div style="word-wrap:break-word">
+                <label for="reason-input">Reason for purchase</label><br>
+                <input type="text" id="reason-input" class="form-control" value="{{ data.reason }}">
+            </div>
+        </div>
+        <div class="col-6">
+                <label>Category:</label>
+                <div id="categoryDropdown">
 
+                </div>
+
+                <label>Manufacturer:</label>
+                <div id="manufacturerDropdown">
+
+                </div>
+
+                <label>Vendor:</label>
+                <div id="vendorDropdown">
+                </div>
+                <span hx-get="/category/dropdown{% if data.category_name %}/{{ data.category_name }}{% endif %}" hx-trigger="load" hx-target="#categoryDropdown">
+                <span hx-get="/manufacturer/dropdown{% if data.manufacturer_name %}/{{ data.manufacturer_name }}{% endif %}" hx-trigger="load" hx-target="#manufacturerDropdown">
+                <span hx-get="/vendor/dropdown{% if data.vendor_name %}/{{ data.vendor_name }}{% endif %}" hx-trigger="load" hx-target="#vendorDropdown">
+        </div>
+    </div>
+    <div class="d-flex gap-3 container mt-3" id="hidden-btn" style="display: none !important;">
+        <div class="col-6 d-flex justify-content-end">
+            <button id="save-changes-button" class="btn btn-dark mb-0 w-75">Save Changes</button>
+        </div>
+        <div class="col-6 d-flex justify-content-start">
+            <button id="cancel-button" class="btn btn-outline-danger mb-0 w-75">Cancel</button>
+        </div>  
+    </div>
 </div>
+    {% endif %}
+
+<script>
+    // Function to handle input changes
+    function handleInputChange() {
+        const container = document.getElementById('hidden-btn');
+        container.style.display = '';  // Remove the display: none style
+    }
+
+
+    // Use event delegation to handle changes on dynamically loaded inputs
+    document.body.addEventListener('keydown', (event) => {
+        if (event.target.closest('#item-form input, #dropdown')) {
+            handleInputChange();    
+        }
+    });
+    document.body.addEventListener('click', (event) => {
+    if (event.target.closest('#dropdown')) {
+        handleInputChange();    
+    }
+});
+
+</script>
+
+<script>
+    const handleSubmit = () => {
+    // Get the data from the rows
+    const item = document.getElementById('itemInput').value;
+    const price = document.getElementById('price-input').value;
+    const url = document.getElementById('purchase-url-input').value;
+    const quantity = document.getElementById('quantity-input').value;
+    const reason = document.getElementById('reason-input').value;
+    const category = document.getElementById('select2-category-select-container').textContent.trim();
+    const manufacturer = document.getElementById('select2-manufacturer-select-container').textContent.trim();
+    const vendor = document.getElementById('select2-vendor-select-container').textContent.trim();
+    const status = document.getElementById('dropdown').value;
+
+    const item_id = {{data.id}};
+
+    // Send the data to the server
+    const formData = {
+        item_id: item_id,
+        title: item,
+        price_when_bought: price,
+        url: url,
+        quantity: quantity,
+        category: category,
+        manufacturer: manufacturer,
+        vendor: vendor,
+        reason: reason,
+        status:status
+    };
+    // Send formData to the server using fetch
+    fetch(`${window.location.origin}/api/orders/update_ordered`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        if (!response.ok) {
+
+            throw new Error('Network response was not ok');
+        }
+        if (response.ok) {
+            // Redirect the user back upon successful response
+            console.log('updated')
+            location.reload()
+        }
+        return response.json();
+    })
+    .catch(error => {
+        // Handle error
+        console.error('Error:', error);
+    });
+};
+
+const submitButton = document.querySelector('#save-changes-button');
+submitButton.addEventListener('click', handleSubmit);
+
+const cancelButton = document.querySelector('#cancel-button');
+cancelButton.addEventListener('click', () => {
+    location.reload();
+}
+    );
+</script>

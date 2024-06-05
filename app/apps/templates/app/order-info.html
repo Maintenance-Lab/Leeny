@@ -9,7 +9,7 @@
 {% block content %}
 <div class="container-fluid pb-6 overflow-hidden ">
     <h1 class="mb-4">Order #{{data['order_data'].id}}</h1>
-    <div class="d-flex gap-3">
+    <div class="container d-flex gap-3">
     <div class="col-6 d-flex gap-3 flex-column">
         <div class="card p-3 pt-0" style="max-height: 125px !important;">
             <table class="table align-items-center mb-0" style="max-height: 125px !important;">
@@ -59,7 +59,7 @@
             </table>
         </div>
 
-        <div class="card" style="height: 250px !important; overflow-y: auto; overflow-x: hidden;"
+        <div class="card" style="height: 250px !important; overflow-y: auto;"
             id="table-scroll">
             <table class="table align-items-center mb-0 ">
                 <thead style="position: sticky; top: 0px; background-color: #ffffff;">
@@ -128,8 +128,10 @@
                             <a href="/" hx-get="/ordered/load/{{item.id}}" hx-trigger="click" hx-target="#results">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px"
                                     viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-                                    <path
-                                        d="M256 464a208 208 0 1 1 0-416 208 208 0 1 1 0 416zM256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM376.9 294.6c4.5-4.2 7.1-10.1 7.1-16.3c0-12.3-10-22.3-22.3-22.3H304V160c0-17.7-14.3-32-32-32l-32 0c-17.7 0-32 14.3-32 32v96H150.3C138 256 128 266 128 278.3c0 6.2 2.6 12.1 7.1 16.3l107.1 99.9c3.8 3.5 8.7 5.5 13.8 5.5s10.1-2 13.8-5.5l107.1-99.9z" />
+                                    <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 135.1c-4.2-4.5-10.1-7.1-16.3-7.1C266 128 256 138 256 150.3V208H160c-17.7 0-32 14.3-32 32v32c0 17.7 14.3 32 32 32h96v57.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.3-7.1l99.9-107.1c3.5-3.8 5.5-8.7 5.5-13.8s-2-10.1-5.5-13.8L294.6 135.1z"/>
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    
                                 </svg>
                             </a>
                         </td>
@@ -142,7 +144,7 @@
     </div>
 
     <div class="col-6 d-flex gap-3" >
-        <div id="results"></div>
+        <div id="results" class="w-100"></div>
     </div>
 
 </div>
@@ -177,8 +179,10 @@
 <script>
     // Initialize Perfect Scrollbar
     document.addEventListener('DOMContentLoaded', function () {
-        const ps = new PerfectScrollbar('#table-scroll');
+    const ps = new PerfectScrollbar('#table-scroll', {
+        suppressScrollX: true
     });
+});
 </script>
 
 {% endblock %}

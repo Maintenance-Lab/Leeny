@@ -4,31 +4,33 @@
 {% block content %}
 
 <section class="min-vh-100">
-  <div class="container mt-7">
+  <div class="container mt-9">
     <div class="row justify-content-center">
-      <div class="col-xl-6 col-lg-8 col-md-10">
-        <div class="card z-index-0">
-          <div class="card-body">
+      <div class="d-flex justify-content-center gap-3">
+        <div class="card col-6 ">
+          <div class="p-4">
             <div class="row">
-              <div class="col-md-6">
-                <div style="text-align: left;">
-                  <label style="display: block;">Name borrower</label>
-                  <div class="mb-3">
-                    <p style="margin: 0;">{{ session.name }}</p>
+              <h2>Confirm borrow details</h2>
+              <div class="col-md-12">
+                <div class="d-flex" style="text-align: left;">
+                  <div class="mb-1 col-5">
+                    <label style="display: block;">Name borrower</label>
+                    <p class="ms-1">{{ session.name }}</p>
                   </div>
 
-                  <label style="display: block;">Project</label>
-                  <div class="mb-3">
-                    <p style="margin: 0;">{{ session.project }}</p>
+                  
+                  <div class="mb-1 col-5">
+                    <label style="display: block;">Project</label>
+                    <p class="ms-1">{{ session.project }}</p>
                   </div>
 
-                  <label style="display: block;">Return Date</label>
-                  <div class="mb-3">
-                    <p style="margin: 0;">{{ timestamp }}</p>
+                  <div class="mb-1 col-2">
+                    <label style="display: block;">Return Date</label>
+                    <p class="ms-1">{{ timestamp }}</p>
                   </div>
-
-                  <label style="display: block;">Items</label>
-                  <ul style="list-style-type: none; padding-left: 0;">
+                </div>
+                <label style="display: block;">Items</label>
+                  <ul class="ms-1" style="list-style-type: none; padding-left: 0;">
                     {% for item, quantity in session.addedProducts.items() %}
                     <li style="margin-bottom: 5px;">
                       <span style="display: inline-block; width: 50px;">{{ quantity }}</span>
@@ -36,26 +38,28 @@
                     </li>
                     {% endfor %}
                   </ul>
-                </div>
-              </div>
-              <div class="col-md-6 text-center">
-                <p>Ask an employee to scan their card for verification</p>
-                <img src="https://static.thenounproject.com/png/74445-200.png" width="200" height="200" alt="Admin Card Image">
               </div>
             </div>
-            <div class="row justify-content-center mt-4">
-                <div class="col-auto">
-                    <a href="/borrow-date" class="btn btn-outline-danger">Back</a>
-                </div>
-                <div class="col-auto">
-                    <button type="button" class="btn btn-dark" id="scan-card">Scan Admin Card</button>
-                </div>
-            </div>
+          </div>
+        </div>
+        <div class="card col-3 p-4 py-1">
+          <div class=" d-flex flex-column align-items-center text-center">
+            <img src="https://static.thenounproject.com/png/74445-200.png" width="200" height="200" alt="Admin Card Image">
+            <p class="mb-0">Ask an employee to scan their card for verification</p>
+          </div>
+          <div class="row justify-content-center mt-4">
+              <div class="col-auto">
+                  <a href="/borrow-date" class="btn btn-outline-danger">Back</a>
+              </div>
+              <div class="col-auto">
+                  <button type="button" class="btn btn-dark" id="scan-card">Scan Admin Card</button>
+              </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 </section>
 
 {% endblock content %}

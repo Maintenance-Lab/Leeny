@@ -18,36 +18,38 @@
                   </td>
             </tr>
 
-            <div class="container-fluid d-flex text-center justify-content-center align-items-center">
-                <a type="button" class="btn btn-outline-danger  mt-2 mb-4 " href="/inventory" onclick="clearBarcode();clearProjectDate();">Cancel</a>
-                <form method="POST">
-                    <input type="hidden" name="borrow_data" id="borrowData">
-                    <button type="submit" class="btn btn-dark ms-3 mt-2 mb-4" id="continue" name="continue">Continue</button>
-                </form>
-            </div>
 
         </div>
         <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
             <div id="notFoundText"></div>
 
             <div class="card text-left">
-                <div class="table-responsive p-0 " style="max-height: 450px;">
+                <div class="table-responsive p-0" style="max-height: 450px;">
                     <table class="table align-items-center mb-0 p-3">
-                        <thead class="mt-n2" style="height: 5px">
+                        <thead class="mt-n2 sticky-top bg-white" style="height: 5px">
                             <tr >
-                              <th ><h6>Product</h6></th>
-                              <th><h6>Quantity</h6></th>
+                              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-2">Product</th>
+                              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-2">Quantity</th>
+                              <th></th>
                             </tr>
                         </thead>
                     <tbody id="tableBody">
                     </tbody>
                     </table>
+                    <div class="text-center mt-3 mb-2">
+                        <button class="btn btn-light w-50 mx-auto" id="no-barcode">Can't find a Barcode?    </button>
+                    </div>
                 </div>
             </div>
 
-            <div class="text-center mt-3">
-                <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/inventory">Back</a>
-                <button class="btn btn-light w-50 mx-auto" id="no-barcode">Can't find a Barcode?    </button>
+            
+
+            <div class="container-fluid d-flex text-center justify-content-center align-items-center mt-2">
+                <a type="button" class="btn btn-outline-danger  mt-2 mb-4 " href="/inventory" onclick="clearBarcode();clearProjectDate();">Cancel</a>
+                <form method="POST">
+                    <input type="hidden" name="borrow_data" id="borrowData">
+                    <button type="submit" class="btn btn-dark ms-3 mt-2 mb-4" id="continue" name="continue">Continue</button>
+                </form>
             </div>
 
         </div>

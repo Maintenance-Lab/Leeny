@@ -108,7 +108,34 @@ class AuthenticateAdmin(Resource):
 
         return {'authenticated': False}
 
+@api.route('/get_barcode', methods=['POST'])
+class GetBarcode(Resource):
+    def post(self):
+        barcodes = session.get('barcodes', [])
+        print("Getting barcodes: ", barcodes)
+        return {'barcodes': barcodes}, 200
 
+@api.route('/clear_barcode', methods=['POST'])
+class ClearBarcode(Resource):
+    def post(self):
+        session['barcodes'] = []
+        print("Barcodes cleared")
+        return {'message': 'Barcodes cleared'}, 200
+
+@api.route('/clear_project_date', methods=['POST'])
+class ClearProjectDate(Resource):
+    def post(self):
+        session['project'] = ''
+        session['estimated_return_date'] = ''
+        print("Project date cleared")
+        return {'message': 'Project date cleared'}, 200
+
+@api.route('/get_project_date', methods=['POST'])
+class GetProjectDate(Resource):
+    def post(self):
+        project = session.get('project', '')
+        estimated_return_date = session.get('estimated_return_date', '')
+        return {'project': project, 'estimated_return_date': estimated_return_date}, 200
 
 @api.route('/borrow', methods=['POST'])
 class Borrow(Resource):
@@ -118,11 +145,20 @@ class Borrow(Resource):
         barcode = data['barcode']
         print("BARCODE: ", barcode)
 
+        # if 'barcodes' not in session:
+        #     session['barcodes'] = []
+
+        # # Add barcode to session
+        # barcodes = session['barcodes']
+        # print("BARCODES BEFORE APPENDING: ", barcodes)
+        # session['barcodes'] = barcodes + [barcode]
+        # print("BARCODES AFTER APPENDING: ", session['barcodes'])
+
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
         print("PRODUCT: ", product)
 
-        if product is not None:
+        if product:
             title = product.title
             quantity_total = product.quantity_total
             quantity_unavailable = product.quantity_unavailable
@@ -156,7 +192,7 @@ class Borrow(Resource):
             }
 
         return output, 200
-    
+
 @api.route('/borrow/add_to_cart', methods=['POST'])
 class borrow_add_to_cart(Resource):
     def post(self):
@@ -180,8 +216,6 @@ class Borrow2(Resource):
         addedBarcodes = session['addedBarcodes']
         project = session['project']
         return_date = session['estimated_return_date']
-
-
 
         for items in addedBarcodes.items():
             print("barcode: ", items[0], "quantity: ", items[1])
@@ -217,6 +251,8 @@ class Borrow2(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+        session['barcodes'] = []
 
 
         # Send email to users
@@ -265,7 +301,7 @@ class Return(Resource):
                     'message': f'Product not found',
                     'success': False
                 }
-                
+
         else:
             # Product not found
             output = {
@@ -359,6 +395,7 @@ class AdminLogin(Resource):
                 session['_user_id'] = user.id
                 session['email'] = user.email
                 session['role'] = user.role
+                session['fullname'] = user.fullname
 
                 output = {
                     'message': f'Login successful',
@@ -495,7 +532,7 @@ class EditProduct(Resource):
             'message': f'Product updated',
             'success': True
         }, 200
-    
+
 @api.route('/delete-product', methods=['POST'])
 class DeleteProduct(Resource):
     def post(self):
@@ -514,7 +551,7 @@ class DeleteProduct(Resource):
                 'message': f'Product could not be deleted. This might be because the product is currently being borrowed.',
                 'success': False
                 }, 200
-            
+
         else:
             return {
             'message': f'Product Not Found',
@@ -568,7 +605,7 @@ class DeleteUser(Resource):
                 'message': f'User could not be deleted. This might be because the user is currently borrowing something.',
                 'success': False
                 }, 200
-            
+
         else:
             return {
             'message': f'User Not Found',

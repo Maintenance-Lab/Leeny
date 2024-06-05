@@ -38,7 +38,7 @@ from datetime import datetime
 def start():
     logout_user()
     [session.pop(key) for key in list(session.keys()) if key != '_flashes']
-    
+
     login_form = LoginForm(request.form)
 
     if request.method == "POST":
@@ -101,6 +101,20 @@ def post():
             borrow_data = json.loads(request.form["borrow_data"])
             session['addedBarcodes'] = borrow_data
 
+            barcode_list = []
+            for barcode, quantity in borrow_data.items():
+                # Check if the barcode is not 'null'
+                if barcode != 'null':
+                    # Repeat each barcode according to its quantity and append to the list
+                    for i in range(quantity):
+                        barcode_list.append(barcode)
+
+            print("Barcode list: ", barcode_list)
+
+            if 'barcodes' not in session:
+                session['barcodes'] = []
+            session['barcodes'] += barcode_list
+
             # create dictionary with names and quantities
             # addedBarcodes = request.form["borrow_data"]
             addedProducts = {}
@@ -135,9 +149,9 @@ def post():
 def card_forgotten():
     logout_user()
     [session.pop(key) for key in list(session.keys()) if key != '_flashes']
-    
+
     login_form = CreateAccountForm(request.form)
-    
+
     if request.method == "POST":
         if "email_login" in request.form:
             email = request.form['email']
@@ -148,15 +162,15 @@ def card_forgotten():
                 except:
                     flash({'category':'danger', 'title': 'Incorrect Email!', 'text': 'Your Email is incorrect or unknown'}, 'General')
 
-            
+
             if user:
-                print('user') 
+                print('user')
                 session['fullname'] = user.fullname
                 session['role'] = user.role
                 login_user(user)
                 # flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'admin-login')
-                return render_template('app/card_forgotten.html', form=login_form)
+                return render_template('app/card_forgotten.html', email = request.form['email'])
             else:      
                 flash({'category':'warning', 'title': 'Incorrect email!', 'text': 'Try again using another email'}, 'General')
 
@@ -255,13 +269,6 @@ def home():
 def admin_dashboard():
     return render_template('app/admin-dashboard.html', segment='admin-dashboard')
 
-
-@blueprint.route('/admin-inventory')
-# @login_required
-def admin_inventory():
-    return render_template('app/admin-inventory.html', segment='admin-inventory')
-
-
 @blueprint.route('/add-product')
 # @login_required
 def admin_add_product():
@@ -355,15 +362,15 @@ def user(id):
     create_account_form = CreateAccountForm(request.form)
     all_objects = Users.query.filter_by(id=id)
     data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
-    
+
     for item in data['data']:
         timestamp = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
         item['created_at_ts'] = timestamp
-    
+
     for item in data['data']:
         timestamp2 = datetime.fromtimestamp(item['updated_at_ts']).strftime('%d-%m-%Y')
         item['updated_at_ts'] = timestamp2
-    
+
     if request.method == "POST":
         if "update_profile" in request.form:
             test = Users.query.filter_by(id=id).update(dict(fullname=request.form['fullname'], email=request.form['email']\
@@ -372,7 +379,7 @@ def user(id):
             db.session.commit()
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect((f'/user/{id}'))
-        
+
 
         # Load borrowed data
     select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
@@ -418,7 +425,7 @@ def order_info(order_id = None):
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns) \
     .first()
-        
+
     order_data = [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in [all_objects]][0]
 
     data = {'data': result,'order_data':order_data}
@@ -647,7 +654,7 @@ def inventory_search_small():
     .limit(4)
 
     data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
-    
+
     return render_template('app/htmx-results/inventory-results-small.html', data=data)
 
 @blueprint.route('/inventory/search/borrow')
@@ -662,7 +669,7 @@ def inventory_search_borrow():
     .limit(4)
 
     data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
-    
+
     return render_template('app/htmx-results/inventory-results-borrow.html', data=data)
 
 @blueprint.route('/inventory/borrowed/<int:load>')
@@ -675,8 +682,8 @@ def inventory_borrowed(load):
     .join(Users, Users.id == Borrowed.user_id) \
     .with_entities(*select_columns) \
     .order_by(Borrowed.estimated_return_date.asc()) \
-    
-    if load == 1:   
+
+    if load == 1:
         all_objects = all_objects.filter(Borrowed.estimated_return_date < datetime.now().timestamp())
 
 
@@ -765,7 +772,7 @@ def orders_load(output):
             item['created_at_ts'] = 'Today'
         else:
             item['created_at_ts'] =  timestamp
-    
+
     if session.get('_user_id') != None:
         user_id=session['_user_id']
     else:

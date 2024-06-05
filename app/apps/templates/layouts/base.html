@@ -42,14 +42,17 @@
   {% block stylesheets %}{% endblock stylesheets %}  
 
 </head>
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show bg-gray-100 max-width:100%">
+  <div style="height:5em;">
+    {% include "includes/navigation.html" %} 
+  </div>
   
   {% include "includes/sidebar.html" %} 
   {% include "includes/sweetalerts.html" %}
 
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+  <main class="main-content position-relative">
 
-    {% include "includes/navigation.html" %} 
+    
 
     {% block content %}{% endblock content %}
 

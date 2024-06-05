@@ -609,6 +609,68 @@ class AddToCart(Resource):
         return {
             'success': True
         }, 200
+    
+
+@api.route('/orders/update_ordered', methods=['POST'])
+class UpdateOrder(Resource):
+    def post(self):
+        data = request.get_json()
+        item = Ordered.query.filter(Ordered.id == data['item_id']).first()
+        if item:
+            # Dropdown menus
+            manufacturer_name = data['manufacturer']
+            if manufacturer_name != "Select Manufacturer...":
+                manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+                if not manufacturer:
+                    manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+                    db.session.add(manufacturer)
+
+
+            category_name = data['category']
+            if category_name != "Select Category...":
+                category = ProductCategory.query.filter_by(category_name=category_name).first()
+                if not category:
+                    category = ProductCategory(category_name=category_name)
+                    db.session.add(category)
+            
+
+            vendor_name = data['vendor']
+            if vendor_name != "Select Vendor...":
+                vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+                if not vendor:
+                    vendor = Vendor(vendor_name=vendor_name)
+                    db.session.add(vendor)
+
+            db.session.commit()
+            if vendor_name != "Select Vendor...":
+                item.vendor_id = vendor.id
+            if category_name != "Select Category...":
+                item.category_id= category.id
+            if manufacturer_name != "Select Manufacturer...":
+                item.manufacturer_id= manufacturer.id
+
+            item.title=data['title']
+            item.price_when_bought=data['price_when_bought'].replace("€", "").strip()
+            item.url=data['url']
+            item.quantity=data['quantity']
+            item.reason=data['reason']
+            item.status=data['status']
+
+
+            db.session.commit()
+
+        else:
+            return {
+                'message': 'Item not found',
+                'success': False
+            }
+
+        
+        return {
+                'success': True
+            }, 200
+
+    
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):

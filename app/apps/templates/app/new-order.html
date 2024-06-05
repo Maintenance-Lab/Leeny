@@ -63,6 +63,10 @@
             <form method="POST" class="text-center mt-3">
                 <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Cancel</button>
             </form>
+            {% else %}
+            <div class="d-flex w-100 justify-content-center mt-3">
+                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " onclick="window.history.back();">Cancel</button>
+            </div>
             {% endif %}
         </div>
     </div>

@@ -51,24 +51,58 @@
      // Calculate tomorrow's date
      var tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 7);
+    setDateFunction();
 
-    if (document.querySelector('.datepicker')) {
-      flatpickr('.datepicker', {
-        mode: "single",
-        dateFormat: "U",
-        altInput: true,
-        altFormat: "d-m-Y",
-        minDate: "today",
-        maxDate: new Date().fp_incr(90),
-        // allowInput: true,
-      });
+    function setDateFunction() {
+      if (document.querySelector('.datepicker')) {
+        flatpickr('.datepicker', {
+          mode: "single",
+          dateFormat: "U",
+          altInput: true,
+          altFormat: "d-m-Y",
+          minDate: "today",
+          maxDate: new Date().fp_incr(90),
+          // allowInput: true,
+        });
+      }
     }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        fetch('api/get_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response from server:', data);
+            project = data.project;
+            estimated_return_date = data.estimated_return_date;
+
+            document.querySelector('input[name="project"]').value = project;
+
+            // set value date picker
+            console.log("current value date picker", document.querySelector('input[name="estimated_return_date"]').value)
+            document.querySelector('input[name="estimated_return_date"]').value = estimated_return_date;
+            console.log("new value date picker", document.querySelector('input[name="estimated_return_date"]').value)
+            setDateFunction();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
 
   </script>
   <style>
     div > div.flatpickr-days > div > span.flatpickr-day.today{
       background: #ffffff !important;
-      color: black; 
+      color: black;
       border: 1px solid #67748e;
       pointer-events: none;
     }

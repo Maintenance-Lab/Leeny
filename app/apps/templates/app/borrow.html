@@ -46,7 +46,7 @@
 
             <div class="container-fluid d-flex text-center justify-content-center align-items-center mt-2">
                 <a type="button" class="btn btn-outline-danger  mt-2 mb-4 " href="/inventory" onclick="clearBarcode();clearProjectDate();">Cancel</a>
-                <form method="POST">
+                <form autocomplete="off" method="POST">
                     <input type="hidden" name="borrow_data" id="borrowData">
                     <button type="submit" class="btn btn-dark ms-3 mt-2 mb-4" id="continue" name="continue">Continue</button>
                 </form>

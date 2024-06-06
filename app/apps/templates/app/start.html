@@ -15,7 +15,7 @@
         <div class="card py-5 col-lg-4 col-md-6 col-sm-10 text-center ">
             <!-- invisible form for pasting and getting the uid -->
             <div class="visually-hidden">
-              <form role="form text-left" method="post" action="">
+              <form autocomplete="off" role="form text-left" method="post" action="">
                 {{ form.hidden_tag() }}
 
                   {{ form.uid_1(id="uid_1") }}
@@ -27,7 +27,7 @@
             <h3 class="mb-lg-4">het uitleensysteem</h3>
             <hr class="mx-7 my-3">
             <!-- form for the sweetalert -->
-            <form class="mx-7 mt-4 mb-3" method="POST">
+            <form autocomplete="off" class="mx-7 mt-4 mb-3" method="POST">
               <input type="submit" value="Log In" class="btn btn-dark w-100 h-100">
             </form>
             <a type="submit" class="btn  btn-light mx-7 mb-2" href="/register">Register</a>

@@ -324,7 +324,7 @@ def inventory():
 @blueprint.route('/users')
 # @login_required
 def users():
-    # Add pagination
+    # Add pagination    
     return render_template('app/users.html', segment='users')
 
 @blueprint.route('/orders')
@@ -352,6 +352,7 @@ def settings():
                                                                              , study=request.form['study'], faculty=request.form['faculty']))
             # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
+            session['fullname'] = request.form['fullname']
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect(url_for('webapp_blueprint.settings'))
 
@@ -377,6 +378,7 @@ def user(id):
                                                                              , study=request.form['study'], faculty=request.form['faculty']))
             test5 = Users.query.filter_by(id=id).update(dict(role=request.form['role']))
             db.session.commit()
+            session['fullname'] = request.form['fullname']
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect((f'/user/{id}'))
 

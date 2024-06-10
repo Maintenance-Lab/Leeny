@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            
+
 
             <div class="container-fluid d-flex text-center justify-content-center align-items-center mt-2">
                 <a type="button" class="btn btn-outline-danger  mt-2 mb-4 " href="/inventory" onclick="clearBarcode();clearProjectDate();">Cancel</a>
@@ -109,15 +109,6 @@
     function addTableRow(barcode, item_name, item_quantity, notFound) {
         // Select the table body
         body = document.getElementById('tableBody');
-
-        // // Get all items in the table body
-        // items = body.querySelectorAll('tr');
-        // console.log("items: ", items);
-        // // if item not in items
-        // if (item_name in items) {
-        //     console.log("item already in items");
-        //     return;
-        // }
 
         // If item is scanned, enable continue button
         if (addedBarcodes != {}) {
@@ -350,13 +341,6 @@
     const notFound = document.getElementById('notFoundText');
 
     document.addEventListener('DOMContentLoaded', (event) => {
-        // Select the table body
-        body = document.getElementById('tableBody');
-
-        // Get all items in the table body
-        items = body.querySelectorAll('tr');
-        console.log("items: ", items);
-
         fetch('api/get_barcode', {
             method: 'POST',
             headers: {
@@ -393,7 +377,7 @@
 
     // Change value in dict if quantity is manually changed
     document.addEventListener('input', function(event) {
-        // only if quantity of product is not higher than max quantity
+        // Only if quantity of product is not higher than max quantity
         if (event.target.tagName === 'INPUT') {
             var barcode = event.target.getAttribute('data-barcode');
                 addedBarcodes[barcode] = parseInt(event.target.value);
@@ -404,131 +388,82 @@
     document.getElementById("barcodeInputField").addEventListener('input', function() {
         // Clear the previous timer
         clearTimeout(typingTimer);
-
-        // Get barcode from input field
         barcode = document.getElementById("barcodeInputField").value;
 
         // Set a new timer to handle barcode input after a certain amount of time
         typingTimer = setTimeout(function() {
-            console.log("Sending this barcode: ", barcode);
             addBarcode(barcode);
         }, doneTypingInterval);
     });
 
     document.getElementById("continue").addEventListener('click', function() {
-        console.log("continue clicked");
-        console.log("added barcodes 3: ", addedBarcodes);
-
-        // Convert the addedBarcodes dictionary to JSON string
         var borrowDataString = JSON.stringify(addedBarcodes);
-
-        // Set the JSON string as the value of the hidden input field
         document.getElementById("borrowData").value = borrowDataString;
-
-        // Submit the form
         document.getElementById("borrowForm").submit();
     });
 
-
     // Sweet alert
-
     function openSearchModal() {
-    Swal.fire({
-        title: 'Search Items',
-        html: `
-            <div class="p-3">
-                <input id="search-input" type="text" class="input form-control" placeholder="Search items..." name="q" autocomplete="off">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                        <tbody id="results">
-                        </tbody>
-                    </table>
+        Swal.fire({
+            title: 'Search Items',
+            html: `
+                <div class="p-3">
+                    <input id="search-input" type="text" class="input form-control" placeholder="Search items..." name="q" autocomplete="off">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <tbody id="results">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        `,
-        showCloseButton: true,
-        showCancelButton: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            const input = document.getElementById('search-input');
-            input.focus();
+            `,
+            showCloseButton: true,
+            showCancelButton: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                const input = document.getElementById('search-input');
+                input.focus();
 
-            // Event listener to ensure focus is restored if lost
-            input.addEventListener('blur', () => {
-                setTimeout(() => input.focus(), 0);
-            });
-
-            $(document).ready(function() {
-        let debounceTimeout;
-
-        $('#search-input').on('keyup change', function() {
-            clearTimeout(debounceTimeout);
-
-            debounceTimeout = setTimeout(() => {
-                var query = $(this).val();
-                $.ajax({
-                    url: '/inventory/search/borrow',
-                    type: 'GET',
-                    data: { q: query },
-                    success: function(response) {
-                        $('#results').html(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
+                // Event listener to ensure focus is restored if lost
+                input.addEventListener('blur', () => {
+                    setTimeout(() => input.focus(), 0);
                 });
-            }, 250); // 250ms delay
-        });
-    });
-        },
-        willClose: () => {
-            const input = document.getElementById('search-input');
-            input.removeEventListener('blur', () => {
-                setTimeout(() => input.focus(), 0);
+
+                $(document).ready(function() {
+            let debounceTimeout;
+
+            $('#search-input').on('keyup change', function() {
+                clearTimeout(debounceTimeout);
+
+                debounceTimeout = setTimeout(() => {
+                    var query = $(this).val();
+                    $.ajax({
+                        url: '/inventory/search/borrow',
+                        type: 'GET',
+                        data: { q: query },
+                        success: function(response) {
+                            $('#results').html(response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }, 250); // 250ms delay
             });
-        }
-    });
-};
+        });
+            },
+            willClose: () => {
+                const input = document.getElementById('search-input');
+                input.removeEventListener('blur', () => {
+                    setTimeout(() => input.focus(), 0);
+                });
+            }
+        });
+    };
 
     document.getElementById('no-barcode').addEventListener('click', function() {
         openSearchModal();
-        });
-
-        // Swal.fire({
-        // title: 'Search Items',
-        // html: `
-        //     <div class="p-3">
-        //         <input id="search-input" type="text" class="input form-control" placeholder="Search items..." name="q" hx-get="/inventory/search/borrow" hx-trigger="load, keyup changed delay:250ms" hx-target="#results">
-        //         <div class="table-responsive p-0">
-        //             <table class="table align-items-center mb-0">
-        //                 <tbody id="results">
-        //                 </tbody>
-        //             </table>
-        //         </div>
-        //     </div>
-        // `,
-        // showCloseButton: true,
-        // showCancelButton: false,
-        // showConfirmButton: false,
-        // didOpen: () => {
-        //     const input = document.getElementById('search-input');
-        //     input.focus();
-
-        //     // Event listener to ensure focus is restored if lost
-        //     input.addEventListener('blur', () => {
-        //         setTimeout(() => input.focus(), 0);
-        //     });
-
-        // },
-        // willClose: () => {
-        //     const input = document.getElementById('search-input');
-        //     input.removeEventListener('blur', () => {
-        //         setTimeout(() => input.focus(), 0);
-        //     });
-        // }
-        // });
-
-
+    });
 </script>
 
 {% endblock javascripts %}

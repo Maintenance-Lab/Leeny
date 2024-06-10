@@ -237,24 +237,20 @@ def post_return():
             flash({'text':'123'}, 'cancel')
     return render_template('app/return.html')
 
-
 @blueprint.route('/return-confirm', methods=["GET","POST"])
 # @login_required
 def return_confirm():
     return render_template('app/return-confirm.html')
-
 
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
     timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
     return render_template('app/borrow-confirm.html', timestamp=timestamp)
 
-
 @blueprint.route('/home')
 @login_required
 def home():
     return render_template('app/home.html', segment='home')
-
 
 @blueprint.route('/admin-dashboard')
 # @login_required
@@ -284,11 +280,6 @@ def dropdown_vendor():
     all_objects = Vendor.query.all()
     data = [{'id': obj.id, 'name': obj.vendor_name} for obj in all_objects]
     return jsonify(data)
-
-
-
-
-
 
 @blueprint.route('/edit-product/<int:id>')
 # @login_required

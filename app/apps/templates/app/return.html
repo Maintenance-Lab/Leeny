@@ -348,11 +348,9 @@
             return response.json();
         })
         .then(data => {
-            console.log('GOTTED barcodes -------------:', data);
             barcodes = data.barcodes;
             clearBarcode();
             for (const barcode of barcodes) {
-                console.log("BARCODE TO ADD: ", barcode)
                 addBarcode(barcode);
             }
         });
@@ -362,12 +360,10 @@
     document.getElementById("barcodeInputField").addEventListener('input', function() {
         // Clear the previous timer
         clearTimeout(typingTimer);
-
         barcode = document.getElementById("barcodeInputField").value;
 
         // Set a new timer to handle barcode input after a certain amount of time
         typingTimer = setTimeout(function() {
-            console.log("Sending this barcode: ", barcode);
             addBarcode(barcode);
         }, doneTypingInterval);
     });

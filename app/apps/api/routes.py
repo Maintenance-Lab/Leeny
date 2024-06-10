@@ -270,7 +270,6 @@ class Return(Resource):
 
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
-
         if product is not None:
             title = product.title
 
@@ -280,11 +279,10 @@ class Return(Resource):
 
             if borrow is not None:
                 # Product found
-                quantity = borrow.quantity
                 output = {
                     'barcode': barcode,
                     'name': title,
-                    'quantity': quantity,
+                    'quantity': borrow.quantity,
                     'message': f'Product found',
                     'success': True
                 }
@@ -310,7 +308,6 @@ class Return(Resource):
 class Return2(Resource):
     def post(self):
         print("IN RETURN 2")
-        print("Session Contents:", session)
         return_data = request.get_json()['addedBarcodes']
         session['return_data'] = return_data
 
@@ -330,8 +327,6 @@ class Return2(Resource):
                 for _ in range(quantity):
                     barcode_list.append(barcode)
 
-                print("Barcode list: ", barcode_list)
-
                 if 'barcodes' not in session:
                     session['barcodes'] = []
                 session['barcodes'] += barcode_list
@@ -350,7 +345,6 @@ class ReturnConfirm(Resource):
 
             # If barcode is an int
             if barcode != 'null':
-                print("Barcode is an int")
                 # Subtract from quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
                 product.quantity_borrowed -= quantity
@@ -359,15 +353,7 @@ class ReturnConfirm(Resource):
                 user_id = session['_user_id']
                 borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
                 borrow.quantity -= quantity
-
-                print("New borrowed quantity: ", borrow.quantity)
-                print("Product quantity borrowed: ", product.quantity_borrowed)
-
-                if borrow.quantity <= 0:
-                    db.session.delete(borrow)
-                    print("Borrow entry removed from table.")
-                else:
-                    print("Quantity updated in borrow table.")
+                borrow.returned += quantity
 
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")

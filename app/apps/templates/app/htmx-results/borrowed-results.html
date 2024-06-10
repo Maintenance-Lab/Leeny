@@ -28,7 +28,8 @@
             <!-- Admin table -->
             {% if session['role'] == 'admin' %}
 
-                {% for item in data['data'] %}
+                {% for item in data['data'] if item.quantity != 0 %}
+
                 <tr>
                     <td style="padding-left: 24px;">
                         <h6 class="mb-0 text-sm">{{item.title}}</h6>
@@ -40,10 +41,10 @@
                         {{item.quantity}}
                     </td>
                     <td class="align-middle text-center text-sm">
-                        {{item.created_at_ts}} 
+                        {{item.created_at_ts}}
                     </td>
                     <td class="align-middle text-center text-sm">
-                        {{item.estimated_return_date}} 
+                        {{item.estimated_return_date}}
                     </td>
                     <td class="align-middle text-center px-0 text-xs {% if item.days_until_return > 0 %}text-success{% else %}text-danger{% endif %}">
                         {% if item.days_until_return > 1 %}
@@ -117,7 +118,7 @@
 
             {% else %}
                 <!-- Student table -->
-                {% for item in data['data'] %}
+                {% for item in data['data'] if item.quantity != 0 %}
                 <tr>
                     <td style="padding-left: 24px;">
                         <h6 class="mb-0 text-sm">{{item.title}}</h6>
@@ -129,11 +130,11 @@
                         {{item.quantity}}
                     </td>
                     <td class="align-middle text-center text-sm">
-                        {{item.created_at_ts}} 
+                        {{item.created_at_ts}}
                     </td>
 
                     <td class="align-middle text-center text-sm">
-                        {{item.estimated_return_date}} 
+                        {{item.estimated_return_date}}
                     </td>
                     <td class="align-middle text-center px-0 text-xs {% if item.days_until_return > 0 %}text-success{% else %}text-danger{% endif %}"
                         >
@@ -165,7 +166,7 @@
                         };
                     };
                 });
-            
+
                 new DataTable('#borrowed-list', {
                   scrollX: false,
                   autoWidth: true,
@@ -190,17 +191,17 @@
                     { type: '#-days', target: 5 }
                     ],
                   });
-            
+
                   // Define a custom sorting type
                 jQuery.extend(jQuery.fn.dataTableExt.oSort, {
                     "#-days-pre": function (a) {
                         return parseInt(a.replace(/[^-0-9]/g, '')) || 0;
                     },
-            
+
                     "#-days-asc": function (a, b) {
                         return a - b;
                     },
-            
+
                     "#-days-desc": function (a, b) {
                         return b - a;
                     }
@@ -225,9 +226,9 @@
     right:-34px;
     border-radius: 0.5rem !important;
     line-height: 2rem !important;
-  
+
   }
-  
+
   #borrowed-list_wrapper > div:nth-child(1) > div.col-md-auto.ms-auto > div > input {
     height: 40px;
     width: 191px;
@@ -239,28 +240,28 @@
     line-height: 1.4rem;
     color: #495057;
     background-color: #ffffff !important;
-  
+
   }
-  
+
   div.dt-container.dt-empty-footer tbody > tr:last-child > * {
       border-bottom: 0px solid rgba(0, 0, 0, 0) !important;
   }
-  
+
   .dt-paging-button {
     padding: 0.5em 0.2em !important;
   }
-  
+
   .dt-search input {
     border-radius: 8px !important;
     padding: 3px 0px !important;
     text-indent: 10px !important;
   }
-  
+
   .page-item.active .page-link {
     background-color: #344767 !important;
     border-color: #344767 !important;
   }
-  
+
   .dt-paging .dt-paging-button:hover {
     background: transparent !important;
     border: 1px solid transparent !important;
@@ -268,14 +269,14 @@
 
   #inventory-list_wrapper > div:nth-child(3) > div.col-md-auto.ms-auto > div > ul > li:nth-child(5) {
     background: transparent !important;
-    border-color: #344767 !important; 
+    border-color: #344767 !important;
     border: 1px solid transparent !important;
   }
-  
+
   div.dt-container {
     margin-top: -15px;
   }
-  
+
   #inventory-list_wrapper > div:last-of-type {
         height: 57px;
   }

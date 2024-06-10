@@ -18,7 +18,6 @@
                     <p class="ms-1">{{ session.name }}</p>
                   </div>
 
-                  
                   <div class="mb-1 col-5">
                     <label style="display: block;">Project</label>
                     <p class="ms-1">{{ session.project }}</p>
@@ -66,6 +65,36 @@
 
 {% block javascripts %}
 <script>
+  function clearBarcode() {
+        fetch('api/clear_barcode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+    }
+
+    function clearProjectDate() {
+        fetch('api/clear_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+    }
+
     // Set sweet alert to scan card
     document.getElementById('scan-card').addEventListener('click', function() {
         Swal.fire({
@@ -127,6 +156,8 @@
                         if (!response.ok) {
                             throw new Error('Response was not ok');
                         }
+                        clearBarcode();
+                        clearProjectDate();
                         Swal.fire({
                             title: "Borrow successfully completed!",
                             html: "",

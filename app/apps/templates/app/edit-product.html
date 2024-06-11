@@ -10,13 +10,13 @@
       <div class="card mb-4" style="max-width: 900px; margin: 0 auto;">
         <div class="card-body px-4 pt-4 pb-2">
           {% if session['role'] == 'admin' %}
-          <h1 class="text-center">Edit product in database</h1>
+          <h1 class="text-center">Edit product</h1>
 
           <!-- Step 3 -->
           <form autocomplete="off" method="post" action="api/edit-product">
               <div class="row">
                 <!-- First Column -->
-                <div class="col-md-4 text-center">
+                <div class="col-md-4 text-start">
                   <div class="form-group">
                     <label for="title">Product Name</label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ product['data'][0].title }}" required>
@@ -40,7 +40,7 @@
                 </div>
 
                 <!-- Second Column -->
-                <div class="col-md-4 text-center">
+                <div class="col-md-4 text-start">
                   <div class="form-group">
                     <label for="quantity">Quantity</label>
                     <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="{{ product['data'][0].quantity_total }}" required>
@@ -60,7 +60,7 @@
                 </div>
 
                 <!-- Third Column -->
-                <div class="col-md-4 text-center">
+                <div class="col-md-4 text-start">
                   <div class="form-group">
                     <label for="category">Category</label>
                     <select id="categoryDropdown" class="form-control" name="category" required></select>

@@ -297,7 +297,6 @@ def admin_edit_product(id):
     print("DATA: ", data)
     return render_template('app/edit-product.html', product=data, form=form)
 
-
 @blueprint.route('/inventory')
 # @login_required
 def inventory():

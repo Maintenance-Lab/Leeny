@@ -9,7 +9,7 @@
     $(document).ready(function() {
         $('#category-select').select2({
             placeholder: "Select Category...",
-            tags: true      
+            tags: true
         });
     });
 
@@ -21,15 +21,19 @@
         try{
             handleInputChange();
         } catch (error) {
-            
+
         }
     });
 </script>
 
 <style>
+#categoryDropdown > span {
+    width: 100% !important;
+}
+
 .select2-selection {
     display: block;
-    width: 100%;
+    width: 100% !important;
     font-size: 0.91rem !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;

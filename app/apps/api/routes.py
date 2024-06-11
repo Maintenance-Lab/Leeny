@@ -441,21 +441,43 @@ class GetVendors(Resource):
 class AddProduct(Resource):
     def post(self):
         data = request.form.to_dict(flat=True)
+        print("DATA: ", data)
+
+        # Get manufacturer/category/vendor id or create new entry
+        manufacturer_name = data['manufacturer']
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if not manufacturer:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+            db.session.commit()
+
+        category_name = data['category']
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if not category:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+            db.session.commit()
+
+        vendor_name = data['vendor']
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=vendor_name)
+            db.session.add(vendor)
+            db.session.commit()
 
         product = Product(title=data['title'],
-                            barcode=data['barcode'],
-                            price_when_bought=data['price'],
-                            description=data['description'],
-                            url=data['url'],
-                            notes=data['notes'],
-                            created_at_ts=datetime.now(),
-                            manufacturer_id=data['manufacturer'],
-                            category_id=data['category'],
-                            vendor_id=data['vendor'],
-                            quantity_total=data['quantity'],
-                            quantity_unavailable=data['quantity_unavailable'],
-                            quantity_borrowed='0',
-                            )
+                    barcode=data['barcode'],
+                    price_when_bought=data['price'],
+                    description=data['description'],
+                    url=data['url'],
+                    notes=data['notes'],
+                    manufacturer_id=manufacturer.id,
+                    category_id=category.id,
+                    vendor_id=vendor.id,
+                    quantity_total=data['quantity'],
+                    quantity_unavailable=data['quantity_unavailable'],
+                    quantity_borrowed='0',
+                    )
 
         db.session.add(product)
         db.session.commit()

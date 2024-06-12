@@ -17,7 +17,7 @@ def send_email(to, subject, template):
             recipients=[to],
             html=template
         )
-        mail.send(msg)
+        # mail.send(msg)
         return "Message sent!"
 
 
@@ -74,27 +74,27 @@ def send_email_reminder():
                 # Check if return date is passed
                 if time_left <= 0:
                     message = (f"Allready past return date!!! Contact the Lab asap. \
-                            Time past return date: {months} month(s), {weeks} week(s), \
-                            {days} day(s), {hours} hour(s)")
+                               Time past return date: {months} month(s), {weeks} week(s), \
+                               {days} day(s), {hours} hour(s)")
                     html = render_template('app/email_reminder.html', name=user_name, item=item_name,
-                                        return_date=formatted_return_date, message=message)
+                                           return_date=formatted_return_date, message=message)
                     # Send email to user
                     send_email(user_email, "Return reminder", html)
 
                 # Check if return date is in less then 1 week
                 elif 518400 < time_left <= 604800:
                     message = (f"less then one week. Exact time remaining: {months} month(s),\
-                            {weeks} week(s), {days} day(s), {hours} hour(s)")
+                               {weeks} week(s), {days} day(s), {hours} hour(s)")
                     html = render_template('app/email_reminder.html', name=user_name, item=item_name,
-                                        return_date=formatted_return_date, message=message)
+                                           return_date=formatted_return_date, message=message)
                     # Send email to user
                     send_email(user_email, "Return reminder", html)
 
                 # Check if return date is in less then 1 day
                 elif 0 < time_left < 86400:
                     message = (f"less then one week. Exact time remaining: {months} month(s),\
-                            {weeks} week(s), {days} day(s), {hours} hour(s)")
+                               {weeks} week(s), {days} day(s), {hours} hour(s)")
                     html = render_template('app/email_reminder.html', name=user_name, item=item_name,
-                                        return_date=formatted_return_date, message=message)
+                                           return_date=formatted_return_date, message=message)
                     # Send email to user
                     send_email(user_email, "Return reminder", html)

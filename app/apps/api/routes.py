@@ -67,7 +67,6 @@ class changeCardUID(Resource):
 
         return output, 200
 
-
 @api.route('/authenticate_admin', methods=['GET', 'POST'])
 class AuthenticateAdmin(Resource):
     def post(self):
@@ -137,26 +136,27 @@ class GetProjectDate(Resource):
         estimated_return_date = session.get('estimated_return_date', '')
         return {'project': project, 'estimated_return_date': estimated_return_date}, 200
 
+@api.route('/set_project_date', methods=['POST'])
+class SetProjectDate(Resource):
+    def post(self):
+        data = request.get_json()
+        project = data['project']
+        estimated_return_date = data['estimated_return_date']
+
+        session['project'] = project
+        session['estimated_return_date'] = estimated_return_date
+        print("Project date set")
+        return {'message': 'Project date set'}, 200
+
 @api.route('/borrow', methods=['POST'])
 class Borrow(Resource):
     def post(self):
         # Get the barcode data from the request
         data = request.get_json()
         barcode = data['barcode']
-        print("BARCODE: ", barcode)
-
-        # if 'barcodes' not in session:
-        #     session['barcodes'] = []
-
-        # # Add barcode to session
-        # barcodes = session['barcodes']
-        # print("BARCODES BEFORE APPENDING: ", barcodes)
-        # session['barcodes'] = barcodes + [barcode]
-        # print("BARCODES AFTER APPENDING: ", session['barcodes'])
 
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
-        print("PRODUCT: ", product)
 
         if product:
             title = product.title
@@ -208,8 +208,6 @@ class borrow_add_to_cart(Resource):
         session['borrow_cart'] = data
         return data, 200
 
-
-
 @api.route('/borrow2', methods=['POST'])
 class Borrow2(Resource):
     def post(self):
@@ -224,7 +222,6 @@ class Borrow2(Resource):
 
             # If barcode is an int
             if barcode != 'null':
-                print("Barcode is an int")
                 # Add 1 to quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
                 product.quantity_borrowed += quantity
@@ -254,7 +251,6 @@ class Borrow2(Resource):
 
         session['barcodes'] = []
 
-
         # Send email to users
         user_id = session['_user_id']
         user = Users.query.filter_by(id=user_id).first()
@@ -265,8 +261,6 @@ class Borrow2(Resource):
         html = render_template('app/email_borrow_overview.html', timestamp=timestamp, borrowed_date=borrowed_date)
         send_email(email, "Borrow overview", html)
 
-
-
 @api.route('/return', methods=['POST'])
 class Return(Resource):
     def post(self):
@@ -276,7 +270,6 @@ class Return(Resource):
 
         # Query the database for the product based on barcode
         product = Product.query.filter_by(barcode=barcode).first()
-
         if product is not None:
             title = product.title
 
@@ -286,11 +279,10 @@ class Return(Resource):
 
             if borrow is not None:
                 # Product found
-                quantity = borrow.quantity
                 output = {
                     'barcode': barcode,
                     'name': title,
-                    'quantity': quantity,
+                    'quantity': borrow.quantity,
                     'message': f'Product found',
                     'success': True
                 }
@@ -312,16 +304,15 @@ class Return(Resource):
 
         return output, 200
 
-
 @api.route('/return2', methods=['POST'])
 class Return2(Resource):
     def post(self):
         print("IN RETURN 2")
-        print("Session Contents:", session)
         return_data = request.get_json()['addedBarcodes']
         session['return_data'] = return_data
 
         addedProducts = {}
+        barcode_list = []
 
         for items in return_data.items():
             barcode = items[0]
@@ -333,8 +324,14 @@ class Return2(Resource):
                 product_name = product.title
                 addedProducts[product_name] = quantity
 
-        session["addedProducts"] = addedProducts
+                for _ in range(quantity):
+                    barcode_list.append(barcode)
 
+                if 'barcodes' not in session:
+                    session['barcodes'] = []
+                session['barcodes'] += barcode_list
+
+        session["addedProducts"] = addedProducts
 
 @api.route('/return-confirm', methods=['POST'])
 class ReturnConfirm(Resource):
@@ -348,7 +345,6 @@ class ReturnConfirm(Resource):
 
             # If barcode is an int
             if barcode != 'null':
-                print("Barcode is an int")
                 # Subtract from quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
                 product.quantity_borrowed -= quantity
@@ -357,15 +353,7 @@ class ReturnConfirm(Resource):
                 user_id = session['_user_id']
                 borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
                 borrow.quantity -= quantity
-
-                print("New borrowed quantity: ", borrow.quantity)
-                print("Product quantity borrowed: ", product.quantity_borrowed)
-
-                if borrow.quantity <= 0:
-                    db.session.delete(borrow)
-                    print("Borrow entry removed from table.")
-                else:
-                    print("Quantity updated in borrow table.")
+                borrow.returned += quantity
 
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
@@ -379,7 +367,6 @@ class ReturnConfirm(Resource):
         returned_timestamp = datetime.today().strftime('%d-%m-%Y')
         html = render_template('app/email_return_overview.html', returned_timestamp=returned_timestamp)
         send_email(email, "Return overview", html)
-
 
 @api.route('/admin-login', methods=['POST'])
 class AdminLogin(Resource):
@@ -408,7 +395,6 @@ class AdminLogin(Resource):
             }
 
         return output, 200
-
 
 @api.route('/get-options')
 class GetOptions(Resource):
@@ -455,21 +441,43 @@ class GetVendors(Resource):
 class AddProduct(Resource):
     def post(self):
         data = request.form.to_dict(flat=True)
+        print("DATA: ", data)
+
+        # Get manufacturer/category/vendor id or create new entry
+        manufacturer_name = data['manufacturer']
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+        if not manufacturer:
+            manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+            db.session.add(manufacturer)
+            db.session.commit()
+
+        category_name = data['category']
+        category = ProductCategory.query.filter_by(category_name=category_name).first()
+        if not category:
+            category = ProductCategory(category_name=category_name)
+            db.session.add(category)
+            db.session.commit()
+
+        vendor_name = data['vendor']
+        vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=vendor_name)
+            db.session.add(vendor)
+            db.session.commit()
 
         product = Product(title=data['title'],
-                            barcode=data['barcode'],
-                            price_when_bought=data['price'],
-                            description=data['description'],
-                            url=data['url'],
-                            notes=data['notes'],
-                            created_at_ts=datetime.now(),
-                            manufacturer_id=data['manufacturer'],
-                            category_id=data['category'],
-                            vendor_id=data['vendor'],
-                            quantity_total=data['quantity'],
-                            quantity_unavailable=data['quantity_unavailable'],
-                            quantity_borrowed='0',
-                            )
+                    barcode=data['barcode'],
+                    price_when_bought=data['price'],
+                    description=data['description'],
+                    url=data['url'],
+                    notes=data['notes'],
+                    manufacturer_id=manufacturer.id,
+                    category_id=category.id,
+                    vendor_id=vendor.id,
+                    quantity_total=data['quantity'],
+                    quantity_unavailable=data['quantity_unavailable'],
+                    quantity_borrowed='0',
+                    )
 
         db.session.add(product)
         db.session.commit()
@@ -557,6 +565,7 @@ class DeleteProduct(Resource):
             'message': f'Product Not Found',
             'success': False
             }, 200
+
 @api.route('/delete-order', methods=['POST'])
 class DeleteOrder(Resource):
     def post(self):
@@ -612,7 +621,6 @@ class DeleteUser(Resource):
             'success': False
             }, 200
 
-
 @api.route('/get-options')
 class GetOptions(Resource):
     def get(self):
@@ -646,7 +654,6 @@ class AddToCart(Resource):
         return {
             'success': True
         }, 200
-    
 
 @api.route('/orders/update_ordered', methods=['POST'])
 class UpdateOrder(Resource):
@@ -669,7 +676,7 @@ class UpdateOrder(Resource):
                 if not category:
                     category = ProductCategory(category_name=category_name)
                     db.session.add(category)
-            
+
 
             vendor_name = data['vendor']
             if vendor_name != "Select Vendor...":
@@ -702,12 +709,10 @@ class UpdateOrder(Resource):
                 'success': False
             }
 
-        
+
         return {
                 'success': True
             }, 200
-
-    
 
 @api.route('/product/', methods=['GET'])
 class ProductRoute(Resource):

@@ -106,10 +106,8 @@ def post():
                 # Check if the barcode is not 'null'
                 if barcode != 'null':
                     # Repeat each barcode according to its quantity and append to the list
-                    for i in range(quantity):
+                    for _ in range(quantity):
                         barcode_list.append(barcode)
-
-            print("Barcode list: ", barcode_list)
 
             if 'barcodes' not in session:
                 session['barcodes'] = []
@@ -171,7 +169,7 @@ def card_forgotten():
                 # flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'admin-login')
                 return render_template('app/card_forgotten.html', email = request.form['email'])
-            else:      
+            else:
                 flash({'category':'warning', 'title': 'Incorrect email!', 'text': 'Try again using another email'}, 'General')
 
     return render_template('app/card_forgotten.html', form=login_form)
@@ -203,10 +201,8 @@ def borrow_date():
             # add data to session
             session["estimated_return_date"] = estimated_return_date
             session["project"] = project
-            print("Return date: ", estimated_return_date)
-            print("Project: ", project)
 
-            # If price > limit go to email verif
+            # # If price > limit go to email verif
             # limit_price = 100
             # print("Borrow price: ", session['borrowPrice'])
             # if session['borrowPrice'] > limit_price:
@@ -219,7 +215,6 @@ def borrow_date():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow-date.html', form=form)
 
-
 @blueprint.route('/return', methods=["GET","POST"])
 # @login_required
 def post_return():
@@ -228,13 +223,10 @@ def post_return():
         if 'continue' in request.form:
             # lookup name with session uid
             user_id = session['_user_id']
-            print("User id: ", user_id)
-
             user = Users.query.filter_by(id=user_id).first()
 
             if user:
                 name = user.fullname
-                print("User: ", user.fullname)
                 session["name"] = name
             else:
                 session["name"] = None
@@ -245,24 +237,20 @@ def post_return():
             flash({'text':'123'}, 'cancel')
     return render_template('app/return.html')
 
-
 @blueprint.route('/return-confirm', methods=["GET","POST"])
 # @login_required
 def return_confirm():
     return render_template('app/return-confirm.html')
-
 
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
     timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
     return render_template('app/borrow-confirm.html', timestamp=timestamp)
 
-
 @blueprint.route('/home')
 @login_required
 def home():
     return render_template('app/home.html', segment='home')
-
 
 @blueprint.route('/admin-dashboard')
 # @login_required
@@ -293,11 +281,6 @@ def dropdown_vendor():
     data = [{'id': obj.id, 'name': obj.vendor_name} for obj in all_objects]
     return jsonify(data)
 
-
-
-
-
-
 @blueprint.route('/edit-product/<int:id>')
 # @login_required
 def admin_edit_product(id):
@@ -314,7 +297,6 @@ def admin_edit_product(id):
     print("DATA: ", data)
     return render_template('app/edit-product.html', product=data, form=form)
 
-
 @blueprint.route('/inventory')
 # @login_required
 def inventory():
@@ -324,7 +306,7 @@ def inventory():
 @blueprint.route('/users')
 # @login_required
 def users():
-    # Add pagination    
+    # Add pagination
     return render_template('app/users.html', segment='users')
 
 @blueprint.route('/orders')
@@ -717,7 +699,7 @@ def inventory_borrowed(load):
 @blueprint.route('/item/load/<int:id>')
 def item_load(id):
     # Load product info
-    select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total, 
+    select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total,
                       Product.price_when_bought, Product.description, Product.url, Product.documentation, Product.notes,
                       Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
 
@@ -785,7 +767,7 @@ def orders_load(output):
 @blueprint.route('/ordered/load/<int:id>')
 @blueprint.route('/ordered/load/<int:id>/<int:load>')
 def ordered_load(id, load=0):
-                      
+
     select_columns = [Ordered.id, Ordered.product_id, Ordered.title, Ordered.price_when_bought, Ordered.url,
                       Ordered.reason, Ordered.quantity, Ordered.status,
 
@@ -799,7 +781,7 @@ def ordered_load(id, load=0):
         .filter(Ordered.id == id)\
         .with_entities(*select_columns) \
         .all()
-    
+
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
 
 

@@ -31,7 +31,7 @@
                   </div>
 
                   <div class="text-center mt-3">
-                    <a type="button" class="btn btn-outline-danger w-30" href="/borrow">Back</a>
+                    <a type="button" class="btn btn-outline-danger w-30" href="/borrow" onclick="project_date()">Back</a>
                   </div>
 
 
@@ -66,6 +66,20 @@
         });
       }
     }
+
+    function project_date() {
+        fetch('api/set_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                project: document.querySelector('input[name="project"]').value,
+                estimated_return_date: document.querySelector('input[name="estimated_return_date"]').value
+            })
+        })
+    }
+
 
     document.addEventListener('DOMContentLoaded', (event) => {
         fetch('api/get_project_date', {

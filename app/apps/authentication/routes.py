@@ -26,7 +26,7 @@ from apps.authentication.models import Users, Scanner
 
 from apps.authentication.util import verify_pass, generate_token
 
-from apps.email import send_email_reminder
+from apps.email import send_email
 
 from flask import Flask
 from flask_mail import Mail, Message

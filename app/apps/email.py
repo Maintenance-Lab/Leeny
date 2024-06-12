@@ -1,19 +1,9 @@
-from flask import Flask
-from flask_mail import Mail, Message
+from flask_mail import Message
 from apps.config import Config
-from flask import current_app
-
-
 from apps.webapp.models import Borrowed
-from apps.webapp.models import Product
-from apps.authentication.models import Users
 from datetime import datetime
 from flask import render_template
 from dateutil.relativedelta import relativedelta
-
-
-# TEST
-# from apps import mail
 from sqlalchemy.orm import undefer, joinedload
 from apps import mail, scheduler, db
 
@@ -32,7 +22,7 @@ def send_email(to, subject, template):
 
 
 # Schedule the task for every morning at 9:00
-@scheduler.task('cron', id='send_email_reminder', hour='9')
+@scheduler.task('cron', id='send_email_reminder', hour='15', minute='34')
 def send_email_reminder():
     with scheduler.app.app_context():
         with db.session() as session:

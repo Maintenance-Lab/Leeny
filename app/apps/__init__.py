@@ -12,9 +12,15 @@ from importlib import import_module
 from apps.config import Config
 from flask_mail import Mail
 
+# TEST
+from flask_apscheduler import APScheduler
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+mail = Mail()
+
+#
+scheduler = APScheduler() 
 
 
 def register_extensions(app):
@@ -51,8 +57,6 @@ def configure_database(app):
 
 from apps.authentication.oauth import github_blueprint
 
-mail = Mail()
-
 
 def create_app(config):
     app = Flask(__name__)
@@ -65,15 +69,9 @@ def create_app(config):
     
     configure_database(app)
 
-    # Mail
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USERNAME'] = Config.MAIL_USERNAME          # Sender Gmail address
-    app.config['MAIL_PASSWORD'] = Config.MAIL_PASSWORD          #  Generated App Password
-    # app.config['GMAIL_PASSWORD']= Config.GMAIL_PASS           #  Gmail Passwords
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USE_SSL'] = False
     mail.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
 
     
     if app.config['DEBUG']:

@@ -26,7 +26,7 @@ from apps.authentication.models import Users, Scanner
 
 from apps.authentication.util import verify_pass, generate_token
 
-from apps.scripts.email_verif import send_email
+from apps.email import send_email_reminder
 
 from flask import Flask
 from flask_mail import Mail, Message
@@ -142,6 +142,8 @@ def rfid_login():
     if current_user.is_authenticated:
         return redirect(url_for('webapp_blueprint.index'))
     else:
+        print("send email")
+        send_email_reminder() 
         return render_template('accounts/rfid_login.html',
                                form=login_form)
 

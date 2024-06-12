@@ -14,7 +14,7 @@ from apps import db
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from apps.authentication.util import verify_pass
-from apps.scripts.email_verif import send_email
+from apps.email import send_email
 
 
 api = Api(blueprint)

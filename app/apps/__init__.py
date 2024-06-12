@@ -9,10 +9,18 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
+from apps.config import Config
+from flask_mail import Mail
 
+# TEST
+from flask_apscheduler import APScheduler
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+mail = Mail()
+
+#
+scheduler = APScheduler() 
 
 
 def register_extensions(app):
@@ -49,6 +57,7 @@ def configure_database(app):
 
 from apps.authentication.oauth import github_blueprint
 
+
 def create_app(config):
     app = Flask(__name__)
 
@@ -59,6 +68,11 @@ def create_app(config):
     app.register_blueprint(github_blueprint, url_prefix="/login") 
     
     configure_database(app)
+
+    mail.init_app(app)
+    scheduler.init_app(app)
+    scheduler.start()
+
     
     if app.config['DEBUG']:
         app.logger.info('DEBUG            = ' + str(app.config['DEBUG'])             )

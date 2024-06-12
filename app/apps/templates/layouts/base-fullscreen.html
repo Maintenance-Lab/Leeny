@@ -43,8 +43,7 @@
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
-<body class="">
-
+<body class="g-sidenav-show" style="height: 100% !important; background: linear-gradient(220deg, rgb(248, 247, 247) 50%, rgb(215, 213, 213) 100%);">
   {% block content %}{% endblock content %}
 
   {% include "includes/scripts.html" %}
@@ -52,16 +51,6 @@
 
   <!-- Specific JS goes HERE --> 
   {% block javascripts %}{% endblock javascripts %}
-
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script>
 
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

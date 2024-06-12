@@ -10,7 +10,7 @@
     height: 29px;
     position: absolute;
     width: 191px;
-    top:-43px;
+    top:-51px;
     right:-34px;
     border-radius: 0.5rem !important;
     line-height: 2rem !important;
@@ -80,7 +80,7 @@
       <div class="d-flex align-items-center justify-content-between ">
         <h1>Inventory</h1>
         <div class="d-flex gap-3 mx-10">
-          <a class="btn btn-dark m-0" href="/borrow">Borrow an item</a>
+          <a class="btn btn{% if session['role'] == 'admin' %}-outline{% endif %}-dark m-0" href="/borrow">Borrow an item</a>
           {% if session['role'] == 'admin' %}
           <a class="btn btn-dark m-0" href="/add-product">Add items</a>  
           {% endif %}
@@ -88,7 +88,7 @@
 
       </div>
       </div>
-      <div class="col-12">
+      <div class="col-12 mt-2">
           <div class=" px-0 pt-0 pb-2">
               <div class="dataTable-wrapper dataTable-loading">
                 <div class="dataTable-container card px-2 py-1">

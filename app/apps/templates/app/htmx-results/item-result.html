@@ -104,16 +104,20 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
 
-    {% endif %}
+    
 
     
     </div>
     <!-- Other details can be added here -->
-    <div class="mt-2">
-        <a href="/inventory" class="btn btn-outline-dark  mb-0">Back</a>
+    <div class="row">
+        <div class="mt-2 col-12">
+            <button type="button" class="btn btn-outline-dark mb-0" style="width: 150px;"  onclick="goBack()">Back</button>
+        </div>
     </div>
+
 </div>
 <style>
     .truncate {
@@ -124,3 +128,8 @@
         text-overflow: ellipsis;
     }
 </style>
+<script>
+    function goBack() {
+      window.history.back();
+    }
+</script>

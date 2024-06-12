@@ -897,17 +897,6 @@ def vendor_dropdown(preselect=-1):
 
     return render_template('app/htmx-results/vendor-dropdown.html', data=data, value=preselect)
 
-@blueprint.route('/get_user')
-def get_user():
-    try:
-        user = session['fullname']
-        role = session['role']
-        if role == 'admin':
-            return f'<div class="d-flex align-items-center gap-2"><p class="badge sm-badge bg-gradient-success mb-0">ADMIN</p><p class="mb-0">{user}</p></div>'
-        else:
-            return f'<p class="mb-0">{user}</p>'
-    except:
-        return ""
 
 @blueprint.route('/users/search')
 def users_search():

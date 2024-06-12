@@ -1,43 +1,94 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Return {% endblock title %}
+{% block title %} Borrowed {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+
+  .toggleContainer {
+   position: relative;
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   width: fit-content;
+   border: 3px solid #344767;
+   border-radius: 20px;
+   background: #344767;
+   font-weight: bold;
+   color: #343434;
+   cursor: pointer;
+   align-self: center;
+   align-items:center;
+ }
+ .toggleContainer::before {
+   content: '';
+   position: absolute;
+   width: 50%;
+   height: 100%;
+   left: 0%;
+   border-radius:20px;
+   background: white;
+   transition: all 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer::before {
+    left: 50%;
+ }
+ .toggleContainer div {
+   padding: 6px;
+   text-align: center;
+   z-index: 1;
+ }
+ .toggleCheckbox {
+   display: none;
+ }
+
+ label, .form-label {
+  margin:0px !important;
+ }
+ .toggleCheckbox:checked + .toggleContainer div:first-child{
+   color: white;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer div:last-child{
+   color: #344767;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:first-child{
+   color: #344767;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:last-child{
+   color: white;
+   transition: color 0.3s;
+ }
+</style>
+</style>
+{% endblock stylesheets %}
 
 {% block content %}
 
   <div class="container-fluid py-4">
-
     <div class="row">
       <div class="d-flex align-items-center justify-content-between">
-        <h1>Your Borrowed Items</h1>
-        <div class="d-flex gap-3">
+          {% if session['role'] == 'admin' %}
+            <h1>Borrowed Items</h1>
+          {% else %}
+            <h1>Your Borrowed Items</h1>
+          {% endif %}
+        <div class="d-flex gap-3 mx-10">
+          <div>
+            <input type="checkbox" id="toggle" class="toggleCheckbox"/>
+            <label for="toggle" class="toggleContainer">
+            <div>All</div>
+            <div>Overdue</div>
+          </label>
+        </div>
           <a class="btn btn-dark m-0" href="/return">Return an item</a>
+          <span></span>
         </div>
       </div>
-      <div class="col-12">
-        <div class="card mb-4">
-          <div class="card-body px-0 pt-0 pb-2">
-            <div class="table-responsive p-0">
-              <table class="table align-items-center mb-0">
-                <thead>
-                  <tr>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Item</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Manufacturer</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Return Date</th>
-                    <th class="text-secondary opacity-7"></th>
-                  </tr>
-                </thead>
-                <span hx-get="/inventory/borrowed" hx-trigger="load" hx-target="#results">
-                <tbody id="results">
+      <div class="col-12" id="results">
 
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -45,4 +96,16 @@
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script src="https://unpkg.com/htmx.org@1.6.1"></script>
+<script>
+  document.getElementById('toggle').addEventListener('change', function() {
+    var url = this.checked ? '/inventory/borrowed/1  ' : '/inventory/borrowed/0';
+    htmx.ajax('GET', url, { target: '#results' });
+  });
+
+  // Initial load
+  htmx.ajax('GET', '/inventory/borrowed/0', { target: '#results' });
+</script>
+
+{% endblock javascripts %}

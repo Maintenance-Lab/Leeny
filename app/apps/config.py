@@ -79,6 +79,8 @@ class Config(object):
     MAIL_NAME = "Leeny"
     MAIL_USERNAME = os.getenv("EMAIL_USER")
     MAIL_PASSWORD = os.getenv("EMAIL_PASS")
+    # GMAIL_PASSWORD = os.getenv("GMAIL_PASS")
+
 
     # TEST
     SCHEDULER_API_ENABLED = True

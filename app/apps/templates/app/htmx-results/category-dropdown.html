@@ -1,7 +1,7 @@
 <select id="category-select" class="form-select" aria-label="Default select example">
     <option value="" selected disabled>Select Category...</option>
-    {% for name in data %}
-    <option value="{{ name }}">{{ name }}</option>
+    {% for category in data %}
+    <option value="{{ category[1] }}">{{ category[1] }}</option>
     {% endfor %}
 </select>
 
@@ -12,12 +12,28 @@
             tags: true
         });
     });
+
+    {% if value != -1 %}
+    $('#category-select').val("{{value}}").trigger('change');
+    {% endif %}
+
+    $('#category-select').on('change', function() {
+        try{
+            handleInputChange();
+        } catch (error) {
+
+        }
+    });
 </script>
 
 <style>
+#categoryDropdown > span {
+    width: 100% !important;
+}
+
 .select2-selection {
     display: block;
-    width: 100%;
+    width: 100% !important;
     font-size: 0.91rem !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;

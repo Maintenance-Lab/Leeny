@@ -12,7 +12,7 @@ class Product(db.Model):
 
     # Properties
     title = db.Column(db.String(255), nullable=False)
-    barcode = db.Column(db.String(255), nullable=False)
+    barcode = db.Column(db.String(255), nullable=True)
     price_when_bought = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
     url = db.Column(db.String(255))
@@ -35,3 +35,18 @@ class Product(db.Model):
     manufacturer = db.relationship('Manufacturer', backref='product')
     category = db.relationship('ProductCategory', backref='product')
     vendor = db.relationship('Vendor', backref='product')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'barcode': self.barcode,
+            'price_when_bought': self.price_when_bought,
+            'description': self.description,
+            'url': self.url,
+            'documentation': self.documentation,
+            'notes': self.notes,
+            'manufacturer_id': self.manufacturer_id,
+            'category_id': self.category_id,
+            'vendor_id': self.vendor_id
+        }

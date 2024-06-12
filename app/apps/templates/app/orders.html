@@ -8,9 +8,39 @@
 {% block stylesheets %}
 <style>
 .dt-search {
-  margin-right: 20px;
+  margin-right: 28px;
   height: 29px;
+  position: absolute;
+  width: 191px;
+  top:-43px;
+  right:-34px;
+  border-radius: 0.5rem !important;
+  line-height: 2rem !important;
+
 }
+
+#dt-search-0 {
+  height: 40px;
+  width: 191px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d2d6da;
+  padding-left: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4rem;
+  color: #495057;
+  background-color: #ffffff !important;
+
+}
+
+div.dt-container.dt-empty-footer tbody > tr:last-child > * {
+    border-bottom: 0px solid rgba(0, 0, 0, 0) !important;
+}
+
+.dt-paging-button {
+  padding: 0.5em 0.2em !important;
+}
+
 .dt-search input {
   border-radius: 8px !important;
   padding: 3px 0px !important;
@@ -26,50 +56,122 @@
   background: transparent !important;
   border: 1px solid transparent !important;
 }
+
+div.dt-container {
+  margin-top: -15px;
+}
+
+#products-list_wrapper > div:last-of-type {
+      height: 57px;
+}
+
+.toggleContainer {
+   position: relative;
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   width: fit-content;
+   border: 3px solid #344767;
+   border-radius: 20px;
+   background: #344767;
+   font-weight: bold;
+   color: #343434;
+   cursor: pointer;
+   align-self: center;
+   align-items:center;
+ }
+ .toggleContainer::before {
+   content: '';
+   position: absolute;
+   width: 50%;
+   height: 100%;
+   left: 0%;
+   border-radius:20px;
+   background: white;
+   transition: all 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer::before {
+    left: 50%;
+ }
+ .toggleContainer div {
+   padding: 6px;
+   text-align: center;
+   z-index: 1;
+ }
+ .toggleCheckbox {
+   display: none;
+ }
+
+ label, .form-label {
+  margin:0px !important; 
+ }
+ .toggleCheckbox:checked + .toggleContainer div:first-child{
+   color: white;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox:checked + .toggleContainer div:last-child{
+   color: #344767;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:first-child{
+   color: #344767;
+   transition: color 0.3s;
+ }
+ .toggleCheckbox + .toggleContainer div:last-child{
+   color: white;
+   transition: color 0.3s;
+ }
 </style>
 
 
 {% endblock %}
 
 {% block content %}
-  <div class="container-fluid">
+  <div class="container-fluid py-4">
     <div class="row">
         <div class="d-flex align-items-center justify-content-between">
             <h1>Orders</h1>
-            <div class="d-flex gap-4">
-              <div class="d-flex gap-2 " data-toggle="buttons">
-                <button class="btn btn-dark mb-0" hx-get="/orders/load/1" hx-trigger="click" hx-target="#results">My orders</button>
-                <button class="btn btn-light mb-0 active" hx-get="/orders/load/0" hx-trigger="click" hx-target="#results">All</button>
-              </div>
+            <div class="d-flex gap-3 mx-10 align-items-center">
+              <div>
+                <input type="checkbox" id="toggle" class="toggleCheckbox"/>
+                <label for="toggle" class="toggleContainer">  
+                <div>All</div>
+                <div>My orders</div> 
+              </label> 
+            </div>
+
               <a class="btn btn-dark m-0" href="/orders/new">Start an order</a>
               <span hx-get="/orders/load/0" hx-trigger="load" hx-target="#results">
             </div>
           </div>
-      <div class="col-12">
+      <div class="col-12 pb-5">
         <div class="">
-          <div class="card-body px-0 pt-0 pb-2">
+          <div class=" px-0 pt-0 pb-2">
             <div class="p-0">
               <div class="dataTable-wrapper dataTable-loading">
-                <div class="dataTable-container">
+                <div class="dataTable-container card px-2 py-1">
                   <table class="table table-flush dataTable-table" id="products-list">
                     <thead class="thead-light">
                       <tr>
-                        <th>
+                        <th class="text-start">
                           Order Id
-                        </th>
-                        <th>
-                          Date
                         </th>
                         <th>
                           Project
                         </th>
                         <th>
+                          Date
+                        </th>
+                        <th>
                           By
                         </th>
+                        <th>
+
+                        </th>
+                        
                       </tr>
                     </thead>
                     <tbody id="results">
-
+                      
                     </tbody>
                   </table>
                 </div>
@@ -84,4 +186,14 @@
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
+<script src="https://unpkg.com/htmx.org@1.6.1"></script>
+<script>
+  document.getElementById('toggle').addEventListener('change', function() {
+    var url = this.checked ? '/orders/load/1  ' : '/orders/load/0';
+    htmx.ajax('GET', url, { target: '#results' });
+  });
+
+  // Initial load
+  htmx.ajax('GET', '/orders/load/0', { target: '#results' });
+</script>
 {% endblock %}

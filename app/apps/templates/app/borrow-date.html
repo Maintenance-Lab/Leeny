@@ -9,9 +9,9 @@
     <div class="row">
       <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
         <div class="card z-index-0">
-          <div class="card-header text-center pt-4">
+          <div class="card text-center pt-4">
 
-                <form role="form text-left" method="post" action="">
+                <form autocomplete="off" class="p-4" role="form text-left" method="post" action="">
 
 
                   {{ form.hidden_tag() }}
@@ -27,22 +27,22 @@
                   </div>
 
                   <div class="text-center">
-                      <button type="submit" class="btn btn-dark w-50 mt-2 mb-4" id="continue" name="continue">Continue</button>
+                      <button type="submit" class="btn btn-dark w-50 mt-2" id="continue" name="continue">Continue</button>
                   </div>
 
                   <div class="text-center mt-3">
-                    <a type="button" class="btn btn-outline-danger w-30 mt-2 mb-4 " href="/borrow">Cancel</a>
+                    <a type="button" class="btn btn-outline-danger w-30" href="/borrow" onclick="project_date()">Back</a>
                   </div>
 
 
 
                 </form>
-              </div>
+            </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
+</section>
 {% endblock content %}
 
 
@@ -50,20 +50,80 @@
 <script>
      // Calculate tomorrow's date
      var tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setDate(tomorrow.getDate() + 7);
+    setDateFunction();
 
-    if (document.querySelector('.datepicker')) {
-      flatpickr('.datepicker', {
-        mode: "single",
-        dateFormat: "U",
-        altInput: true,
-        altFormat: "d-m-Y",
-        defaultDate: tomorrow,
-        minDate: "today",
-        maxDate: new Date().fp_incr(14),
-      });
+    function setDateFunction() {
+      if (document.querySelector('.datepicker')) {
+        flatpickr('.datepicker', {
+          mode: "single",
+          dateFormat: "U",
+          altInput: true,
+          altFormat: "d-m-Y",
+          minDate: "today",
+          maxDate: new Date().fp_incr(90),
+          // allowInput: true,
+        });
+      }
     }
 
+    function project_date() {
+        fetch('api/set_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                project: document.querySelector('input[name="project"]').value,
+                estimated_return_date: document.querySelector('input[name="estimated_return_date"]').value
+            })
+        })
+    }
+
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        fetch('api/get_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response from server:', data);
+            project = data.project;
+            estimated_return_date = data.estimated_return_date;
+
+            document.querySelector('input[name="project"]').value = project;
+
+            // set value date picker
+            console.log("current value date picker", document.querySelector('input[name="estimated_return_date"]').value)
+            document.querySelector('input[name="estimated_return_date"]').value = estimated_return_date;
+            console.log("new value date picker", document.querySelector('input[name="estimated_return_date"]').value)
+            setDateFunction();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
   </script>
+  <style>
+    div > div.flatpickr-days > div > span.flatpickr-day.today{
+      background: #ffffff !important;
+      color: black;
+      border: 1px solid #67748e;
+      pointer-events: none;
+    }
+    div.flatpickr-innerContainer > div > div.flatpickr-days > div > span.flatpickr-day.selected{
+      background: #67748e !important;
+    }
+  </style>
 
 {% endblock javascripts %}
+

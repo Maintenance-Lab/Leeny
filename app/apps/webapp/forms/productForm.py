@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
-from wtforms import StringField, IntegerField, TextAreaField
+from wtforms import StringField, IntegerField, TextAreaField, FileField
 
 class ProductForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
@@ -18,6 +18,9 @@ class ProductForm(FlaskForm):
     manufacturer_id = IntegerField('Manufacturer ID', validators=[DataRequired()])
     category_id = IntegerField('Category ID', validators=[DataRequired()])
     vendor_id = IntegerField('Vendor ID', validators=[DataRequired()])
+
+    # # documentation is pdf, doc, or docx file
+    # documentation = FileField('Documentation')
 
 
     # Timestamps (Nog toevoegen?)

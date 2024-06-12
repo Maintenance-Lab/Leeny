@@ -25,7 +25,7 @@
 
                 <div class="row d-flex justify-content-center">
                     <div class="col-12 col-lg-8">
-                        <form class="multisteps-form__form mb-8">
+                        <form autocomplete="off" class="multisteps-form__form mb-8">
 
                             <div class="card multisteps-form__panel p-3 border-radius-xl bg-white js-active"
                                 data-animation="FadeIn">
@@ -40,6 +40,8 @@
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-end align-items-center text-center mt-4">
+                                        <button type="button" class="btn btn-dark mb-0 me-auto" onclick="window.history.back();">Back</button>
+
                                         <p class="mb-0 mx-2" id="loadingerror"></p>
                                         <button class="btn bg-gradient-dark mb-0 js-btn-next disabled" type="button">Next</button>
                                     </div>
@@ -64,7 +66,7 @@
 
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-4">
                                         <label>Manufacturer:</label>
                                         <div id="manufacturerDropdown">
@@ -93,10 +95,10 @@
                                             placeholder="#" value="1" />
                                     </div>
 
-                                        
 
-                                        
-                                        
+
+
+
                                     </div>
                                     <div class="row">
                                         <div class="button-row d-flex mt-2 col-12">
@@ -127,7 +129,7 @@
                                         <div class="col-3">Price:</div>
                                         <div class="col-9" id="confirmedPrice"></div>
                                     </div>
-                                    <div class="row mt-2">  
+                                    <div class="row mt-2">
                                         <div class="col-3">Category:</div>
                                         <div class="col-9" id="confirmedCategory"></div>
                                     </div>
@@ -169,7 +171,7 @@
 
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
+<!-- Specific JS goes HERE -->
 {% block javascripts %}
 <script>
     const DOMstrings = {
@@ -327,6 +329,7 @@ DOMstrings.stepsForm.addEventListener('click', e=>{
         // Get the values of previous steps
         const itemInputValue = document.getElementById('itemInput').value;
         const priceInputValue = document.getElementById('priceInput').value;
+        const urlInputValue = document.getElementById('urlInput').value;
         const quantityInputValue = document.getElementById('quantityInput').value;
         const categoryInputValue = document.getElementById('select2-category-select-container').textContent.trim();
         const manufacturerInputValue = document.getElementById('select2-manufacturer-select-container').textContent.trim();
@@ -336,6 +339,7 @@ DOMstrings.stepsForm.addEventListener('click', e=>{
         // Get the elements to populate in the "Confirm" step
         const confirmedItemElement = document.getElementById('confirmedItem');
         const confirmedPriceElement = document.getElementById('confirmedPrice');
+        const confirmedUrlElement = document.getElementById('confirmedUrl');
         const confirmedQuantityElement = document.getElementById('confirmedQuantity');
         const confirmedCategoryElement = document.getElementById('confirmedCategory');
         const confirmedManufacturerElement = document.getElementById('confirmedManufacturer');
@@ -344,6 +348,7 @@ DOMstrings.stepsForm.addEventListener('click', e=>{
 
         confirmedItemElement.textContent = itemInputValue;
         confirmedPriceElement.textContent = priceInputValue;
+        confirmedUrlElement.textContent = urlInputValue;
         confirmedQuantityElement.textContent = quantityInputValue;
         confirmedReasonElement.textContent = reasonInputValue;
 
@@ -375,16 +380,18 @@ const handleSubmit = () => {
     // Get the data from the rows
     const item = document.getElementById('itemInput').value;
     const price = document.getElementById('priceInput').value;
+    const url = document.getElementById('urlInput').value;
     const quantity = document.getElementById('quantityInput').value;
     const category = document.getElementById('select2-category-select-container').textContent.trim();
     const manufacturer = document.getElementById('select2-manufacturer-select-container').textContent.trim();
     const vendor = document.getElementById('select2-vendor-select-container').textContent.trim();
     const reason = document.getElementById('reasonInput').value;
 
-    // Example: Send the data to the server (replace with your actual submission logic)
+    // Send the data to the server
     const formData = {
         item: item,
         price: price,
+        url: url,
         quantity: quantity,
         category: category,
         manufacturer: manufacturer,
@@ -406,7 +413,7 @@ const handleSubmit = () => {
         }
         if (response.ok) {
             // Redirect the user back upon successful response
-            window.location.href = '/orders/new'; 
+            window.location.href = '/orders/new';
         }
         return response.json();
     })
@@ -462,7 +469,7 @@ document.addEventListener('htmx:beforeSend', function(event) {
     }
 });
 
-    
+
 inputField.addEventListener('input', function() {
     if (isValidURL(inputField.value)) {
         loadingMessage.innerHTML = `
@@ -476,12 +483,6 @@ inputField.addEventListener('input', function() {
 });
 
 </script>
-
-<!-- Styles -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 
 {% endblock %}

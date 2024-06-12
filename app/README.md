@@ -144,6 +144,16 @@ At this point, the app runs at `http://127.0.0.1:5000/`.
 
 <br />
 
+<br>
+Needs a .env file that defines the default email_user to send the mails from.
+Uses gmail SMPT app password (https://mailtrap.io/blog/flask-send-email-gmail/).
+
+example for .env:
+
+export EMAIL_USER='sender email'
+export EMAIL_PASS='app password'
+<br />
+
 ## API Generator
 
 This module helps to generate secure APIs using `Flask-restX` via a simple workflow: 

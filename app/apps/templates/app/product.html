@@ -62,7 +62,7 @@
                         </td>
                         <td class="text-sm">{{ product.quantity }}</td>
                         <td>
-                          {% if product.quantity == 0 %}
+                          {% if product.quantity_total - product.quantity_unavailable == 0 %}
                             <span class="badge badge-danger badge-sm">Out of Stock</span>
                           {% else %}
                             <span class="badge badge-success badge-sm">In Stock</span>

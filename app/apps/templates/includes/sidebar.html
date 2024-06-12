@@ -1,24 +1,26 @@
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main" data-color="info">
-    <div class="sidenav-header">
-      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href="/">
-        <span class="ms-1 font-weight-bold">Leeny het uitleensysteem</span>
-      </a>
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 mt-6 mb-7 pt-3 bg-white d-flex flex-column" id="sidenav-main" data-color="info">
+  <div class="sidenav-header d-flex flex-row align-items-center">
+    <img class="nav-link m-0" width="85px" src="{{ config.ASSETS_ROOT }}/img/Lab-Logo.png">
+    <div>
+      <div class="d-flex gap-2 mt-3 mb-1 align-items-center">
+      <h4 class="font-weight-bold text-dark  " >Leeny</h4>
+      {% if session['role'] == 'admin' %}<p class="badge sm-badge bg-gradient-success mb-0 h-50">ADMIN</p>{% endif %}
+      </div>
+
+      <p class=" nav-link-text mt-n1" >Maintenance Lab</p>
     </div>
-    <hr class="horizontal dark mt-0">
-    <div class="collapse navbar-collapse  w-auto h-auto " id="sidenav-collapse-main">
-      <ul class="navbar-nav">
+    </div>
+    <hr class="horizontal dark mt-1 w-100">
+    <div class="collapse navbar-collapse w-100 flex-fill" id="sidenav-collapse-main">
+      <ul class="navbar-nav justify-content-between gap-1 overflow-hidden">
         <li class="nav-item">
           <a class="nav-link {% if 'home' in segment %} shadow border-radius-md {% endif %}" href="/home">
             <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="100 0 400 400" style="overflow: visible"style="overflow: visible"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
                 <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg>
             </div>
-            <span class="nav-link-text ms-1">Home</span>
+            <span class="nav-link-text ms-1">{% if session['role'] != 'admin' %}Home{% else %}Dashboard{% endif %}</span>
           </a>
-        </li>
-        <li class="nav-item mt-3">
-          <br/>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if 'inventory' in segment %} shadow border-radius-md {% endif %}" href="/inventory">
@@ -40,9 +42,6 @@
             <span class="nav-link-text ms-1">Borrowed</span>
           </a>
         </li>
-        <li class="nav-item mt-3">
-          <br/>
-        </li>
         <li class="nav-item">
           <a class="nav-link {% if 'orders' in segment %} shadow border-radius-md {% endif %}" href="/orders">
             <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -52,19 +51,29 @@
             <span class="nav-link-text ms-1">Orders</span>
           </a>
         </li>
-        <li class="nav-item mt-3">
-          <br/>
-        </li>
+        {% if session['role'] == 'admin'%}
         <li class="nav-item">
-          <a class="nav-link {% if 'settings' in segment %} shadow border-radius-md {% endif %}" href="/settings">
+          <a class="nav-link {% if 'users' in segment %} shadow border-radius-md {% endif %}" href="/users">
             <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="50 30 400 400" style="overflow: visible"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-                <path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg>
-
+              <svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="40 -80 570 550"  ><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192h42.7c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0H21.3C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7h42.7C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3H405.3zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352H378.7C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7H154.7c-14.7 0-26.7-11.9-26.7-26.7z"/></svg>
             </div>
-            <span class="nav-link-text ms-1">Settings</span>
+            <span class="nav-link-text ms-1">Users</span>
           </a>
         </li>
+        {% endif %}
+        <hr class="horizontal dark mt-1 w-100 {% if session['role'] != 'admin' %} mt-10 {% else %} mt-8 {% endif %}">
+        <li class="nav-item">
+          <a class="nav-link {% if 'settings' in segment %} shadow border-radius-md {% endif %} " href="/settings">
+            <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
+            </div>
+            <span class="nav-link-text ms-1">
+              {{session['fullname']}}
+            </span>
+          </a>
+        </li>
+
+
         <li class="nav-item">
           <a class="nav-link  " href="{{ url_for('authentication_blueprint.logout') }}">
             <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -74,16 +83,13 @@
             <span class="nav-link-text ms-1">Logout</span>
           </a>
         </li>
+
+
+              
       </ul>
     </div>
+
   </aside>
 
 {% block javascripts %}
-  <script>
-    document.getElementById('update-card').addEventListener('click', function() {
-      function navlink_bluring() {
-        print
-      }
-    }
-</script>
 {% endblock javascripts %}

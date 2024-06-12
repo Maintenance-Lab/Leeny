@@ -13,13 +13,13 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="min-height: 100%;">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="apple-touch-icon" sizes="76x76" href="{{ config.ASSETS_ROOT }}/img/apple-icon.png">
-  <link rel="icon" type="image/png" href="{{ config.ASSETS_ROOT }}/img/favicon.png">
+  <link rel="icon" type="image/png" href="{{ config.ASSETS_ROOT }}/img/Leeny-Logo.png">
 
   <title>
     Leeny - {% block title %}{% endblock %}
@@ -37,24 +37,21 @@
   <link id="pagestyle" href="{{ config.ASSETS_ROOT }}/css/soft-ui-dashboard.css?v=1.0.6" rel="stylesheet" />
   
   <link id="pagestyle_dark" href="{{ config.ASSETS_ROOT }}/css/dark-theme-core.css" rel="stylesheet" />
-
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.dataTables.css" />
   
-  <!-- JQuery -->
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-
   <!-- Specific CSS goes HERE -->
   {% block stylesheets %}{% endblock stylesheets %}  
 
 </head>
-<body class="g-sidenav-show  bg-gray-100">
+<body class="g-sidenav-show" style="height: 100% !important; background: linear-gradient(220deg, rgb(248, 247, 247) 50%, rgb(215, 213, 213) 100%);">
+  <div class="mb-4">
+  </div>
   
   {% include "includes/sidebar.html" %} 
   {% include "includes/sweetalerts.html" %}
 
-  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+  <main class="main-content position-relative pt-0">
 
-    {% include "includes/navigation.html" %} 
+    
 
     {% block content %}{% endblock content %}
 
@@ -66,17 +63,6 @@
   <!-- Specific JS goes HERE --> 
   {% block javascripts %}{% endblock javascripts %}  
 
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
-    }
-  </script>
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>  
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ config.ASSETS_ROOT }}/js/soft-ui-dashboard.min.js?v=1.0.6"></script>
 

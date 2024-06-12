@@ -1,4 +1,4 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/base-fullscreen.html' %}
 
 {% block title %} New Order {% endblock title %}
 
@@ -6,46 +6,45 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-<div class="position-absolute">
+<div class="justify-content-center d-flex mt-5   mb-n8">
     <h1>Place new order</h1>
 </div>
-    <div class="container-fluid d-flex justify-content-center align-items-center gap-5" style="height: calc(100vh - 65px);">
+    <div class="container-fluid d-flex justify-content-center align-items-center gap-5" style="height: 100vh">
         <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
             <div class="card text-left">
-                <div class="table-responsive p-0 " style="max-height: 360px;">
-                    <table class="table align-items-center mb-0 p-2" style="min-height: 50px;">
+                <div id="table-scroll" class="table-responsive p-0" style="max-height: 400px; overflow-x:hidden">
+                    {% if data %}
+                    <table class="table align-items-center mb-0 p-2">
                         <thead>
-                            {% if data != [] %}
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-2">Item</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Quantity</th>
-                            {% else %}
-                                <div class="d-flex flex-column align-items-center">
-                                    <p class="mt-6 mb-0">Start by adding items</p>
-                                    <svg height="20px" fill="#67748e" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/></svg>
-                                </div>
-                            {% endif %}
-
+                            <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0">Quantity</th>
+                            <th class=" text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 px-0"></th>
                         </thead>
                         <tbody>
-
                             {% for item in data %}
                             <tr>
                                 <td>
                                     {{item.item}}
                                 </td>
-                                <td>
+                                <td class="ps-0">
                                     {{item.quantity}}
                                 </td>
                                 <td>
-                                    <a href="/orders/new/remove/{{item.id}}">
+                                    <a href="/orders/new/remove/{{loop.index - 1}}">
                                         <svg width="10px" fill="#67748e" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
                                     </a>
                                 </td>
                             </tr>
                             {% endfor %}
-                            
                         </tbody>
                     </table>
+                    {% else %}
+                    <div class="d-flex flex-column align-items-center">
+                        <h5 class="mt-4 mb-0">Start adding items</h5>
+                        <p class="mb-3 mt-2 text-xs">They will appear here.</p>
+                    </div>
+                    {% endif %}
+
                     <div class="d-flex justify-content-center">
                         <a href="/orders/new/item" class="btn btn-light">
                             Add{% if data != [] %} next{% endif %} Item
@@ -54,17 +53,52 @@
                     
                     <div class="text-center">
                         {% if data != [] %}
-                        <button type="button" class="btn btn-dark w-50 mt-2 mb-4" id="continue">Continue</button>
+                        <a href="/orders/new/confirm" class="btn btn-dark w-50 mt-2 mb-4">Continue</a>
                         {% endif %}
 
                     </div>
                 </div>
             </div>
-            <form method="POST" class="text-center mt-3">
-                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Back</button>
+            {% if data != [] %}
+            <form autocomplete="off" method="POST" class="text-center mt-3">
+                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " name="cancel">Cancel</button>
             </form>
+            {% else %}
+            <div class="d-flex w-100 justify-content-center mt-3">
+                <button class="btn btn-outline-danger w-30 mt-2 mb-4 " onclick="window.history.back();">Cancel</button>
+            </div>
+            {% endif %}
         </div>
     </div>
+    
+<script>
+    // Initialize Perfect Scrollbar
+    document.addEventListener('DOMContentLoaded', function() {
+    const ps = new PerfectScrollbar('#table-scroll');
+    });
+</script>
+
+<style>
+    .ps {
+      overflow: hidden !important;
+    }
+
+    .ps__rail-x,
+    .ps__rail-y {
+      opacity: 1 !important;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .ps__thumb-x,
+    .ps__thumb-y {
+      opacity: 1 !important;
+      background-color: #aaa;
+    }
+
+    .ps .ps__rail-y.ps--clicking {
+    background-color: #ffffff;
+    }
+  </style>
 
 
 {% endblock content %}

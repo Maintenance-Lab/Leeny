@@ -10,7 +10,7 @@ import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
 from flask import current_app, flash, render_template, redirect, url_for, request, session, jsonify
-from flask_login import login_required, login_user
+from flask_login import login_required, login_user, logout_user
 from jinja2 import TemplateNotFound
 import http
 from datetime import datetime
@@ -28,7 +28,6 @@ from apps.api.forms import *
 from sqlalchemy import update
 from sqlalchemy.inspection import inspect
 from googlesearch import search
-from bs4 import BeautifulSoup
 from apps.webapp.imagescraper import get_largest_image
 
 import json
@@ -37,6 +36,9 @@ from datetime import datetime
 
 @blueprint.route('/start', methods=["GET", "POST"])
 def start():
+    logout_user()
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+
     login_form = LoginForm(request.form)
 
     if request.method == "POST":
@@ -62,6 +64,8 @@ def start():
                         print('Error when card scanning:', e3)
 
             if user:
+                session['fullname'] = user.fullname
+                session['role'] = user.role
                 login_user(user)
                 flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
                 return render_template('app/start.html',
@@ -78,7 +82,7 @@ def start():
                                    form=login_form)
 
     if current_user.is_authenticated:
-        return redirect(url_for('webapp_blueprint.index'))
+        return redirect(url_for('webapp_blueprint.start'))
     else:
         return render_template('app/start.html',
                                form=login_form)
@@ -97,22 +101,41 @@ def post():
             borrow_data = json.loads(request.form["borrow_data"])
             session['addedBarcodes'] = borrow_data
 
+            barcode_list = []
+            for barcode, quantity in borrow_data.items():
+                # Check if the barcode is not 'null'
+                if barcode != 'null':
+                    # Repeat each barcode according to its quantity and append to the list
+                    for _ in range(quantity):
+                        barcode_list.append(barcode)
+
+            if 'barcodes' not in session:
+                session['barcodes'] = []
+            session['barcodes'] += barcode_list
+
             # create dictionary with names and quantities
             # addedBarcodes = request.form["borrow_data"]
             addedProducts = {}
 
+            borrowPrice = 0
             for items in borrow_data.items():
                 barcode = items[0]
                 quantity = items[1]
 
                 if barcode != 'null':
-                    # get product name
-                    product = Product.query.filter_by(barcode=barcode).first()
-                    product_name = product.title
+                    try:
+                        # get product name
+                        product = Product.query.filter_by(barcode=barcode).first()
+                        product_name = product.title
+                    except AttributeError:
+                        product = Product.query.filter_by(id=barcode).first()
+                        product_name = product.title
 
                     addedProducts[product_name] = quantity
+                    borrowPrice += product.price_when_bought * quantity
 
             session["addedProducts"] = addedProducts
+            session['borrowPrice'] = borrowPrice
 
             return redirect(url_for('webapp_blueprint.borrow_date'))
 
@@ -120,6 +143,36 @@ def post():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
 
+@blueprint.route('/card-forgotten', methods=["GET", "POST"])
+def card_forgotten():
+    logout_user()
+    [session.pop(key) for key in list(session.keys()) if key != '_flashes']
+
+    login_form = CreateAccountForm(request.form)
+
+    if request.method == "POST":
+        if "email_login" in request.form:
+            email = request.form['email']
+            print("test--------------------------------------")
+            if email:
+                try:
+                    user = Users.query.filter_by(email=email).first()
+                except:
+                    flash({'category':'danger', 'title': 'Incorrect Email!', 'text': 'Your Email is incorrect or unknown'}, 'General')
+
+
+            if user:
+                print('user')
+                session['fullname'] = user.fullname
+                session['role'] = user.role
+                login_user(user)
+                # flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'Timer')
+                flash({'text': '123', 'location': 'home', 'user': user.fullname}, 'admin-login')
+                return render_template('app/card_forgotten.html', email = request.form['email'])
+            else:
+                flash({'category':'warning', 'title': 'Incorrect email!', 'text': 'Try again using another email'}, 'General')
+
+    return render_template('app/card_forgotten.html', form=login_form)
 
 @blueprint.route('/borrow-date', methods=["GET","POST"])
 # @login_required
@@ -148,15 +201,19 @@ def borrow_date():
             # add data to session
             session["estimated_return_date"] = estimated_return_date
             session["project"] = project
-            print("Return date: ", estimated_return_date)
-            print("Project: ", project)
+
+            # # If price > limit go to email verif
+            # limit_price = 100
+            # print("Borrow price: ", session['borrowPrice'])
+            # if session['borrowPrice'] > limit_price:
+            #     # go to route email_verification
+            #     return redirect(url_for('authentication_blueprint.email_verification'))
 
             return redirect(url_for('webapp_blueprint.borrow_confirm'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow-date.html', form=form)
-
 
 @blueprint.route('/return', methods=["GET","POST"])
 # @login_required
@@ -166,13 +223,10 @@ def post_return():
         if 'continue' in request.form:
             # lookup name with session uid
             user_id = session['_user_id']
-            print("User id: ", user_id)
-
             user = Users.query.filter_by(id=user_id).first()
 
             if user:
                 name = user.fullname
-                print("User: ", user.fullname)
                 session["name"] = name
             else:
                 session["name"] = None
@@ -183,44 +237,55 @@ def post_return():
             flash({'text':'123'}, 'cancel')
     return render_template('app/return.html')
 
-
 @blueprint.route('/return-confirm', methods=["GET","POST"])
 # @login_required
 def return_confirm():
     return render_template('app/return-confirm.html')
 
-
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
 def borrow_confirm():
-    return render_template('app/borrow-confirm.html')
+    timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
+    return render_template('app/borrow-confirm.html', timestamp=timestamp)
 
 @blueprint.route('/home')
-# @login_required
+@login_required
 def home():
     return render_template('app/home.html', segment='home')
-
 
 @blueprint.route('/admin-dashboard')
 # @login_required
 def admin_dashboard():
     return render_template('app/admin-dashboard.html', segment='admin-dashboard')
 
-
-@blueprint.route('/admin-inventory')
-# @login_required
-def admin_inventory():
-    return render_template('app/admin-inventory.html', segment='admin-inventory')
-
-
 @blueprint.route('/add-product')
 # @login_required
 def admin_add_product():
-    return render_template('app/add-product.html', segment='add-product')
+    form = AddProductForm()
+    return render_template('app/add-product.html', segment='add-product', form=form)
+
+@blueprint.route('/dropdown/manufacturer')
+def dropdown_manufacturer():
+    all_objects = Manufacturer.query.all()
+    data = [{'id': obj.id, 'name': obj.manufacturer_name} for obj in all_objects]
+    return jsonify(data)
+
+@blueprint.route('/dropdown/category')
+def dropdown_category():
+    all_objects = ProductCategory.query.all()
+    data = [{'id': obj.id, 'name': obj.category_name} for obj in all_objects]
+    return jsonify(data)
+
+@blueprint.route('/dropdown/vendor')
+def dropdown_vendor():
+    all_objects = Vendor.query.all()
+    data = [{'id': obj.id, 'name': obj.vendor_name} for obj in all_objects]
+    return jsonify(data)
 
 @blueprint.route('/edit-product/<int:id>')
 # @login_required
 def admin_edit_product(id):
-    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable]
+    form = EditProductForm()
+    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
 
     all_objects = Product.query.filter(Product.id == id) \
         .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
@@ -230,14 +295,19 @@ def admin_edit_product(id):
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     print("DATA: ", data)
-    return render_template('app/edit-product.html', product=data, segment='edit-product')
-
+    return render_template('app/edit-product.html', product=data, form=form)
 
 @blueprint.route('/inventory')
 # @login_required
 def inventory():
     # Add pagination
     return render_template('app/inventory.html', segment='inventory')
+
+@blueprint.route('/users')
+# @login_required
+def users():
+    # Add pagination
+    return render_template('app/users.html', segment='users')
 
 @blueprint.route('/orders')
 # @login_required
@@ -260,48 +330,70 @@ def settings():
 
     if request.method == "POST":
         if "update_profile" in request.form:
-            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname']))
-            test2 = Users.query.filter_by(id=session['_user_id']).update(dict(email=request.form['email']))
-            test3 = Users.query.filter_by(id=session['_user_id']).update(dict(study=request.form['study']))
-            test4 = Users.query.filter_by(id=session['_user_id']).update(dict(faculty=request.form['faculty']))
+            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname'], email=request.form['email']\
+                                                                             , study=request.form['study'], faculty=request.form['faculty']))
             # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
+            session['fullname'] = request.form['fullname']
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
             return redirect(url_for('webapp_blueprint.settings'))
 
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
+@blueprint.route('/user/<int:id>', methods=["GET", "POST"])
+def user(id):
+    create_account_form = CreateAccountForm(request.form)
+    all_objects = Users.query.filter_by(id=id)
+    data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
+
+    for item in data['data']:
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
+        item['created_at_ts'] = timestamp
+
+    for item in data['data']:
+        timestamp2 = datetime.fromtimestamp(item['updated_at_ts']).strftime('%d-%m-%Y')
+        item['updated_at_ts'] = timestamp2
+
+    if request.method == "POST":
+        if "update_profile" in request.form:
+            test = Users.query.filter_by(id=id).update(dict(fullname=request.form['fullname'], email=request.form['email']\
+                                                                             , study=request.form['study'], faculty=request.form['faculty']))
+            test5 = Users.query.filter_by(id=id).update(dict(role=request.form['role']))
+            db.session.commit()
+            session['fullname'] = request.form['fullname']
+            flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
+            return redirect((f'/user/{id}'))
+
+
+        # Load borrowed data
+    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
+
+    all_objects = Borrowed.query \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .join(Users, Users.id == Borrowed.user_id) \
+    .filter(Users.id == id) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
+    .limit(5)
+
+    borrowdata = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+    print(borrowdata)
+    for item in borrowdata['data']:
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
+        item['days_until_return'] = days_until_return
+
+    return render_template('app/user.html', data=data, segment='users', id=id, borrowdata=borrowdata, form=create_account_form)
 
 @blueprint.route('/item/<int:id>')
 def item(id):
-    api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
-    response = requests.get(url=api_url, timeout=1)
-    response.raise_for_status()
-
-    result = response.json()
-    return render_template('app/item.html', data=result, segment='inventory')
-
-@blueprint.route('/new_item/')
-@blueprint.route('/item/<int:id>/edit')
-# @login_required
-def new_item(id = None):
-    result=None
-    try:
-        api_url = urljoin(current_app.config["API_ENDPOINT"], f"item/{id}")
-        response = requests.get(url=api_url, timeout=1)
-        response.raise_for_status()
-
-        result = response.json()
-
-    except:
-        pass
-
-    return render_template('app/new-item.html', data=result, segment='inventory')
+    data = id
+    return render_template('app/item.html', data=data, segment='inventory')
 
 @blueprint.route('/orders/<int:order_id>')
 def order_info(order_id = None):
 
-    select_columns = [column.name for column in inspect(Ordered).c]
     all_objects = Ordered.query.filter(Ordered.order_id == order_id).all()
     result = []
 
@@ -311,48 +403,157 @@ def order_info(order_id = None):
             obj_dict[column] = getattr(obj, column)
         result.append(obj_dict)
 
-    result_order = []
-    order_object = Order.query.filter(Order.ordered_id == order_id).first()
-    for obj in [order_object]:
-        obj_dict = {}
-        for column in obj.__table__.columns.keys():
-            obj_dict[column] = getattr(obj, column)
-        result_order.append(obj_dict)
 
-    data = {'data': result,'order_data':result_order[0]}
+    select_columns = [Order.id, Order.created_at_ts, Order.user_id, Users.fullname, Order.project, Order.students, Order.user_id, Order.created_at_ts, Order.updated_at_ts]
+    all_objects = Order.query.filter(Order.id == order_id) \
+    .join(Users, Users.id == Order.user_id, isouter = True) \
+    .with_entities(*select_columns) \
+    .first()
+
+    order_data = [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in [all_objects]][0]
+
+    data = {'data': result,'order_data':order_data}
 
     for item in data['data']:
-        timestamp = datetime.fromtimestamp(item['created_at_ts']).date()
+        timestamp = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
         item['created_at_ts'] = timestamp
 
-    data['order_data']['created_at_ts'] = datetime.fromtimestamp(data['order_data']['created_at_ts']).date()
+
+    data['order_data']['created_at_ts'] = datetime.fromtimestamp(data['order_data']['created_at_ts']).strftime('%d-%m-%Y')
 
     return render_template('app/order-info.html', data=data, segment='orders')
 
 @blueprint.route('/orders/new', methods=["GET", "POST"])
 def new_order():
     if request.method == 'POST':
-        flash({'text':'Are you sure you want cancel?'}, 'cancel') # to do: sweetalert maken
+        flash({}, 'ConfirmOrder')
+
     if 'cart' not in session:
         session['cart'] = []
     return render_template('app/new-order.html', data=session['cart'], segment='orders')
 
-@blueprint.route('/orders/new/remove/<int:id>', methods=["GET", "POST"])
-def new_order_remove(id):
+@blueprint.route('/orders/clear_cart', methods=["GET", "POST"])
+def clear_cart():
+    if 'cart' in session:
+        [session.pop(key) for key in list(session.keys()) if key == 'cart']
+    return redirect(url_for("webapp_blueprint.orders"))
+
+
+@blueprint.route('/orders/new/confirm', methods=["GET", "POST"])
+def confirm_order():
+    form = confirmOrderForm(request.form)
+
+    if 'cart' not in session:
+        return redirect(url_for("webapp_blueprint.new_order"))
+
+    if request.method == 'POST':
+        if 'confirm' in request.form:
+            # Make new order in database
+            new_order = Order(
+                user_id = session['_user_id'],
+                project = request.form['project'],
+                students = request.form['students']
+            )
+            db.session.add(new_order)
+            db.session.commit()
+
+            current_order_id = new_order.id
+
+
+            for item in session['cart']:
+                if 'id' in item:
+                    item_query = Product.query.filter_by(id=item['id']).first().to_dict()
+                    new_ordered_item = Ordered(
+                        order_id = current_order_id,
+                        reason = item['reason'],
+                        quantity = item['quantity'],
+                        title = item_query['title'],
+                        price_when_bought = item_query['price_when_bought'],
+                        url = item_query['url'],
+                        product_id = item_query['id'],
+                        manufacturer_id = item_query['manufacturer_id'],
+                        vendor_id = item_query['vendor_id'],
+                        category_id = item_query['category_id']
+                        )
+
+                    db.session.add(new_ordered_item)
+                    db.session.commit()
+                else:
+                    # Get manufacturer/category/vendor id or create new entry
+                    manufacturer_name = item['manufacturer']
+                    manufacturer = Manufacturer.query.filter_by(manufacturer_name=manufacturer_name).first()
+                    if not manufacturer:
+                        manufacturer = Manufacturer(manufacturer_name=manufacturer_name)
+                        db.session.add(manufacturer)
+
+                    category_name = item['category']
+                    category = ProductCategory.query.filter_by(category_name=category_name).first()
+                    if not category:
+                        category = ProductCategory(category_name=category_name)
+                        db.session.add(category)
+
+                    vendor_name = item['vendor']
+                    vendor = Vendor.query.filter_by(vendor_name=vendor_name).first()
+                    if not vendor:
+                        vendor = Vendor(vendor_name=vendor_name)
+                        db.session.add(vendor)
+
+                    db.session.commit()
+
+                    vendor_id = vendor.id
+                    manufacturer_id = manufacturer.id
+                    category_id = category.id
+
+                    # Handle price field
+                    try:
+                        price = float(item['price'].replace(',', '.'))
+                    except:
+                        price = 0
+
+
+                    new_ordered_item = Ordered(
+                        order_id = current_order_id,
+                        reason = item['reason'],
+                        quantity = int(item['quantity']),
+                        title = item['item'],
+                        price_when_bought = price,
+                        url = item['url'],
+                        manufacturer_id = manufacturer_id,
+                        vendor_id = vendor_id,
+                        category_id = category_id
+                        )
+
+                db.session.add(new_ordered_item)
+            db.session.commit()
+
+            [session.pop(key) for key in list(session.keys()) if key == 'cart']
+
+            flash({'category':'success', 'title': 'Order submitted!', 'text': 'Your order has been submitted!'}, 'General')
+
+
+            return redirect(url_for("webapp_blueprint.orders"))
+        if 'back' in request.form:
+            return redirect(url_for("webapp_blueprint.new_order"))
+
+    return render_template('app/order-confirm.html', data=session['cart'], segment='orders', form=form)
+
+@blueprint.route('/orders/new/remove/<int:index>', methods=["GET", "POST"])
+def new_order_remove(index):
     cart = session['cart']
-    session['cart'] = [item for item in cart if item['id'] != id]
+    cart.pop(index)
+    session['cart'] = cart
     return redirect(url_for('webapp_blueprint.new_order'))
 
 @blueprint.route('/orders/new/item')
 def new_order_item():
     if 'cart' not in session:
-        session['cart'] = []
+        return redirect(url_for("webapp_blueprint.new_order"))
     return render_template('app/new-item.html', data=session['cart'], segment='orders')
 
 @blueprint.route('/orders/new/unknown')
 def new_order_item_unknown():
     if 'cart' not in session:
-        session['cart'] = []
+        return redirect(url_for("webapp_blueprint.new_order"))
     return render_template('app/new-item-unknown.html', data=session['cart'], segment='orders')
 
 @blueprint.route('/<template>')
@@ -413,10 +614,8 @@ def get_segment(request):
 
 @blueprint.route('/inventory/search')
 def inventory_search():
-    q = request.args.get("q")
 
     all_objects = Product.query \
-    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id)
 
     # Legacy code; moet nog vervangen worden met voorbeeld zoals in /inventory/borrowed
@@ -430,10 +629,10 @@ def inventory_search():
 def inventory_search_small():
     q = request.args.get("q")
 
-    select_columns = [Product.id, Product.title, Manufacturer.name]
+    select_columns = [Product.id, Product.title, Manufacturer.manufacturer_name]
 
     all_objects = Product.query \
-    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.name.contains(q)) \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
     .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
     .with_entities(*select_columns) \
     .limit(4)
@@ -442,40 +641,107 @@ def inventory_search_small():
 
     return render_template('app/htmx-results/inventory-results-small.html', data=data)
 
-@blueprint.route('/inventory/borrowed')
-def inventory_borrowed():
-    user_id = session['_user_id']
+@blueprint.route('/inventory/search/borrow')
+def inventory_search_borrow():
+    q = request.args.get("q")
+    select_columns = [Product.id, Product.title, Manufacturer.manufacturer_name, Product.quantity_borrowed, Product.quantity_total]
 
-    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name]
+    all_objects = Product.query \
+    .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
+    .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+    .with_entities(*select_columns) \
+    .limit(4)
+
+    data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+
+    return render_template('app/htmx-results/inventory-results-borrow.html', data=data)
+
+@blueprint.route('/inventory/borrowed/<int:load>')
+def inventory_borrowed(load):
+    select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name, Users.fullname]
 
     all_objects = Borrowed.query \
-    .filter(Borrowed.user_id == user_id) \
     .join(Product, Product.id == Borrowed.product_id) \
     .join(Manufacturer, Product.id == Manufacturer.id) \
-    .with_entities(*select_columns)
+    .join(Users, Users.id == Borrowed.user_id) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
 
+    if load == 1:
+        all_objects = all_objects.filter(Borrowed.estimated_return_date < datetime.now().timestamp())
+
+
+    try:
+        user_id = session['_user_id']
+        role = session['role']
+        if user_id and role != 'admin':
+            all_objects = all_objects.filter(Borrowed.user_id == user_id)
+    except:
+        pass
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
     for item in data['data']:
+        sort_ts = item['estimated_return_date']
         timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
-        item['estimated_return_date'] = timestamp
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
+        timestamp2 = datetime.fromtimestamp(item['created_at_ts']).strftime('%d-%m-%Y')
 
-    # return render_template('app/inventory-results.html', data=data)
+        item['sort_ts'] = sort_ts
+        item['estimated_return_date'] = timestamp
+        item['created_at_ts'] = timestamp2
+        item['days_until_return'] = days_until_return
+
 
     return render_template('app/htmx-results/borrowed-results.html', data=data)
 
 
+
+@blueprint.route('/item/load/<int:id>')
+def item_load(id):
+    # Load product info
+    select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total,
+                      Product.price_when_bought, Product.description, Product.url, Product.documentation, Product.notes,
+                      Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
+
+    all_objects = Product.query.filter(Product.id == id) \
+        .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+        .join(ProductCategory, ProductCategory.id == Product.category_id) \
+        .join(Vendor, Vendor.id == Product.vendor_id) \
+        .with_entities(*select_columns)
+
+    data = [{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects][0]
+
+    # Load borrowed data
+    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
+
+    all_objects = Borrowed.query \
+    .join(Product, Product.id == Borrowed.product_id) \
+    .filter(Borrowed.product_id == data['id']) \
+    .with_entities(*select_columns) \
+    .order_by(Borrowed.estimated_return_date.asc()) \
+    .limit(5)
+
+    borrowdata = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+
+    for item in borrowdata['data']:
+        days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
+        timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')
+        item['estimated_return_date'] = timestamp
+        item['days_until_return'] = days_until_return
+
+    return render_template('app/htmx-results/item-result.html', data=data, borrowdata=borrowdata)
+
 from datetime import datetime, timedelta
 
-@blueprint.route('/orders/load/<int:load>')
-def orders_load(load):
+@blueprint.route('/orders/load/<int:output>')
+def orders_load(output):
 
-    select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project]
+    select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project, Order.user_id]
     all_objects = Order.query \
     .join(Users, Users.id == Order.user_id, isouter = True) \
     .with_entities(*select_columns)
 
-    if load == 1:
+    if output == 1:
         user_id = session["_user_id"]
         all_objects = all_objects.filter(Users.id == user_id)
 
@@ -491,7 +757,36 @@ def orders_load(load):
         else:
             item['created_at_ts'] =  timestamp
 
-    return render_template('app/htmx-results/orders-results.html', data=data)
+    if session.get('_user_id') != None:
+        user_id=session['_user_id']
+    else:
+        user_id = None
+
+    return render_template('app/htmx-results/orders-results.html', data=data, user_id=user_id)
+
+@blueprint.route('/ordered/load/<int:id>')
+@blueprint.route('/ordered/load/<int:id>/<int:load>')
+def ordered_load(id, load=0):
+
+    select_columns = [Ordered.id, Ordered.product_id, Ordered.title, Ordered.price_when_bought, Ordered.url,
+                      Ordered.reason, Ordered.quantity, Ordered.status,
+
+                      Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
+
+
+    all_objects = Ordered.query \
+        .join(Manufacturer, Manufacturer.id == Ordered.manufacturer_id, isouter = True) \
+        .join(ProductCategory, ProductCategory.id == Ordered.category_id, isouter = True) \
+        .join(Vendor, Vendor.id == Ordered.vendor_id, isouter = True) \
+        .filter(Ordered.id == id)\
+        .with_entities(*select_columns) \
+        .all()
+
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+
+
+    return render_template('app/htmx-results/ordered-info.html', data=data['data'][0], load=load)
+
 
 @blueprint.route('/orders/googlesearch/')
 def googlesearchURL():
@@ -559,25 +854,44 @@ def googlesearchURL():
 
     return render_template('app/htmx-results/googlesearch-results.html', data=data)
 
-
 @blueprint.route('/manufacturer/dropdown/')
-def manufacturer_dropdown():
+@blueprint.route('/manufacturer/dropdown/<string:preselect>')
+def manufacturer_dropdown(preselect=-1):
     all_objects = Manufacturer.query.all()
-    data = [obj.name for obj in all_objects]
+    data = [[obj.id, obj.manufacturer_name] for obj in all_objects]
 
-    return render_template('app/htmx-results/manufacturer-dropdown.html', data=data)
+    return render_template('app/htmx-results/manufacturer-dropdown.html', data=data, value=preselect)
 
 @blueprint.route('/category/dropdown/')
-def category_dropdown():
-    all_objects = Category.query.all()
-    data = [obj.name for obj in all_objects]
+@blueprint.route('/category/dropdown/<string:preselect>')
+def category_dropdown(preselect=-1):
+    all_objects = ProductCategory.query.all()
+    data = [[obj.id, obj.category_name] for obj in all_objects]
 
-    return render_template('app/htmx-results/category-dropdown.html', data=data)
+    return render_template('app/htmx-results/category-dropdown.html', data=data, value=preselect)
 
 @blueprint.route('/vendor/dropdown/')
-def vendor_dropdown():
+@blueprint.route('/vendor/dropdown/<string:preselect>')
+def vendor_dropdown(preselect=-1):
     all_objects = Vendor.query.all()
-    data = [obj.name for obj in all_objects]
+    data = [[obj.id, obj.vendor_name] for obj in all_objects]
 
-    return render_template('app/htmx-results/vendor-dropdown.html', data=data)
 
+    return render_template('app/htmx-results/vendor-dropdown.html', data=data, value=preselect)
+
+
+@blueprint.route('/users/search')
+def users_search():
+
+    form = EditProductForm()
+    select_columns = [Users.id, Users.fullname, Users.email, Users.study, Users.faculty, Users.role]
+
+    all_objects = Users.query.with_entities(*select_columns)
+
+    data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
+
+    return render_template('app/htmx-results/users-results.html', data=data)
+
+@blueprint.route('/reload/<string:route>') # Used to reload pages after changing content
+def reload_route(route):
+    return redirect(url_for(f'webapp_blueprint.{route}'))

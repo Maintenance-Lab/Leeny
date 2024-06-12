@@ -1,66 +1,33 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} {{ data['data'][0].title }} {% endblock title %}
+{% block title %} Details {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-
-<div class="card-body mt-5">
-    <div class="row">
-        <div class="col-xl-5 col-lg-6 text-center">
-            <img class="w-100 border-radius-lg shadow-lg mx-auto"
-                src="https://images.unsplash.com/photo-1616627781431-23b776aad6b2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1884&amp;q=80"
-                alt="chair">
-        </div>
-        <div class="col-lg-7 mx-auto">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="mt-lg-0 mt-4">{{ data['data'][0].title }}</h3>
-                <a href="/edit-product/{{data['data'][0].id}}" class="btn btn-dark w-25 mt-2 mb-4" style="margin-top: 20px;">Edit Product</a>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div>
-                    <label class="mb-0 mt-3 mx-0">Available stock</label> <br>
-                    <h7>{{ data['data'][0].quantity }}</h7> <br>
-                </div>
-                <div>
-                    <label class="mb-0 mt-3 mx-0">Purchase price</label><br>
-                    <h7>${{ data['data'][0].price_when_bought }}</h7> <br>
-                </div>
-            </div>
-
-            <label class="mt-4 mx-0">Description</label>
-            <p>
-                {{ data['data'][0].description }}
-            </p>
-
-            <div class="container d-flex gap-3 p-0">
-                <div class="w-50" style="word-wrap:break-word">
-                    <label class="mt-2 mx-0 ">Purchased at</label>
-                    <p><a href="{{ data['data'][0].url }}">{{ data['data'][0].url }}</a></p>
-                </div>
-                <div class="w-50 " style="word-wrap:break-word">
-                    <label class="mt-2 mx-0 ">Documents</label>
-                    <p><a href="{{ data['data'][0].url }}">{{ data['data'][0].documentation }}</a></p>
-                </div>
-            </div>
-
-            {% if data['data'][0].notes %}
-                 <div class="w-50 " style="word-wrap:break-word">
-                    <label class="mt-2 mx-0 ">Notes</label>
-                    <p>{{ data['data'][0].notes }}</p>
-                </div>
-                {% endif %}
-
-            <!-- Other details can be added here -->
-
-        </div>
+<div class="card-body mt-3">
+    <div class="row" id="results">
     </div>
 </div>
+<span hx-get="/item/load/{{data}}" hx-trigger="load" hx-target="#results">
 {% endblock content %}
 
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
-{% endblock %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch(`${window.location.origin}/api/authenticate_admin`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.role === 'admin') {
+                    document.getElementById('edit-product-button').style.display = 'block';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
+
+
+
+{% endblock javascripts %}

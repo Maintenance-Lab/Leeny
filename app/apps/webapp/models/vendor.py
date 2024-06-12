@@ -9,4 +9,3 @@ class Vendor(db.Model):
 
     # Properties
     vendor_name = db.Column(db.String(255), nullable=False)
-    website = db.Column(db.String(255))

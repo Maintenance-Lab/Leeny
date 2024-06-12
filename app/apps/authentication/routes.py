@@ -142,8 +142,6 @@ def rfid_login():
     if current_user.is_authenticated:
         return redirect(url_for('webapp_blueprint.index'))
     else:
-        print("send email")
-        send_email_reminder() 
         return render_template('accounts/rfid_login.html',
                                form=login_form)
 

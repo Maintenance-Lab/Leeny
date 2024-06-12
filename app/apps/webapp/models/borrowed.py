@@ -22,5 +22,5 @@ class Borrowed(db.Model):
     updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))
 
     # Relationships
-    product = db.relationship('Product', backref='borrowed')
-    user = db.relationship('Users', backref='borrowed')
+    product = db.relationship('Product', backref='borrowed', lazy="joined")
+    user = db.relationship('Users', backref='borrowed', lazy="joined")

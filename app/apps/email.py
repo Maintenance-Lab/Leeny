@@ -22,7 +22,7 @@ def send_email(to, subject, template):
 
 
 # Schedule the task for every morning at 9:00
-@scheduler.task('cron', id='send_email_reminder', hour='9', minute='')
+@scheduler.task('cron', id='send_email_reminder', hour='9')
 def send_email_reminder():
     with scheduler.app.app_context():
         with db.session() as session:

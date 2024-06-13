@@ -13,7 +13,9 @@ class Product(db.Model):
     # Properties
     title = db.Column(db.String(255), nullable=False)
     barcode = db.Column(db.String(255), nullable=True)
-    price_when_bought = db.Column(db.Float, nullable=False)
+    # price_when_bought = db.Column(db.Float, nullable=False)
+    priceBTW = db.Column(db.Float)
+    priceNoBTW = db.Column(db.Float)
     description = db.Column(db.Text)
     url = db.Column(db.String(255))
     documentation = db.Column(db.String(255))

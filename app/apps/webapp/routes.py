@@ -123,19 +123,25 @@ def post():
                 quantity = items[1]
 
                 if barcode != 'null':
-                    try:
-                        # get product name
-                        product = Product.query.filter_by(barcode=barcode).first()
-                        product_name = product.title
-                    except AttributeError:
-                        product = Product.query.filter_by(id=barcode).first()
+                    # get product name
+                    product = Product.query.filter_by(barcode=barcode).first()
+                    if product is None:
+                        print("PRODUCT NIET GEVONDEN MET BARCODE: ", barcode)
+                        product = Product.query.filter_by(title=barcode).first()
+                    if product:
+                        print("PRODUCT GEVONDEN: ", product.title)
                         product_name = product.title
 
-                    addedProducts[product_name] = quantity
-                    borrowPrice += product.price_when_bought * quantity
+                        if product_name not in addedProducts:
+                            addedProducts[product_name] = quantity
+                        else:
+                            addedProducts[product_name] += quantity
+
+                        borrowPrice += product.price_when_bought * quantity
 
             session["addedProducts"] = addedProducts
             session['borrowPrice'] = borrowPrice
+            print("ADDED PRODUCTS: ", session["addedProducts"])
 
             return redirect(url_for('webapp_blueprint.borrow_date'))
 

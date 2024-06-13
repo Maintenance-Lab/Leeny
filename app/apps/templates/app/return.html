@@ -207,7 +207,6 @@
     }
 
     function addBarcode(barcode) {
-        console.log("SENDINGH: ", barcode);
         // Send the barcode to the server
         fetch('api/return', {
             method: 'POST',
@@ -369,9 +368,6 @@
     });
 
     document.getElementById("continue").addEventListener('click', function() {
-        console.log("continue clicked");
-        console.log("added barcodes 3: ", addedBarcodes);
-
         // Send to blueprint in routes.py in webapp
         fetch('api/return2', {
             method: 'POST',

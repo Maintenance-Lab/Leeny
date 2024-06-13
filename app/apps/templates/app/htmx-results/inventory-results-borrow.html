@@ -17,19 +17,185 @@
 {% endfor %}
 
 <script>
-document.querySelectorAll('.select-item').forEach(item => {
-    item.addEventListener('click', function() {
-        console.log("clicked")
-        const closestRow = this.closest('tr')
-        const title = closestRow.querySelector('#title').textContent;
-        const id = closestRow.querySelector('#id').textContent;
-        const manufacturer_name = closestRow.querySelector('#manufacturer_name').textContent;
-        const quantity_borrowed = closestRow.querySelector('#quantity_borrowed').textContent;
-        const quantity_total = closestRow.querySelector('#quantity_total').textContent;
-        const quantity = quantity_total - quantity_borrowed;
-        addTableRow(id, title, quantity, "" );
-        Swal.close()
-});
-});
+    document.querySelectorAll('.select-item').forEach(item => {
+        item.addEventListener('click', function() {
+            console.log("clicked")
+            const closestRow = this.closest('tr')
+            const title = closestRow.querySelector('#title').textContent;
+            const id = closestRow.querySelector('#id').textContent;
+            const manufacturer_name = closestRow.querySelector('#manufacturer_name').textContent;
+            const quantity_borrowed = closestRow.querySelector('#quantity_borrowed').textContent;
+            const quantity_total = closestRow.querySelector('#quantity_total').textContent;
+            const quantity = quantity_total - quantity_borrowed;
+            addBarcode(title);
+            // addBarcodeTitle(title);
+            Swal.close()
+        });
+    });
 
+
+    // function addBarcodeTitle(barcode) {
+    //     // Send the barcode to the server
+    //     fetch('api/borrow', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({ barcode: barcode })
+    //         })
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error('Response was not ok');
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             console.log('Response from server:', data);
+
+    //             message = data.message;
+    //             if (message == "Product found") {
+    //                 // When barcode found in database, get name and quantity
+    //                 item_name = data.name;
+    //                 item_quantity = data.quantity;
+
+    //                 if (item_quantity != 0) {
+    //                     foundText(notFound);
+    //                     // Check if barcode already exists on the screen
+    //                     if (barcode in window.addedBarcodes) {
+    //                         if (item_quantity == window.addedBarcodes[barcode]) {
+    //                             Swal.fire({
+    //                                     title: "You have already scanned this item",
+    //                                     html: "Ask an employee for help",
+    //                                     timer: 2200,
+    //                                     timerProgressBar: true,
+    //                                     didOpen: () => {
+    //                                         Swal.showLoading();
+    //                                         const timer = Swal.getPopup().querySelector("c");
+    //                                         timerInterval = setInterval(() => {
+    //                                             timer.textContent = `${Swal.getTimerLeft()}`;
+    //                                         }, 100);
+    //                                     },
+    //                                     willClose: () => {
+    //                                         clearInterval(timerInterval);
+    //                                     }
+    //                                     })
+    //                         }
+    //                         else{
+    //                             // Increment quantity for existing barcode
+    //                             incrementQuantity(barcode, window.addedBarcodes);
+    //                         }
+    //                     }
+    //                     else {
+    //                         // Add new barcode to screen and dictionary
+    //                         window.addedBarcodes[barcode] = 1;
+    //                         addTableRowTitle(barcode, item_name, item_quantity);
+    //                     }
+    //                 }
+    //                 document.getElementById("barcodeInputField").value = "";
+    //             }
+    //             else if (message == "Product not available"){
+    //                     // When quantity is 0
+    //                     Swal.fire({
+    //                         title: "This item is out of stock",
+    //                         html: "Ask an employee for help",
+    //                         timer: 2200,
+    //                         timerProgressBar: true,
+    //                         didOpen: () => {
+    //                             Swal.showLoading();
+    //                             const timer = Swal.getPopup().querySelector("c");
+    //                             timerInterval = setInterval(() => {
+    //                                 timer.textContent = `${Swal.getTimerLeft()}`;
+    //                             }, 100);
+    //                         },
+    //                         willClose: () => {
+    //                             clearInterval(timerInterval);
+    //                         }
+    //                         })
+    //                     console.log("Quantity is 0");
+    //                     // Clear the input field after processing
+    //                     barcode = '';
+    //                     document.getElementById("barcodeInputField").value = "";
+    //             }
+    //             else {
+    //                 // When barcode not found in database
+    //                 Swal.fire({
+    //                                     title: "Barcode not found",
+    //                                     html: "Ask an employee for help",
+    //                                     timer: 2200,
+    //                                     timerProgressBar: true,
+    //                                     didOpen: () => {
+    //                                         Swal.showLoading();
+    //                                         const timer = Swal.getPopup().querySelector("c");
+    //                                         timerInterval = setInterval(() => {
+    //                                             timer.textContent = `${Swal.getTimerLeft()}`;
+    //                                         }, 100);
+    //                                     },
+    //                                     willClose: () => {
+    //                                         clearInterval(timerInterval);
+    //                                     }
+    //                                     })
+    //                 barcode = '';
+    //                 document.getElementById("barcodeInputField").value = "";
+    //                 console.log("Barcode not found");
+    //             }
+    //         })
+    //         .catch(error => console.error('Error:', error));
+    // }
+
+    // function addTableRowTitle(id, item_name, item_quantity) {
+    //     // Select the table body
+    //     body = document.getElementById('tableBody');
+
+    //     // If item is scanned, enable continue button
+    //     if (window.addedBarcodes != {}) {
+    //         document.getElementById("continue").disabled = false;
+    //     }
+
+    //     // Get the current quantity or default to 1
+    //     var quantity = window.addedBarcodes[item_name] || 1;
+
+    //     // Create a new table row with the item name, quantity input and delete link
+    //     const row = createElement('tr');
+    //     const nameCell = createElement('td', ['col-7']);
+    //     const nameDiv = createElement('div', ['d-flex', 'px-2', 'py-1']);
+    //     const nameColumn = createElement('div', ['d-flex', 'flex-column', 'justify-content-center']);
+    //     const itemName = createElement('h6', ['mb-0', 'text-sm', 'text-wrap', 'item-name'], {}, item_name);
+
+    //     nameColumn.appendChild(itemName);
+    //     nameDiv.appendChild(nameColumn);
+    //     nameCell.appendChild(nameDiv);
+    //     row.appendChild(nameCell);
+
+    //     const quantityCell = createElement('td');
+    //     const quantityDiv = createElement('div', ['col-3', 'input-group']);
+    //     const quantityInput = createElement('input', ['form-control', 'p-1'], {
+    //         type: 'number',
+    //         min: '1',
+    //         max: item_quantity,
+    //         'data-barcode': id,
+    //         id: id,
+    //         value: quantity,
+    //         onkeydown: 'preventKeyboardInput(event)'
+    //     });
+
+    //     quantityInput.addEventListener('focus', focused);
+    //     quantityInput.addEventListener('focusout', defocused);
+    //     quantityDiv.appendChild(quantityInput);
+    //     quantityCell.appendChild(quantityDiv);
+    //     row.appendChild(quantityCell);
+
+    //     const deleteCell = createElement('td', ['align-middle', 'col-2']);
+    //     const deleteLink = createElement('a', ['text-secondary', 'font-weight-bold', 'text-xs'], {
+    //         href: 'javascript:;',
+    //         'data-toggle': 'tooltip',
+    //         'data-original-title': 'Delete item'
+    //     }, 'Delete');
+    //     deleteLink.addEventListener('click', () => deleteRow(deleteLink));
+    //     deleteCell.appendChild(deleteLink);
+    //     row.appendChild(deleteCell);
+
+    //     tableBody.appendChild(row);
+
+    //     window.addedBarcodes[item_name] = quantity;
+    // }
 </script>

@@ -70,7 +70,7 @@ class Config(object):
         SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')   
 
     # Mail Settings
-    # MAIL_DEFAULT_SENDER = "leeny.maintenance@gmail.com"
+    MAIL_DEFAULT_SENDER = "leeny.maintenance@gmail.com"
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_PORT = 587
     MAIL_USE_TLS = True
@@ -81,6 +81,9 @@ class Config(object):
     MAIL_PASSWORD = os.getenv("EMAIL_PASS")
     # GMAIL_PASSWORD = os.getenv("GMAIL_PASS")
 
+
+    # TEST
+    SCHEDULER_API_ENABLED = True
 
 
 class ProductionConfig(Config):

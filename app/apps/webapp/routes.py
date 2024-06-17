@@ -123,19 +123,25 @@ def post():
                 quantity = items[1]
 
                 if barcode != 'null':
-                    try:
-                        # get product name
-                        product = Product.query.filter_by(barcode=barcode).first()
-                        product_name = product.title
-                    except AttributeError:
-                        product = Product.query.filter_by(id=barcode).first()
+                    # get product name
+                    product = Product.query.filter_by(barcode=barcode).first()
+                    if product is None:
+                        print("PRODUCT NIET GEVONDEN MET BARCODE: ", barcode)
+                        product = Product.query.filter_by(title=barcode).first()
+                    if product:
+                        print("PRODUCT GEVONDEN: ", product.title)
                         product_name = product.title
 
-                    addedProducts[product_name] = quantity
-                    borrowPrice += product.price_when_bought * quantity
+                        if product_name not in addedProducts:
+                            addedProducts[product_name] = quantity
+                        else:
+                            addedProducts[product_name] += quantity
+
+                        borrowPrice += product.priceBTW * quantity
 
             session["addedProducts"] = addedProducts
             session['borrowPrice'] = borrowPrice
+            print("ADDED PRODUCTS: ", session["addedProducts"])
 
             return redirect(url_for('webapp_blueprint.borrow_date'))
 
@@ -285,7 +291,7 @@ def dropdown_vendor():
 # @login_required
 def admin_edit_product(id):
     form = EditProductForm()
-    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
+    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.priceBTW, Product.priceNoBTW, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
 
     all_objects = Product.query.filter(Product.id == id) \
         .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
@@ -700,7 +706,7 @@ def inventory_borrowed(load):
 def item_load(id):
     # Load product info
     select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total,
-                      Product.price_when_bought, Product.description, Product.url, Product.documentation, Product.notes,
+                      Product.priceBTW, Product.priceNoBTW, Product.description, Product.url, Product.documentation, Product.notes,
                       Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
 
     all_objects = Product.query.filter(Product.id == id) \

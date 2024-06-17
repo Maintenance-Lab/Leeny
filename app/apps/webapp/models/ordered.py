@@ -23,6 +23,8 @@ class Ordered(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)
     url = db.Column(db.String(255))
     price_when_bought = db.Column(db.Float)
+    # priceBTW = db.Column(db.Float)
+    # priceNoBTW = db.Column(db.Float)
     status = db.Column(db.Integer, default=1)
 
 

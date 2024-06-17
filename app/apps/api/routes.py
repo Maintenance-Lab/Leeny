@@ -14,7 +14,7 @@ from apps import db
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from apps.authentication.util import verify_pass
-from apps.scripts.email_verif import send_email
+from apps.email import send_email
 
 
 api = Api(blueprint)
@@ -156,16 +156,23 @@ class Borrow(Resource):
         barcode = data['barcode']
 
         # Query the database for the product based on barcode
-        product = Product.query.filter_by(barcode=barcode).first()
+        # product = Product.query.filter_by(barcode=barcode).first()
+        product = Product.query.filter_by(barcode=barcode.upper()).first()
+        if product is None:
+            product = Product.query.filter_by(title=barcode).first()
 
         if product:
+            print("PRODUCT TILE: ", product.title)
+            if product.barcode:
+                print("PRODUCT BARCODE: ", product.barcode)
+                barcode = product.barcode
             title = product.title
             quantity_total = product.quantity_total
             quantity_unavailable = product.quantity_unavailable
             quantity_borrowed = product.quantity_borrowed
 
             quantity = quantity_total - quantity_unavailable - quantity_borrowed
-
+            print("sending this barcode: ", barcode)
             if quantity > 0:
                 # Product found
                 output = {
@@ -224,26 +231,30 @@ class Borrow2(Resource):
             if barcode != 'null':
                 # Add 1 to quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
-                product.quantity_borrowed += quantity
+                if product is None:
+                    product = Product.query.filter_by(title=barcode).first()
 
-                # Add borrow entry to borrowed table
-                user_id = session['_user_id']
-                borrow = Borrowed(user_id=user_id,
-                                  product_id=product.id,
-                                  quantity=quantity,
-                                  project=project,
-                                  estimated_return_date=return_date
-                                  )
-                print("ADD TO TABLE: ", borrow)
+                if product:
+                    product.quantity_borrowed += quantity
 
-                # Check if the user already has a borrowed item with the same product_id
-                existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
-                if existing_borrow:
-                    existing_borrow.quantity += quantity
-                    print("Existing borrow found. Quantity updated.")
-                else:
-                    db.session.add(borrow)
-                    print("New borrow added to table.")
+                    # Add borrow entry to borrowed table
+                    user_id = session['_user_id']
+                    borrow = Borrowed(user_id=user_id,
+                                    product_id=product.id,
+                                    quantity=quantity,
+                                    project=project,
+                                    estimated_return_date=return_date
+                                    )
+                    print("ADD TO TABLE: ", borrow)
+
+                    # Check if the user already has a borrowed item with the same product_id
+                    existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
+                    if existing_borrow:
+                        existing_borrow.quantity += quantity
+                        print("Existing borrow found. Quantity updated.")
+                    else:
+                        db.session.add(borrow)
+                        print("New borrow added to table.")
 
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
@@ -465,9 +476,23 @@ class AddProduct(Resource):
             db.session.add(vendor)
             db.session.commit()
 
+        priceBTW = 0
+        priceNoBTW = 0
+        # Check if BTW and No BTW are not '' or None?
+        if data['priceBTW'] != '' and data['priceNoBTW'] != '':
+            priceBTW = data['priceBTW']
+            priceNoBTW = data['priceNoBTW']
+        elif data['priceBTW'] != '' and data['priceNoBTW'] == '':
+            priceBTW = float(data['priceBTW'])
+            priceNoBTW = priceBTW * 0.79
+        elif data['priceBTW'] == '' and data['priceNoBTW'] != '':
+            priceNoBTW = float(data['priceNoBTW'])
+            priceBTW = priceNoBTW * 1.21
+
         product = Product(title=data['title'],
                     barcode=data['barcode'],
-                    price_when_bought=data['price'],
+                    priceBTW=priceBTW,
+                    priceNoBTW=priceNoBTW,
                     description=data['description'],
                     url=data['url'],
                     notes=data['notes'],
@@ -483,6 +508,24 @@ class AddProduct(Resource):
         db.session.commit()
 
         return {
+            'success': True
+        }
+
+@api.route('/check-name', methods=['POST'])
+class CheckName(Resource):
+    def post(self):
+        data = request.get_json()
+        name = data['name']
+        product = Product.query.filter_by(title=name).first()
+
+        if product:
+            return {
+                'message': f'Product name already exists',
+                'success': False
+            }
+
+        return {
+            'message': f'Product name available',
             'success': True
         }
 
@@ -521,7 +564,8 @@ class EditProduct(Resource):
 
         product.title = values['title']
         product.barcode = values['barcode']
-        product.price_when_bought = values['price']
+        product.priceBTW = values['priceBTW']
+        product.priceNoBTW = values['priceNoBTW']
         product.description = values['description']
         product.url = values['url']
         product.notes = values['notes']

@@ -23,9 +23,13 @@
             <br>
             </div>
             <div>
-                <label class="mb-0 mt-3 mx-0">Purchase price</label><br>
-                <h7>${{ data.price_when_bought }}</h7> <br>
+                <label class="mb-0 mt-3 mx-0">Purchase price incl. BTW</label><br>
+                <h7>${{ data.priceBTW}}</h7> <br>
             </div>
+
+            <div>
+                <label class="mb-0 mt-3 mx-0">Purchase price excl. BTW</label><br>
+                <h7>${{ data.priceNoBTW}}</h7> <br>
         </div>
         <div class="d-flex gap-3">
             <div>
@@ -52,7 +56,7 @@
     <div class="container d-flex flex-column p-0 w-50">
         <div style="word-wrap:break-word">
             <label class="mt-2 mx-0 ">Purchased at</label>
-            <p class="text-sm mb-2"><a href="{{ data.url }}"  class="truncate">{{ data.url }}</a></p> 
+            <p class="text-sm mb-2"><a href="{{ data.url }}"  class="truncate">{{ data.url }}</a></p>
         </div>
         {% if data.documentation %}
         <div style="word-wrap:break-word">
@@ -107,9 +111,9 @@
         {% endif %}
     </div>
 
-    
 
-    
+
+
     </div>
     <!-- Other details can be added here -->
     <div class="row">

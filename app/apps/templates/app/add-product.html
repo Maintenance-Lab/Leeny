@@ -28,7 +28,7 @@
                   </div>
                 </div>
                 <div class="col-12 text-center">
-                  <a href="/inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Back</a>
+                  <a href="/inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Cancel</a>
                   <a onclick="showStep2()" class="btn btn-dark mt-3 me-2" style="width: 180px;">Enter Manually</a>
                 </div>
             </div>
@@ -54,7 +54,6 @@
               <!-- Part 1 -->
               <div id="step-3-part-1" class="col-12 text-center d-none">
                 <div class="row">
-
                   <div class="form-group">
                     <input type="text" class="form-control visually-hidden" id="barcodeStep3" name="barcode" required>
                   </div>
@@ -70,10 +69,10 @@
                   <!-- Second Column -->
                   <div class="col-md-6 text-start">
                     <div class="form-group">
-                      <label for="price">Price</label>
+                      <label for="priceBTW">Price incl. BTW</label>
                       <div class="input-group">
                         <span class="input-group-text" style="z-index: 4;">€</span>
-                        <input type="text" class="form-control" id="price" name="price" placeholder="50.00" required>
+                        <input type="text" class="form-control" id="priceBTW" name="priceBTW" placeholder="50.00">
                       </div>
                     </div>
                   </div>
@@ -89,57 +88,63 @@
                   <!-- Fourth Column -->
                   <div class="col-md-6 text-start">
                     <div class="form-group">
-                      <label for="url">Website URL</label>
+                      <label for="priceNoBTW">Price excl. BTW</label>
+                      <div class="input-group">
+                        <span class="input-group-text" style="z-index: 4;">€</span>
+                        <input type="text" class="form-control" id="priceNoBTW" name="priceNoBTW" placeholder="50.00">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Fifth Column -->
+                  <div class="col-md-6 text-start">
+                    <div class="form-group">
+                      <label for="url">Vendor URL</label>
                       <input type="text" class="form-control" id="url" name="url" placeholder="www.example.com" required>
                       <p id="result"></p>
                     </div>
                   </div>
 
-                  <!-- Fifth, Sixth, and Seventh Columns -->
-                  <div class="col-12">
-                    <div class="row">
-                      <!-- Fifth Column -->
-                      <div class="col-md-4 text-start">
-                        <div class="form-group">
-                          <label for="category">Category</label>
-                          <div id="categoryDropdown">
-                            <span hx-get="/category/dropdown" hx-trigger="load" hx-target="#categoryDropdown" hx-swap="innerHTML"></span>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Sixth Column -->
-                      <div class="col-md-4 text-start">
-                        <div class="form-group">
-                          <label for="vendor">Vendor</label>
-                          <div id="vendorDropdown">
-                            <span hx-get="/vendor/dropdown" hx-trigger="load" hx-target="#vendorDropdown" hx-swap="innerHTML"></span>
-                          </div>
-                        </div>
-                      </div>
-                      <!-- Seventh Column -->
-                      <div class="col-md-4 text-start">
-                        <div class="form-group">
-                          <label for="manufacturer">Manufacturer</label>
-                          <div id="manufacturerDropdown">
-                            <span hx-get="/manufacturer/dropdown" hx-trigger="load" hx-target="#manufacturerDropdown" hx-swap="innerHTML"></span>
-                          </div>
-                        </div>
+                  <!-- Sixth Column -->
+                  <div class="col-md-6 text-start">
+                    <div class="form-group">
+                      <label for="category">Category</label>
+                      <div id="categoryDropdown">
+                        <span hx-get="/category/dropdown" hx-trigger="load" hx-target="#categoryDropdown" hx-swap="innerHTML"></span>
                       </div>
                     </div>
                   </div>
 
-                </div>
+                  <!-- Seventh Column -->
+                  <div class="col-md-6 text-start">
+                    <div class="form-group">
+                      <label for="vendor">Vendor</label>
+                      <div id="vendorDropdown">
+                        <span hx-get="/vendor/dropdown" hx-trigger="load" hx-target="#vendorDropdown" hx-swap="innerHTML"></span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div class="col-12 text-center">
-                  <button type="button" class="btn btn-dark mt-3" onclick="showStep1()" style="width: 150px;">Cancel</button>
-                  <button type="submit" class="btn btn-dark mt-3 ms-3" style="width: 150px;">Add Product</button>
-                </div>
+                  <!-- Eighth Column -->
+                  <div class="col-md-6 text-start">
+                    <div class="form-group">
+                      <label for="manufacturer">Manufacturer</label>
+                      <div id="manufacturerDropdown">
+                        <span hx-get="/manufacturer/dropdown" hx-trigger="load" hx-target="#manufacturerDropdown" hx-swap="innerHTML"></span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div class="col-12 text-end">
-                  <button type="button" class="btn btn-dark mt-3" onclick="showStep3Part2()" style="position: absolute; top: 20px; right: 40px;">Add More Details</button>
-                </div>
+                  <!-- Buttons -->
+                  <div class="col-12 text-center">
+                    <button type="button" class="btn btn-dark mt-3" onclick="showStep1()" style="width: 150px;">Back</button>
+                    <button type="submit" class="btn btn-dark mt-3 ms-3" style="width: 150px;">Add Product</button>
+                  </div>
 
-              </div>
+                  <div class="col-12 text-end">
+                    <button type="button" class="btn btn-dark mt-3" onclick="showStep3Part2()" style="position: absolute; top: 20px; right: 40px;">Add More Details</button>
+                  </div>
+                </div>
 
               <!-- Part 2 -->
               <div id="step-3-part-2" class="col-12 d-none text-center">
@@ -230,6 +235,7 @@
 <script>
     let currentBarcode = '';
     let submitAllowed = false;
+    let validName = false;
     document.getElementById('step2').disabled = true;
     document.getElementById('topMessage').classList.add('text-danger');
 
@@ -290,7 +296,6 @@
         document.getElementById('step-2').classList.add('d-none');
         document.getElementById('step-3-part-1').classList.add('d-none');
         document.getElementById('step-3-part-2').classList.add('d-none');
-        document.getElementById('step-3-overview').classList.add('d-none');
         document.getElementById('step-4').classList.remove('d-none');
 
         document.getElementById('topMessage').innerText = '';
@@ -338,6 +343,57 @@
         }
     }
 
+    // function checkName() {
+    //   fetch ('api/check-name', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({ name: document.getElementById('title').value })
+    //     })
+    //     .then(response => {
+    //         if (!response.ok) throw new Error('Response was not ok');
+    //         return response.json();
+    //     })
+    //     .then(data => {
+    //         if (data.message === 'Product name already exists') {
+    //             document.getElementById('topMessage').innerText = 'Product name already exists';
+    //             console.log('Product name already exists');
+    //             validName = false;
+    //             return false;
+    //         }
+    //         else {
+    //             document.getElementById('topMessage').innerText = '';
+    //             console.log('Product name is valid');
+    //             validName = true;
+    //             return true;
+    //         }
+    //     })
+    // }
+
+    async function checkName() {
+      const response = await fetch('api/check-name', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: document.getElementById('title').value })
+      });
+
+      if (!response.ok) throw new Error('Response was not ok');
+      const data = await response.json();
+
+      if (data.message === 'Product name already exists') {
+        document.getElementById('topMessage').innerText = 'Product name already exists';
+        console.log('Product name already exists');
+        validName = false;
+      } else {
+        document.getElementById('topMessage').innerText = '';
+        console.log('Product name is valid');
+        validName = true;
+      }
+    }
+
     function addProduct(category, vendor, manufacturer) {
         const form = document.querySelector('form');
         const formData = new FormData(form);
@@ -359,6 +415,47 @@
                 window.location.href = '/inventory';
             }
         })
+    }
+
+    function priceBlock() {
+      let inputValue = event.target.value;
+        inputValue = inputValue.replace(/,/g, '.');
+
+        // Remove non-numeric characters and multiple decimal points
+        inputValue = inputValue.replace(/[^0-9.]/g, '');
+        inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+        // Allow only 2 digits after the decimal point
+        const decimalIndex = inputValue.indexOf('.');
+        if (decimalIndex !== -1) {
+            const decimalPart = inputValue.substring(decimalIndex + 1);
+            if (decimalPart.length > 2) {
+                inputValue = inputValue.substring(0, decimalIndex + 3);
+            }
+        }
+
+        event.target.value = inputValue;
+    }
+
+    function priceFill() {
+      let inputValue = event.target.value;
+
+      // Replace commas with periods for consistency
+      inputValue = inputValue.replace(/,/g, '');
+
+      // Remove non-numeric characters and multiple decimal points
+      inputValue = inputValue.replace(/[^\d.]/g, '');
+      inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+      // If the input ends with a decimal point followed by no digits, append '.00'
+      if (inputValue.endsWith('.')) {
+          inputValue += '00';
+      } else if (!inputValue.includes('.') && inputValue.length > 0) {
+          // If the input has no decimal point, append '.00'
+          inputValue += '.00';
+      }
+
+      event.target.value = inputValue;
     }
 
     function updateProduct() {
@@ -390,31 +487,12 @@
     }
 
     // Add event listener to price field to format input
-    document.getElementById('price').addEventListener('blur', function(event) {
-        let inputValue = event.target.value;
+    document.getElementById('priceBTW').addEventListener('blur', function(event) {
+        priceFill();
+    });
 
-        // Replace commas with periods for consistency
-        inputValue = inputValue.replace(/,/g, '');
-
-        // Check if the input value is empty
-        if (inputValue === '') {
-            // Set the input value to '0.00' if it's empty
-            inputValue = '0.00';
-        } else {
-            // Remove non-numeric characters and multiple decimal points
-            inputValue = inputValue.replace(/[^\d.]/g, '');
-            inputValue = inputValue.replace(/(\..*)\./g, '$1');
-
-            // If the input ends with a decimal point followed by no digits, append '.00'
-            if (inputValue.endsWith('.')) {
-                inputValue += '00';
-            } else if (!inputValue.includes('.')) {
-                // If the input has no decimal point, append '.00'
-                inputValue += '.00';
-            }
-        }
-
-        event.target.value = inputValue;
+    document.getElementById('priceNoBTW').addEventListener('blur', function(event) {
+        priceFill();
     });
 
     document.getElementById('url').addEventListener('blur', function(event) {
@@ -444,24 +522,12 @@
         }
     });
 
-    document.getElementById('price').addEventListener('input', function(event) {
-        let inputValue = event.target.value;
-        inputValue = inputValue.replace(/,/g, '.');
+    document.getElementById('priceBTW').addEventListener('input', function(event) {
+        priceBlock();
+    });
 
-        // Remove non-numeric characters and multiple decimal points
-        inputValue = inputValue.replace(/[^0-9.]/g, '');
-        inputValue = inputValue.replace(/(\..*)\./g, '$1');
-
-        // Allow only 2 digits after the decimal point
-        const decimalIndex = inputValue.indexOf('.');
-        if (decimalIndex !== -1) {
-            const decimalPart = inputValue.substring(decimalIndex + 1);
-            if (decimalPart.length > 2) {
-                inputValue = inputValue.substring(0, decimalIndex + 3);
-            }
-        }
-
-        event.target.value = inputValue;
+    document.getElementById('priceNoBTW').addEventListener('input', function(event) {
+        priceBlock();
     });
 
     document.getElementById('inputFieldStep2').addEventListener('input', function(event) {
@@ -502,21 +568,43 @@
     });
 
     // Send form on submit
-    document.querySelector('form').addEventListener('submit', function(event) {
+    document.querySelector('form').addEventListener('submit', async function(event) {
         event.preventDefault();
+        let hasError = false;
+        await checkName();
 
         const category = document.querySelector('#categoryDropdown select').value;
         const vendor = document.querySelector('#vendorDropdown select').value;
         const manufacturer = document.querySelector('#manufacturerDropdown select').value;
 
+        const priceBTW = document.getElementById('priceBTW').value.trim();
+        const priceNoBTW = document.getElementById('priceNoBTW').value.trim();
+
         if (category === '' || vendor === '' || manufacturer === '') {
             document.getElementById('topMessage').innerText = 'Please select a category, vendor, and manufacturer';
             return;
+            console.log('hasError in category, vendor, manufacturer');
+            hasError = true;
+        }
+        if (!priceBTW && !priceNoBTW) {
+            document.getElementById('topMessage').innerText = 'Please enter a price';
+            return;
+            console.log('hasError in  price');
+            hasError = true;
         }
         if (!submitAllowed) {
           document.getElementById('topMessage').innerText = 'Please enter a valid URL';
           return;
+          console.log('hasError in URL');
+          hasError = true;
         }
+        console.log("validName", validName)
+        if (!validName) {
+          return;
+          console.log('hasErro in name');
+          hasError = true;
+        }
+
         addProduct(category, vendor, manufacturer);
     });
 

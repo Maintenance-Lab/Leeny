@@ -14,7 +14,9 @@
                 {{ item.created_at_ts }}
             </td>
             <td class="text-xs font-weight-bold mb-0">
-                {{item.fullname}}
+                <a href="/user/{{ item.user_id }}">
+                    <u class="text-sm text-dark p-3 ps-4">{{ item.fullname }}</u>
+                </a>
             </td>
             <td class="align-right ">
                 <div class="d-flex justify-content-end align-items-center me-5">
@@ -124,15 +126,15 @@
     // Attach an event listener to each button
     button.addEventListener('click', function(event) {
         event.preventDefault();
-        
+
         // Get the closest 'tr' element
         var row = button.closest('tr');
-        
+
         var cells = row.querySelectorAll('td');
         var order_id = cells[0].textContent.trim();  // First 'td'
         var order_project = cells[1].textContent.trim();  // Second 'td'
         var order_date = cells[2].textContent.trim();  // Third 'td'
-        
+
         // Call the deleteOrder function with the order_id
         deleteOrder(order_id, order_project, order_date);
     });

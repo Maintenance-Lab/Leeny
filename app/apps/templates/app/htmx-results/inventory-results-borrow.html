@@ -17,19 +17,19 @@
 {% endfor %}
 
 <script>
-document.querySelectorAll('.select-item').forEach(item => {
-    item.addEventListener('click', function() {
-        console.log("clicked")
-        const closestRow = this.closest('tr')
-        const title = closestRow.querySelector('#title').textContent;
-        const id = closestRow.querySelector('#id').textContent;
-        const manufacturer_name = closestRow.querySelector('#manufacturer_name').textContent;
-        const quantity_borrowed = closestRow.querySelector('#quantity_borrowed').textContent;
-        const quantity_total = closestRow.querySelector('#quantity_total').textContent;
-        const quantity = quantity_total - quantity_borrowed;
-        addTableRow(id, title, quantity, "" );
-        Swal.close()
-});
-});
-
+    document.querySelectorAll('.select-item').forEach(item => {
+        item.addEventListener('click', function() {
+            console.log("clicked")
+            const closestRow = this.closest('tr')
+            const title = closestRow.querySelector('#title').textContent;
+            const id = closestRow.querySelector('#id').textContent;
+            const manufacturer_name = closestRow.querySelector('#manufacturer_name').textContent;
+            const quantity_borrowed = closestRow.querySelector('#quantity_borrowed').textContent;
+            const quantity_total = closestRow.querySelector('#quantity_total').textContent;
+            const quantity = quantity_total - quantity_borrowed;
+            addBarcode(title);
+            // addBarcodeTitle(title);
+            Swal.close()
+        });
+    });
 </script>

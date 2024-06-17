@@ -208,14 +208,12 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Response from server:', data);
-
                 message = data.message;
                 if (message == "Product found") {
                     // When barcode found in database, get name and quantity
                     item_name = data.name;
                     item_quantity = data.quantity;
-
+                    barcode = data.barcode;
                     if (item_quantity != 0) {
                         foundText(notFound);
                         // Check if barcode already exists on the screen
@@ -298,6 +296,8 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+
+        console.log("ADDED BARCODES: ", addedBarcodes)
     }
 
     function clearBarcode() {
@@ -430,33 +430,37 @@
                 });
 
                 $(document).ready(function() {
-            let debounceTimeout;
+                    let debounceTimeout;
 
-            $('#search-input').on('keyup change', function() {
-                clearTimeout(debounceTimeout);
+                    $('#search-input').on('keyup change', function() {
+                        clearTimeout(debounceTimeout);
 
-                debounceTimeout = setTimeout(() => {
-                    var query = $(this).val();
-                    $.ajax({
-                        url: '/inventory/search/borrow',
-                        type: 'GET',
-                        data: { q: query },
-                        success: function(response) {
-                            $('#results').html(response);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error(xhr.responseText);
-                        }
+                        debounceTimeout = setTimeout(() => {
+                            var query = $(this).val();
+                            $.ajax({
+                                url: '/inventory/search/borrow',
+                                type: 'GET',
+                                data: { q: query },
+                                success: function(response) {
+                                    $('#results').html(response);
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error(xhr.responseText);
+                                }
+                            });
+                        }, 250); // 250ms delay
                     });
-                }, 250); // 250ms delay
-            });
-        });
+                });
             },
             willClose: () => {
                 const input = document.getElementById('search-input');
                 input.removeEventListener('blur', () => {
                     setTimeout(() => input.focus(), 0);
                 });
+            },
+            didClose: () => {
+                // console.log("did close")
+                document.getElementById("barcodeInputField").focus()
             }
         });
     };

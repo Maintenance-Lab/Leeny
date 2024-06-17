@@ -11,9 +11,9 @@
    display: grid;
    grid-template-columns: repeat(2, 1fr);
    width: fit-content;
-   border: 3px solid #344767;
+   border: 3px solid #000080;
    border-radius: 20px;
-   background: #344767;
+   background: #000080;
    font-weight: bold;
    color: #343434;
    cursor: pointer;
@@ -50,18 +50,17 @@
    transition: color 0.3s;
  }
  .toggleCheckbox:checked + .toggleContainer div:last-child{
-   color: #344767;
+   color: #000080;
    transition: color 0.3s;
  }
  .toggleCheckbox + .toggleContainer div:first-child{
-   color: #344767;
+   color: #000080;
    transition: color 0.3s;
  }
  .toggleCheckbox + .toggleContainer div:last-child{
    color: white;
    transition: color 0.3s;
  }
-</style>
 </style>
 {% endblock stylesheets %}
 
@@ -75,7 +74,7 @@
           {% else %}
             <h1>Your Borrowed Items</h1>
           {% endif %}
-        <div class="d-flex gap-3 mx-10">
+        <div class="d-flex gap-3 mx-10 align-items-center">
           <div>
             <input type="checkbox" id="toggle" class="toggleCheckbox"/>
             <label for="toggle" class="toggleContainer">

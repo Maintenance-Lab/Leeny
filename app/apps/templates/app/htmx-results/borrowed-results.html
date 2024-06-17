@@ -1,4 +1,4 @@
-<div class=" px-0 pt-0 pb-2">
+<div class=" px-0 pt-0 pb-2 mt-2">
     <div class="dataTable-wrapper dataTable-loading">
       <div class="dataTable-container card px-2 py-1">
         <table class="table table-flush dataTable-table dataTable" id="borrowed-list">
@@ -55,10 +55,13 @@
                             {{item.days_until_return  }} days
                         {% endif %}
                     </td>
-                    <td class="align-right p-0" href="/item/{{item.id}}">
+                    <td class="d-flex align-right" href="/item/{{item.id}}">
                         <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
                             <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+                                <div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
+
+                                </div>
                             </div>
                         </a>
                     </td>
@@ -147,8 +150,8 @@
                         {% endif %}
                     </td>
                     <td class="align-right p-0" href="/item/{{item.id}}">
-                        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View">
-                            <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px;">
+                        <a href="/item/{{item.id}}" data-toggle="tooltip" data-original-title="View" style="height: 26px !important;">
+                            <div class="d-flex justify-content-end align-items-center" style="margin-right: 75px; ">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="#67748e" height="20px" width="20px" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"/></svg>
                             </div>
                         </a>
@@ -182,7 +185,7 @@
                   },
                   info: false,
                   infoEmpty: false,
-                  pageLength: 8,
+                  pageLength: 13,
                   retrieve: true,
                   columnDefs: [
                     {target: 3, sortable: false},
@@ -222,7 +225,7 @@
     height: 29px;
     position: absolute;
     width: 191px;
-    top:-43px;
+    top:-51px;
     right:-34px;
     border-radius: 0.5rem !important;
     line-height: 2rem !important;
@@ -258,8 +261,8 @@
   }
 
   .page-item.active .page-link {
-    background-color: #344767 !important;
-    border-color: #344767 !important;
+    background-color: #000080 !important;
+    border-color: #000080 !important;
   }
 
   .dt-paging .dt-paging-button:hover {
@@ -269,7 +272,7 @@
 
   #inventory-list_wrapper > div:nth-child(3) > div.col-md-auto.ms-auto > div > ul > li:nth-child(5) {
     background: transparent !important;
-    border-color: #344767 !important;
+    border-color: #000080 !important;
     border: 1px solid transparent !important;
   }
 

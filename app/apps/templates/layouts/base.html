@@ -42,17 +42,15 @@
   {% block stylesheets %}{% endblock stylesheets %}  
 
 </head>
-<body class="g-sidenav-show" style="height: 100% !important; background: linear-gradient(220deg, rgb(248, 247, 247) 50%, rgb(215, 213, 213) 100%);">
-  <div class="mb-4">
-  </div>
+<body class="g-sidenav-show overflow-hidden" style="height: 100% !important; background: linear-gradient(220deg, rgb(248, 247, 247) 50%, rgb(215, 213, 213) 100%);">
+
   
   {% include "includes/sidebar.html" %} 
   {% include "includes/sweetalerts.html" %}
 
   <main class="main-content position-relative pt-0">
 
-    
-
+    <div style="margin-bottom: 20px;"></div>
     {% block content %}{% endblock content %}
 
   </main>

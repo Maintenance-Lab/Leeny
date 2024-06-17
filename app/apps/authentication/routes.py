@@ -61,9 +61,9 @@ def get_uid():
     picca_res = scanner.piccactivate()
     if picca_res.startswith(b'50'):
         uid = scanner.response_parse(picca_res)
-        # print(f"\nUID: {uid}\n")
+        print(f"\nUID: {uid}\n")
         scanner.set_led()
-        # scanner.set_buzzer()
+        scanner.set_buzzer()
     # print("END SCAN ROUND:\n")
     if uid:
         # print("UID found. Exiting...")

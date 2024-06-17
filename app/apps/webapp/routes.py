@@ -137,7 +137,7 @@ def post():
                         else:
                             addedProducts[product_name] += quantity
 
-                        borrowPrice += product.price_when_bought * quantity
+                        borrowPrice += product.priceBTW * quantity
 
             session["addedProducts"] = addedProducts
             session['borrowPrice'] = borrowPrice
@@ -291,7 +291,7 @@ def dropdown_vendor():
 # @login_required
 def admin_edit_product(id):
     form = EditProductForm()
-    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.price_when_bought, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
+    select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.priceBTW, Product.priceNoBTW, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
 
     all_objects = Product.query.filter(Product.id == id) \
         .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
@@ -706,7 +706,7 @@ def inventory_borrowed(load):
 def item_load(id):
     # Load product info
     select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total,
-                      Product.price_when_bought, Product.description, Product.url, Product.documentation, Product.notes,
+                      Product.priceBTW, Product.priceNoBTW, Product.description, Product.url, Product.documentation, Product.notes,
                       Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name]
 
     all_objects = Product.query.filter(Product.id == id) \

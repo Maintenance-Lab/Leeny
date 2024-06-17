@@ -457,17 +457,16 @@
                 input.removeEventListener('blur', () => {
                     setTimeout(() => input.focus(), 0);
                 });
+            },
+            didClose: () => {
+                // console.log("did close")
+                document.getElementById("barcodeInputField").focus()
             }
         });
     };
 
     document.getElementById('no-barcode').addEventListener('click', function() {
         openSearchModal();
-        setTimeout(() => {
-            document.getElementById('search-input').blur();
-            document.getElementById("barcodeInputField").focus();
-            console.log("Focusing on input field after modal closes");
-        }, 100);
     });
 </script>
 

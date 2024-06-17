@@ -18,18 +18,25 @@
                 <!-- First Column -->
                 <div class="col-md-4 text-start">
                   <div class="form-group">
-                    <label for="title">Product Name</label>
+                    <label for="title">Product Name *</label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ product['data'][0].title }}" required>
                   </div>
                   <div class="form-group">
-                    <label for="barcode">Barcode</label>
+                    <label for="barcode">Barcode *</label>
                     <input type="text" class="form-control" id="barcodeStep3" name="barcode" value="{{ product['data'][0].barcode }}" required>
                   </div>
 
                   <div class="form-group">
-                    <label for="price">Price €</label>
+                    <label for="priceBTW">Price incl. BTW €</label>
                     <div class="input-group">
-                      <input type="text" class="form-control" id="price" name="price" placeholder="50.00" value="{{ product['data'][0].price_when_bought }}" required>
+                      <input type="text" class="form-control" id="priceBTW" name="priceBTW" placeholder="50.00" value="{{ product['data'][0].priceBTW }}" required>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="priceNoBTW">Price excl. BTW €</label>
+                    <div class="input-group">
+                      <input type="text" class="form-control" id="priceNoBTW" name="priceNoBTW" placeholder="50.00" value="{{ product['data'][0].priceNoBTW }}" required>
                     </div>
                   </div>
 
@@ -42,7 +49,7 @@
                 <!-- Second Column -->
                 <div class="col-md-4 text-start">
                   <div class="form-group">
-                    <label for="quantity">Quantity</label>
+                    <label for="quantity">Quantity *</label>
                     <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="{{ product['data'][0].quantity_total }}" required>
                   </div>
                   <div class="form-group">
@@ -50,7 +57,7 @@
                     <input type="number" class="form-control" id="quantity_unavailable" name="quantity_unavailable" min="0" value="{{ product['data'][0].quantity_unavailable }}" required>
                   </div>
                   <div class="form-group">
-                    <label for="url">Vendor URL</label>
+                    <label for="url">Vendor URL *</label>
                     <input type="text" class="form-control" id="url" name="url" placeholder="www.example.com" value="{{ product['data'][0].url }}" required>
                   </div>
                   <div class="form-group">
@@ -62,22 +69,22 @@
                 <!-- Third Column -->
                 <div class="col-md-4 text-start">
                   <div class="form-group">
-                    <label for="category">Category</label>
+                    <label for="category">Category *</label>
                     <select id="categoryDropdown" class="form-control" name="category" required></select>
                   </div>
 
                   <div class="form-group">
-                    <label for="vendor">Vendor</label>
+                    <label for="vendor">Vendor *</label>
                     <select id="vendorDropdown" class="form-control" name="vendor" required></select>
                   </div>
 
                   <div class="form-group">
-                    <label for="manufacturer">Manufacturer</label>
+                    <label for="manufacturer">Manufacturer *</label>
                     <select id="manufacturerDropdown" class="form-control" name="manufacturer" required></select>
                   </div>
 
                   <div class="form-group">
-                    <label for="document_url">Document URL</label>
+                    <label for="document_url">Document URL *</label>
                     <input type="text" class="form-control" id="document_url" name="document_url" value="{{ product['data'][0].documentation}}">
                   </div>
                 </div>
@@ -236,38 +243,10 @@
     })
   }
 
-    // Populate dropdowns
-    document.addEventListener('DOMContentLoaded', function() {
-        const category = "{{ product['data'][0].category_name }}";
-        const vendor = "{{ product['data'][0].vendor_name }}";
-        const manufacturer = "{{ product['data'][0].manufacturer_name }}";
 
-        loadDropdown('categoryDropdown', '/api/category/dropdown', category);
-        loadDropdown('vendorDropdown', '/api/vendor/dropdown', vendor);
-        loadDropdown('manufacturerDropdown', '/api/manufacturer/dropdown', manufacturer);
-    });
-
-    // Add event listener to price field to format input
-    document.getElementById('price').addEventListener('blur', function(event) {
-        let inputValue = event.target.value;
-
-        // Remove non-numeric characters and multiple decimal points
-        inputValue = inputValue.replace(/[^0-9.]/g, '');
-        inputValue = inputValue.replace(/(\..*)\./g, '$1');
-
-        // If the input ends with a decimal point followed by no digits, append '.00'
-        if (inputValue.endsWith('.')) {
-            inputValue += '00';
-        } else if (!inputValue.includes('.')) {
-            // If the input has no decimal point, append '.00'
-            inputValue += '.00';
-        }
-
-        event.target.value = inputValue;
-    });
-
-    document.getElementById('price').addEventListener('input', function(event) {
-        let inputValue = event.target.value;
+  function priceBlock() {
+      let inputValue = event.target.value;
+        inputValue = inputValue.replace(/,/g, '.');
 
         // Remove non-numeric characters and multiple decimal points
         inputValue = inputValue.replace(/[^0-9.]/g, '');
@@ -283,6 +262,55 @@
         }
 
         event.target.value = inputValue;
+    }
+
+    function priceFill() {
+      let inputValue = event.target.value;
+
+      // Replace commas with periods for consistency
+      inputValue = inputValue.replace(/,/g, '');
+
+      // Remove non-numeric characters and multiple decimal points
+      inputValue = inputValue.replace(/[^\d.]/g, '');
+      inputValue = inputValue.replace(/(\..*)\./g, '$1');
+
+      // If the input ends with a decimal point followed by no digits, append '.00'
+      if (inputValue.endsWith('.')) {
+          inputValue += '00';
+      } else if (!inputValue.includes('.') && inputValue.length > 0) {
+          // If the input has no decimal point, append '.00'
+          inputValue += '.00';
+      }
+
+      event.target.value = inputValue;
+    }
+
+    // Populate dropdowns
+    document.addEventListener('DOMContentLoaded', function() {
+        const category = "{{ product['data'][0].category_name }}";
+        const vendor = "{{ product['data'][0].vendor_name }}";
+        const manufacturer = "{{ product['data'][0].manufacturer_name }}";
+
+        loadDropdown('categoryDropdown', '/api/category/dropdown', category);
+        loadDropdown('vendorDropdown', '/api/vendor/dropdown', vendor);
+        loadDropdown('manufacturerDropdown', '/api/manufacturer/dropdown', manufacturer);
+    });
+
+    // Add event listener to price field to format input
+    document.getElementById('priceBTW').addEventListener('blur', function(event) {
+        priceFill();
+    });
+
+    document.getElementById('priceNoBTW').addEventListener('blur', function(event) {
+        priceFill();
+    });
+
+    document.getElementById('priceBTW').addEventListener('input', function(event) {
+        priceBlock();
+    });
+
+    document.getElementById('priceNoBTW').addEventListener('input', function(event) {
+        priceBlock();
     });
 
     // Add event listener to quantity fields to allow only numbers

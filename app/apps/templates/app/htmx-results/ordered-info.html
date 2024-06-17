@@ -1,5 +1,5 @@
 
-    {% if session['role'] != 'admin' %} 
+    {% if session['role'] != 'admin' %}
     <div class=" card p-3">
         <div class="d-flex justify-content-between align-items-center">
             <h3 class="mt-lg-0 mt-4">{{ data.title }}</h3>
@@ -18,7 +18,7 @@
                 </div>
                 <div style="word-wrap:break-word">
                     <label class="mt-2 mx-0 ">Purchase URL</label>
-                    <p class="text-sm mb-2"><a href="{{ data.url }}">{{ data.url }}</a></p> 
+                    <p class="text-sm mb-2"><a href="{{ data.url }}">{{ data.url }}</a></p>
                 </div>
                 <div style="word-wrap:break-word">
                     <label class="mt-2 mx-0 ">Reason for purchase</label><br>
@@ -51,7 +51,7 @@
                 <option value=4 {% if data.status == 4 %}selected{% endif %}>Finished</option>
             </select>
         </div>
-        
+
     </div>
     <div class=" card p-3">
 
@@ -105,7 +105,7 @@
         </div>
         <div class="col-6 d-flex justify-content-start">
             <button id="cancel-button" class="btn btn-outline-danger mb-0 w-75">Cancel</button>
-        </div>  
+        </div>
     </div>
 </div>
     {% endif %}
@@ -121,12 +121,12 @@
     // Use event delegation to handle changes on dynamically loaded inputs
     document.body.addEventListener('keydown', (event) => {
         if (event.target.closest('#item-form input, #dropdown')) {
-            handleInputChange();    
+            handleInputChange();
         }
     });
     document.body.addEventListener('click', (event) => {
     if (event.target.closest('#dropdown')) {
-        handleInputChange();    
+        handleInputChange();
     }
 });
 

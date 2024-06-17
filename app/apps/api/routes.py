@@ -564,7 +564,8 @@ class EditProduct(Resource):
 
         product.title = values['title']
         product.barcode = values['barcode']
-        product.price_when_bought = values['price']
+        product.priceBTW = values['priceBTW']
+        product.priceNoBTW = values['priceNoBTW']
         product.description = values['description']
         product.url = values['url']
         product.notes = values['notes']

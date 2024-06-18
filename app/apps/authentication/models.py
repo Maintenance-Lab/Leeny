@@ -30,6 +30,8 @@ class Users(db.Model, UserMixin):
     uid_3         = db.Column(db.String(64), nullable=True)
     study         = db.Column(db.String(64), nullable=True)
     faculty       = db.Column(db.String(64), nullable=True)
+    study         = db.Column(db.String(64), nullable=False)
+    faculty       = db.Column(db.String(64), nullable=False)
     role          = db.Column(db.String(16), nullable=True, default='student')
 
     # uid_1         = db.Column(db.String(64), unique=True, nullable=True)

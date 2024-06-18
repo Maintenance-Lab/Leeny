@@ -133,8 +133,6 @@
                         if (!response.ok) {
                             throw new Error('Response was not ok');
                         }
-
-                        clearBarcode();
                         Swal.fire({
                             title: "Return successfully completed!",
                             html: "",
@@ -154,6 +152,7 @@
                         .then(function (result) {
                             if (result.dismiss === Swal.DismissReason.timer) {
                                 window.location.href = "/borrowed";
+                                clearBarcode();
                             }
                         });
                         return response.json();

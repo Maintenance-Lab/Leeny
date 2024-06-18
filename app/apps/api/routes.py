@@ -118,7 +118,6 @@ class GetBarcode(Resource):
 class ClearBarcode(Resource):
     def post(self):
         session['barcodes'] = []
-        print("Barcodes cleared")
         return {'message': 'Barcodes cleared'}, 200
 
 @api.route('/clear_project_date', methods=['POST'])
@@ -126,7 +125,6 @@ class ClearProjectDate(Resource):
     def post(self):
         session['project'] = ''
         session['estimated_return_date'] = ''
-        print("Project date cleared")
         return {'message': 'Project date cleared'}, 200
 
 @api.route('/get_project_date', methods=['POST'])
@@ -155,8 +153,6 @@ class Borrow(Resource):
         data = request.get_json()
         barcode = data['barcode']
 
-        # Query the database for the product based on barcode
-        # product = Product.query.filter_by(barcode=barcode).first()
         product = Product.query.filter_by(barcode=barcode.upper()).first()
         if product is None:
             product = Product.query.filter_by(title=barcode).first()
@@ -279,16 +275,21 @@ class Return(Resource):
         data = request.get_json()
         barcode = data['barcode']
 
-        # Query the database for the product based on barcode
-        product = Product.query.filter_by(barcode=barcode).first()
-        if product is not None:
+        product = Product.query.filter_by(barcode=barcode.upper()).first()
+        if product is None:
+            product = Product.query.filter_by(title=barcode).first()
+
+        if product:
+            if product.barcode:
+                barcode = product.barcode
+
             title = product.title
 
             # quantity for borrowed from user
             user_id = session['_user_id']
             borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
 
-            if borrow is not None:
+            if borrow:
                 # Product found
                 output = {
                     'barcode': barcode,
@@ -298,10 +299,10 @@ class Return(Resource):
                     'success': True
                 }
             else:
-                # Product not found
+                # Product not borrowed
                 output = {
                     'barcode': barcode,
-                    'message': f'Product not found',
+                    'message': f'Product not borrowed',
                     'success': False
                 }
 
@@ -315,39 +316,12 @@ class Return(Resource):
 
         return output, 200
 
-@api.route('/return2', methods=['POST'])
-class Return2(Resource):
-    def post(self):
-        print("IN RETURN 2")
-        return_data = request.get_json()['addedBarcodes']
-        session['return_data'] = return_data
-
-        addedProducts = {}
-        barcode_list = []
-
-        for items in return_data.items():
-            barcode = items[0]
-            quantity = items[1]
-
-            if barcode != 'null':
-                # get product name
-                product = Product.query.filter_by(barcode=barcode).first()
-                product_name = product.title
-                addedProducts[product_name] = quantity
-
-                for _ in range(quantity):
-                    barcode_list.append(barcode)
-
-                if 'barcodes' not in session:
-                    session['barcodes'] = []
-                session['barcodes'] += barcode_list
-
-        session["addedProducts"] = addedProducts
-
 @api.route('/return-confirm', methods=['POST'])
 class ReturnConfirm(Resource):
     def post(self):
-        return_data = session['return_data']
+        # return_data = session['return_data']
+
+        return_data = session['addedBarcodes']
 
         for items in return_data.items():
             print("barcode: ", items[0], "quantity: ", items[1])
@@ -369,6 +343,8 @@ class ReturnConfirm(Resource):
         # Save changes to database
         print("COMMITING CHANGES -------------------------------")
         db.session.commit()
+
+        session['barcodes'] = []
 
         # Send email to users
         user_id = session['_user_id']

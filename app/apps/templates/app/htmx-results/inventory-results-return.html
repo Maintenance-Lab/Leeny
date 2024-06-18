@@ -1,0 +1,34 @@
+{% for item in data['data'] %}
+<tr>
+    <td>
+        <h6 class="mb-0 text-sm text-start" id="title">{{item.title}}</h6>
+    </td>
+    <td>
+        <p class="text-xs font-weight-bold mb-0" id="manufacturer_name">{{item.manufacturer_name}}</p>
+        <p class="text-xs font-weight-bold mb-0 visually-hidden" id="id">{{item.id}}</p>
+        <p class="text-xs font-weight-bold mb-0 visually-hidden" id="quantity_borrowed">{{item.quantity_borrowed}}</p>
+        <p class="text-xs font-weight-bold mb-0 visually-hidden" id="quantity_total">{{item.quantity_total}}</p>
+    <td style="width:60px" class="select-item">
+        <div class="btn btn-dark mb-0 py-1 px-3">
+            <svg height="20px" fill="#ffffff" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>
+        </div>
+    </td>
+</tr>
+{% endfor %}
+
+<script>
+    document.querySelectorAll('.select-item').forEach(item => {
+        item.addEventListener('click', function() {
+            console.log("clicked")
+            const closestRow = this.closest('tr')
+            const title = closestRow.querySelector('#title').textContent;
+            const id = closestRow.querySelector('#id').textContent;
+            const manufacturer_name = closestRow.querySelector('#manufacturer_name').textContent;
+            const quantity_borrowed = closestRow.querySelector('#quantity_borrowed').textContent;
+            const quantity_total = closestRow.querySelector('#quantity_total').textContent;
+            const quantity = quantity_total - quantity_borrowed;
+            addBarcode(title);
+            Swal.close()
+        });
+    });
+</script>

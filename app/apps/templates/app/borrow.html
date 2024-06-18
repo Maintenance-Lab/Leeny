@@ -21,7 +21,6 @@
 
         </div>
         <div class="container-fluid align-items-center col-lg-4 col-md-6 col-sm-10 mx-0">
-            <div id="notFoundText"></div>
 
             <div class="card text-left">
                 <div class="table-responsive p-0" style="max-height: 450px;">
@@ -89,6 +88,24 @@
             quantityInput.value = currentQuantity + 1;
             addedBarcodes[barcode] = currentQuantity + 1;
         }
+        else {
+            Swal.fire({
+                title: "You have already scanned this item",
+                html: "Ask an employee for help",
+                timer: 2200,
+                timerProgressBar: true,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("c");
+                    timerInterval = setInterval(() => {
+                        timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            })
+        }
     }
 
     function createElement(tag, classes = [], attributes = {}, content = '') {
@@ -107,7 +124,6 @@
     }
 
     function addTableRow(barcode, item_name, item_quantity, notFound) {
-        // Select the table body
         body = document.getElementById('tableBody');
 
         // If item is scanned, enable continue button
@@ -163,31 +179,6 @@
         addedBarcodes[barcode] = quantity;
     }
 
-    function notFoundText(notFound, available, message, item_name=null) {
-        if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
-            // Remove existing content from notFound div
-            while (notFound.firstChild) {
-                notFound.removeChild(notFound.firstChild);
-            }
-
-            // Create a new text node with the message
-            message = message + (item_name || '');
-
-            // Append the text node to the notFound div
-            const textNode = document.createTextNode(message);
-            notFound.appendChild(textNode);
-        }
-    }
-
-    function foundText(notFound) {
-        if (notFound && notFound.nodeType === Node.ELEMENT_NODE) {
-            // Remove existing content from notFound div
-            while (notFound.firstChild) {
-                notFound.removeChild(notFound.firstChild);
-            }
-        }
-    }
-
     function preventKeyboardInput(event) {
       event.preventDefault();
     }
@@ -195,109 +186,106 @@
     function addBarcode(barcode) {
         // Send the barcode to the server
         fetch('api/borrow', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ barcode: barcode })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                message = data.message;
-                if (message == "Product found") {
-                    // When barcode found in database, get name and quantity
-                    item_name = data.name;
-                    item_quantity = data.quantity;
-                    barcode = data.barcode;
-                    if (item_quantity != 0) {
-                        foundText(notFound);
-                        // Check if barcode already exists on the screen
-                        if (barcode in addedBarcodes) {
-                            if (item_quantity == addedBarcodes[barcode]) {
-                                Swal.fire({
-                                        title: "You have already scanned this item",
-                                        html: "Ask an employee for help",
-                                        timer: 2200,
-                                        timerProgressBar: true,
-                                        didOpen: () => {
-                                            Swal.showLoading();
-                                            const timer = Swal.getPopup().querySelector("c");
-                                            timerInterval = setInterval(() => {
-                                                timer.textContent = `${Swal.getTimerLeft()}`;
-                                            }, 100);
-                                        },
-                                        willClose: () => {
-                                            clearInterval(timerInterval);
-                                        }
-                                        })
-                            }
-                            else{
-                                // Increment quantity for existing barcode
-                                incrementQuantity(barcode, addedBarcodes);
-                            }
-                        }
-                        else {
-                            // Add new barcode to screen and dictionary
-                            addedBarcodes[barcode] = 1;
-                            addTableRow(barcode, item_name, item_quantity);
-                        }
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ barcode: barcode })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            message = data.message;
+            if (message == "Product found") {
+                // When barcode found in database, get name and quantity
+                item_name = data.name;
+                item_quantity = data.quantity;
+                barcode = data.barcode;
+                if (item_quantity != 0) {
+                    // Check if barcode already exists on the screen
+                    if (barcode in addedBarcodes) {
+                        // if (item_quantity == addedBarcodes[barcode]) {
+                            // Swal.fire({
+                            //     title: "You have already scanned this item",
+                            //     html: "Ask an employee for help",
+                            //     timer: 2200,
+                            //     timerProgressBar: true,
+                            //     didOpen: () => {
+                            //         Swal.showLoading();
+                            //         const timer = Swal.getPopup().querySelector("c");
+                            //         timerInterval = setInterval(() => {
+                            //             timer.textContent = `${Swal.getTimerLeft()}`;
+                            //         }, 100);
+                            //     },
+                            //     willClose: () => {
+                            //         clearInterval(timerInterval);
+                            //     }
+                            // })
+                        // }
+                        // else{
+                            // Increment quantity for existing barcode
+                        incrementQuantity(barcode, addedBarcodes);
+                        // }
                     }
-                    document.getElementById("barcodeInputField").value = "";
+                    else {
+                        // Add new barcode to screen and dictionary
+                        addedBarcodes[barcode] = 1;
+                        addTableRow(barcode, item_name, item_quantity);
+                    }
                 }
-                else if (message == "Product not available"){
-                        // When quantity is 0
-                        Swal.fire({
-                            title: "This item is out of stock",
-                            html: "Ask an employee for help",
-                            timer: 2200,
-                            timerProgressBar: true,
-                            didOpen: () => {
-                                Swal.showLoading();
-                                const timer = Swal.getPopup().querySelector("c");
-                                timerInterval = setInterval(() => {
-                                    timer.textContent = `${Swal.getTimerLeft()}`;
-                                }, 100);
-                            },
-                            willClose: () => {
-                                clearInterval(timerInterval);
-                            }
-                            })
-                        console.log("Quantity is 0");
-                        // Clear the input field after processing
-                        barcode = '';
-                        document.getElementById("barcodeInputField").value = "";
-                }
-                else {
-                    // When barcode not found in database
+                document.getElementById("barcodeInputField").value = "";
+            }
+            else if (message == "Product not available"){
+                    // When quantity is 0
                     Swal.fire({
-                                        title: "Barcode not found",
-                                        html: "Ask an employee for help",
-                                        timer: 2200,
-                                        timerProgressBar: true,
-                                        didOpen: () => {
-                                            Swal.showLoading();
-                                            const timer = Swal.getPopup().querySelector("c");
-                                            timerInterval = setInterval(() => {
-                                                timer.textContent = `${Swal.getTimerLeft()}`;
-                                            }, 100);
-                                        },
-                                        willClose: () => {
-                                            clearInterval(timerInterval);
-                                        }
-                                        })
+                        title: "This item is out of stock",
+                        html: "Ask an employee for help",
+                        timer: 2200,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            const timer = Swal.getPopup().querySelector("c");
+                            timerInterval = setInterval(() => {
+                                timer.textContent = `${Swal.getTimerLeft()}`;
+                            }, 100);
+                        },
+                        willClose: () => {
+                            clearInterval(timerInterval);
+                        }
+                        })
+
+                    // Clear the input field after processing
                     barcode = '';
                     document.getElementById("barcodeInputField").value = "";
-                    console.log("Barcode not found");
-                }
-            })
-            .catch(error => console.error('Error:', error));
-
-        console.log("ADDED BARCODES: ", addedBarcodes)
+            }
+            else {
+                // When barcode not found in database
+                Swal.fire({
+                                    title: "Barcode not found",
+                                    html: "Ask an employee for help",
+                                    timer: 2200,
+                                    timerProgressBar: true,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                        const timer = Swal.getPopup().querySelector("c");
+                                        timerInterval = setInterval(() => {
+                                            timer.textContent = `${Swal.getTimerLeft()}`;
+                                        }, 100);
+                                    },
+                                    willClose: () => {
+                                        clearInterval(timerInterval);
+                                    }
+                                    })
+                barcode = '';
+                document.getElementById("barcodeInputField").value = "";
+                console.log("Barcode not found");
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     function clearBarcode() {
@@ -338,7 +326,6 @@
     var doneTypingInterval = 50;
 
     const tableBody = document.querySelector('tbody');
-    const notFound = document.getElementById('notFoundText');
 
     document.addEventListener('DOMContentLoaded', (event) => {
         fetch('api/get_barcode', {
@@ -360,7 +347,6 @@
             for (const barcode of barcodes) {
                 addBarcode(barcode);
             }
-
         });
     })
 
@@ -424,46 +410,39 @@
                 const input = document.getElementById('search-input');
                 input.focus();
 
-                // Event listener to ensure focus is restored if lost
-                input.addEventListener('blur', () => {
-                    setTimeout(() => input.focus(), 0);
+                // Ensure focus is restored if lost
+                const restoreFocus = () => setTimeout(() => input.focus(), 0);
+                input.addEventListener('blur', restoreFocus);
+
+                let debounceTimeout;
+                $('#search-input').on('keyup change', function() {
+                    clearTimeout(debounceTimeout);
+                    debounceTimeout = setTimeout(() => {
+                        const query = $(this).val();
+                        $.ajax({
+                            url: '/inventory/search/borrow',
+                            type: 'GET',
+                            data: { q: query },
+                            success: function(response) {
+                                $('#results').html(response);
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(xhr.responseText);
+                            }
+                        });
+                    }, 250);
                 });
 
-                $(document).ready(function() {
-                    let debounceTimeout;
-
-                    $('#search-input').on('keyup change', function() {
-                        clearTimeout(debounceTimeout);
-
-                        debounceTimeout = setTimeout(() => {
-                            var query = $(this).val();
-                            $.ajax({
-                                url: '/inventory/search/borrow',
-                                type: 'GET',
-                                data: { q: query },
-                                success: function(response) {
-                                    $('#results').html(response);
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error(xhr.responseText);
-                                }
-                            });
-                        }, 250); // 250ms delay
-                    });
-                });
-            },
-            willClose: () => {
-                const input = document.getElementById('search-input');
-                input.removeEventListener('blur', () => {
-                    setTimeout(() => input.focus(), 0);
+                // Ensure the event listener is removed when the modal is closed
+                Swal.getPopup().addEventListener('remove', () => {
+                    input.removeEventListener('blur', restoreFocus);
                 });
             },
             didClose: () => {
-                // console.log("did close")
-                document.getElementById("barcodeInputField").focus()
+                document.getElementById("barcodeInputField").focus();
             }
         });
-    };
+    }
 
     document.getElementById('no-barcode').addEventListener('click', function() {
         openSearchModal();

@@ -97,57 +97,61 @@ def post():
             print("form data: ", request.form["borrow_data"])
 
             # add data to session
-            # session["borrow_data"] = request.form["borrow_data"]
             borrow_data = json.loads(request.form["borrow_data"])
             session['addedBarcodes'] = borrow_data
 
-            barcode_list = []
-            for barcode, quantity in borrow_data.items():
-                # Check if the barcode is not 'null'
-                if barcode != 'null':
-                    # Repeat each barcode according to its quantity and append to the list
-                    for _ in range(quantity):
-                        barcode_list.append(barcode)
-
-            if 'barcodes' not in session:
-                session['barcodes'] = []
-            session['barcodes'] += barcode_list
-
-            # create dictionary with names and quantities
-            # addedBarcodes = request.form["borrow_data"]
-            addedProducts = {}
-
-            borrowPrice = 0
-            for items in borrow_data.items():
-                barcode = items[0]
-                quantity = items[1]
-
-                if barcode != 'null':
-                    # get product name
-                    product = Product.query.filter_by(barcode=barcode).first()
-                    if product is None:
-                        print("PRODUCT NIET GEVONDEN MET BARCODE: ", barcode)
-                        product = Product.query.filter_by(title=barcode).first()
-                    if product:
-                        print("PRODUCT GEVONDEN: ", product.title)
-                        product_name = product.title
-
-                        if product_name not in addedProducts:
-                            addedProducts[product_name] = quantity
-                        else:
-                            addedProducts[product_name] += quantity
-
-                        borrowPrice += product.priceBTW * quantity
+            populate_barcodelist(borrow_data)
+            addedProducts, borrowPrice = populate_addedproducts(borrow_data)
 
             session["addedProducts"] = addedProducts
             session['borrowPrice'] = borrowPrice
-            print("ADDED PRODUCTS: ", session["addedProducts"])
 
             return redirect(url_for('webapp_blueprint.borrow_date'))
 
         if 'cancel' in request.form:
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow.html')
+
+def populate_barcodelist(data):
+    barcode_list = []
+    for barcode, quantity in data.items():
+        # Check if the barcode is not 'null'
+        if barcode != 'null':
+            # Repeat each barcode according to its quantity and append to the list
+            for _ in range(quantity):
+                barcode_list.append(barcode)
+
+    if 'barcodes' not in session:
+        session['barcodes'] = []
+    session['barcodes'] += barcode_list
+
+def populate_addedproducts(data, borrow=True):
+    addedProducts = {}
+    borrowPrice = 0
+
+    for items in data.items():
+        barcode = items[0]
+        quantity = items[1]
+
+        if barcode != 'null':
+            # get product name
+            product = Product.query.filter_by(barcode=barcode).first()
+            if product is None:
+                product = Product.query.filter_by(title=barcode).first()
+            if product:
+                product_name = product.title
+
+                if product_name not in addedProducts:
+                    addedProducts[product_name] = quantity
+                else:
+                    addedProducts[product_name] += quantity
+
+                if borrow:
+                    borrowPrice += product.priceBTW * quantity
+
+    return addedProducts, borrowPrice
+
+
 
 @blueprint.route('/card-forgotten', methods=["GET", "POST"])
 def card_forgotten():
@@ -221,13 +225,20 @@ def borrow_date():
             flash({'text':'123'}, 'cancel')
     return render_template('app/borrow-date.html', form=form)
 
+
 @blueprint.route('/return', methods=["GET","POST"])
 # @login_required
 def post_return():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            # lookup name with session uid
+            return_data = json.loads(request.form["return_data"])
+            session['addedBarcodes'] = return_data
+
+            populate_barcodelist(return_data)
+            addedProducts, borrowPrice = populate_addedproducts(return_data, borrow=False)
+            session["addedProducts"] = addedProducts
+
             user_id = session['_user_id']
             user = Users.query.filter_by(id=user_id).first()
 
@@ -662,6 +673,28 @@ def inventory_search_borrow():
 
     return render_template('app/htmx-results/inventory-results-borrow.html', data=data)
 
+@blueprint.route('/inventory/search/return')
+def inventory_search_return():
+    q = request.args.get("q")
+
+    user_id = session['_user_id']
+
+    # Get all borrowed items
+    select_columns = [Product.id, Product.title, Manufacturer.manufacturer_name, Product.quantity_borrowed, Product.quantity_total]
+
+    all_objects = Product.query \
+        .join(Manufacturer, Manufacturer.id == Product.manufacturer_id) \
+        .join(Borrowed, Borrowed.product_id == Product.id) \
+        .filter(Borrowed.user_id == user_id) \
+        .filter(Product.title.contains(q) | Product.description.contains(q) | Manufacturer.manufacturer_name.contains(q)) \
+        .with_entities(*select_columns) \
+        .limit(4) \
+        .all()
+
+    data = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
+
+    return render_template('app/htmx-results/inventory-results-return.html', data=data)
+
 @blueprint.route('/inventory/borrowed/<int:load>')
 def inventory_borrowed(load):
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name, Users.fullname]
@@ -699,8 +732,6 @@ def inventory_borrowed(load):
 
 
     return render_template('app/htmx-results/borrowed-results.html', data=data)
-
-
 
 @blueprint.route('/item/load/<int:id>')
 def item_load(id):
@@ -770,7 +801,7 @@ def orders_load(output):
 
     return render_template('app/htmx-results/orders-results.html', data=data, user_id=user_id)
 
-@blueprint.route('/ordered/load/<int:id>')
+# @blueprint.route('/ordered/load/<int:id>')
 @blueprint.route('/ordered/load/<int:id>/<int:load>')
 def ordered_load(id, load=0):
 
@@ -792,7 +823,6 @@ def ordered_load(id, load=0):
 
 
     return render_template('app/htmx-results/ordered-info.html', data=data['data'][0], load=load)
-
 
 @blueprint.route('/orders/googlesearch/')
 def googlesearchURL():
@@ -860,7 +890,7 @@ def googlesearchURL():
 
     return render_template('app/htmx-results/googlesearch-results.html', data=data)
 
-@blueprint.route('/manufacturer/dropdown/')
+# @blueprint.route('/manufacturer/dropdown/')
 @blueprint.route('/manufacturer/dropdown/<string:preselect>')
 def manufacturer_dropdown(preselect=-1):
     all_objects = Manufacturer.query.all()
@@ -868,7 +898,7 @@ def manufacturer_dropdown(preselect=-1):
 
     return render_template('app/htmx-results/manufacturer-dropdown.html', data=data, value=preselect)
 
-@blueprint.route('/category/dropdown/')
+# @blueprint.route('/category/dropdown/')
 @blueprint.route('/category/dropdown/<string:preselect>')
 def category_dropdown(preselect=-1):
     all_objects = ProductCategory.query.all()
@@ -876,7 +906,7 @@ def category_dropdown(preselect=-1):
 
     return render_template('app/htmx-results/category-dropdown.html', data=data, value=preselect)
 
-@blueprint.route('/vendor/dropdown/')
+# @blueprint.route('/vendor/dropdown/')
 @blueprint.route('/vendor/dropdown/<string:preselect>')
 def vendor_dropdown(preselect=-1):
     all_objects = Vendor.query.all()

@@ -25,7 +25,7 @@ from apps.authentication.models import *
 from apps.webapp.forms import *
 # staat nog niet goed ivm verplaatsing ivm api traag
 from apps.api.forms import *
-from sqlalchemy import update
+from sqlalchemy import update, func
 from sqlalchemy.inspection import inspect
 from googlesearch import search
 from apps.webapp.imagescraper import get_largest_image
@@ -342,12 +342,35 @@ def borrows():
 # @login_required
 def settings():
     create_account_form = CreateAccountForm(request.form)
+
     all_objects = Users.query.filter_by(id=session['_user_id'])
     data = {'data':[{'id': obj.id, **UsersForm(obj=obj).data} for obj in all_objects]}
 
     if request.method == "POST":
         if "update_profile" in request.form:
-            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=request.form['fullname'], email=request.form['email']\
+            user_id = session['_user_id']
+            current_user = Users.query.filter_by(id=user_id).first()
+            fullname =request.form['fullname']
+            email = request.form['email']
+
+            # Check if user exists and is not current user
+            user = Users.query.filter(func.lower(Users.fullname)==fullname.strip().lower()).first()
+
+            print("User: ", Users.fullname, "Current user: ", current_user.fullname.strip().lower())
+            if user and user != current_user:
+                flash({'category':'error', 'title': 'User exists!', 'text': 'This user already exists'}, 'General')
+                return redirect(url_for('webapp_blueprint.settings'))
+
+
+            # check if email appears in database
+            existing_email = Users.query.filter(func.lower(Users.email)==email.strip().lower()).first()
+            print("Existing email: ", email.strip().lower(), "Current user email: ", current_user.email.strip().lower())
+
+            if existing_email and email.strip().lower() != current_user.email.strip().lower():
+                flash({'category':'error', 'title': 'Email exists!', 'text': 'This email is already in use'}, 'General')
+                return redirect(url_for('webapp_blueprint.settings'))
+
+            test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=fullname, email=email\
                                                                              , study=request.form['study'], faculty=request.form['faculty']))
             # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
@@ -373,7 +396,24 @@ def user(id):
 
     if request.method == "POST":
         if "update_profile" in request.form:
-            test = Users.query.filter_by(id=id).update(dict(fullname=request.form['fullname'], email=request.form['email']\
+            current_user = Users.query.filter_by(id=id).first()
+            fullname =request.form['fullname']
+            email = request.form['email']
+
+            # Check if user exists and is not user from id
+            user = Users.query.filter(func.lower(Users.fullname)==fullname.strip().lower()).first()
+
+            if user and user != current_user:
+                flash({'category':'error', 'title': 'User exists!', 'text': 'This user already exists'}, 'General')
+                return redirect(url_for('webapp_blueprint.user', id=id))
+
+            # Check if email appears in database
+            existing_email = Users.query.filter(func.lower(Users.email)==email.strip().lower()).first()
+            if existing_email and email.strip().lower() != current_user.email.strip().lower():
+                flash({'category':'error', 'title': 'Email exists!', 'text': 'This email is already in use'}, 'General')
+                return redirect(url_for('webapp_blueprint.user', id=id))
+
+            test = Users.query.filter_by(id=id).update(dict(fullname=fullname, email=email\
                                                                              , study=request.form['study'], faculty=request.form['faculty']))
             test5 = Users.query.filter_by(id=id).update(dict(role=request.form['role']))
             db.session.commit()
@@ -383,7 +423,7 @@ def user(id):
 
 
         # Load borrowed data
-    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project]
+    select_columns = [Borrowed.quantity, Borrowed.estimated_return_date, Borrowed.project, Borrowed.returned]
 
     all_objects = Borrowed.query \
     .join(Product, Product.id == Borrowed.product_id) \
@@ -394,7 +434,6 @@ def user(id):
     .limit(5)
 
     borrowdata = {'data': [{col.key: obj_field for col, obj_field in zip(select_columns, obj)} for obj in all_objects]}
-    print(borrowdata)
     for item in borrowdata['data']:
         days_until_return = (datetime.fromtimestamp(item['estimated_return_date']) - datetime.now()).days
         timestamp = datetime.fromtimestamp(item['estimated_return_date']).strftime('%d-%m-%Y')

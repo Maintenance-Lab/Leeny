@@ -319,8 +319,6 @@ class Return(Resource):
 @api.route('/return-confirm', methods=['POST'])
 class ReturnConfirm(Resource):
     def post(self):
-        # return_data = session['return_data']
-
         return_data = session['addedBarcodes']
 
         for items in return_data.items():

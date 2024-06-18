@@ -86,7 +86,14 @@ User Profile
     <div class="col-4">
       <div class="card mb-6">
         <div class="card-body px-4 pt-4 pb-3">
-          {% if borrowdata['data'] != [] %}
+          {% set has_items = False %}
+          {% for item in borrowdata['data'] %}
+              {% if item.quantity != 0 %}
+                  {% set has_items = True %}
+              {% endif %}
+          {% endfor %}
+
+          {% if has_items %}
         <label class="mx-0">Currently Borrowing</label>
         <table class="table align-items-center mb-4">
             <thead>
@@ -99,12 +106,13 @@ User Profile
             </thead>
             <tbody>
                 {% for item in borrowdata['data'] %}
+                {% if item.quantity != 0 %}
                     <tr>
                         <td class="align-middle text-start text-sm pe-4 ps-0 mt-0"  style="width: 80%; word-wrap: break-word; white-space: normal;">
                             {{item.project}}
                         </td>
                         <td class="align-middle text-start text-sm pe-4 ps-0 mt-0">
-                            {{item.quantity}}
+                              {{item.quantity}}
                         </td>
 
                         <td class="align-middle text-start pe-2 ps-0">
@@ -119,6 +127,7 @@ User Profile
                         </td>
 
                     </tr>
+                  {% endif %}
                 {% endfor %}
             </tbody>
         </table>

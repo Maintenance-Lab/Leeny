@@ -75,10 +75,10 @@ class CreateAccountForm(FlaskForm):
                         validators=[DataRequired(), Email()])
     study = StringField('Study Programme',
                         id='study_create',
-                        validators=[])
+                        validators=[DataRequired()])
     faculty = StringField('Faculty',
                           id='faculty_create',
-                          validators=[])
+                          validators=[DataRequired()])
     uid_1 = StringField('Card 1',
                         id='card_create',
                         validators=[])

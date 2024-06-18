@@ -1,19 +1,19 @@
-<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 mt-6 mb-7 pt-3 bg-white d-flex flex-column" id="sidenav-main" data-color="info">
-  <div class="sidenav-header d-flex flex-row align-items-center">
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 mt-4 mb-4 pt-1 bg-white d-flex flex-column" id="sidenav-main" data-color="info">
+  <div class="sidenav-header d-flex flex-row align-items-center pt-3 ms-n4">
     <img class="nav-link m-0" width="85px" src="{{ config.ASSETS_ROOT }}/img/Lab-Logo.png">
     <div>
       <div class="d-flex gap-2 mt-3 mb-1 align-items-center">
-      <h4 class="font-weight-bold text-dark  " >Leeny</h4>
-      {% if session['role'] == 'admin' %}<p class="badge sm-badge bg-gradient-success mb-0 h-50">ADMIN</p>{% endif %}
+      <h4 class="font-weight-bold mb-0" style="color: black">Leeny</h4>
+      {% if session['role'] == 'admin' %}<p class="badge sm-badge bg-gradient-success mb-0 mt-1 h-50">ADMIN</p>{% endif %}
       </div>
 
-      <p class=" nav-link-text mt-n1" >Maintenance Lab</p>
+      <p class=" nav-link-text mt-n1">Maintenance Lab</p>
     </div>
     </div>
-    <hr class="horizontal dark mt-1 w-100">
+    <hr class="horizontal dark mt-3 w-100">
     <div class="collapse navbar-collapse w-100 flex-fill" id="sidenav-collapse-main">
-      <ul class="navbar-nav justify-content-between gap-1 overflow-hidden">
-        <li class="nav-item">
+      <ul class="navbar-nav justify-content-between gap-2 overflow-hidden">
+        <li class="nav-item mt-1">
           <a class="nav-link {% if 'home' in segment %} shadow border-radius-md {% endif %}" href="/home">
             <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="100 0 400 400" style="overflow: visible"style="overflow: visible"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -30,7 +30,7 @@
               </svg>
 
             </div>
-            <span class="nav-link-text ms-1">Inventory</span>
+            <span class="nav-link-text ms-1">Lab Inventory</span>
           </a>
         </li>
         <li class="nav-item">
@@ -39,7 +39,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="50 0 400 400" style="overflow: visible"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
                 <path d="M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z"/></svg>
             </div>
-            <span class="nav-link-text ms-1">Borrowed</span>
+            <span class="nav-link-text ms-1">My Items</span>
           </a>
         </li>
         <li class="nav-item">
@@ -61,7 +61,7 @@
           </a>
         </li>
         {% endif %}
-        <hr class="horizontal dark mt-1 w-100 {% if session['role'] != 'admin' %} mt-10 {% else %} mt-8 {% endif %}">
+        <hr class="horizontal dark mt-1 w-100 {% if session['role'] != 'admin' %} mt-12 {% else %} mt-10 {% endif %}">
         <li class="nav-item">
           <a class="nav-link {% if 'settings' in segment %} shadow border-radius-md {% endif %} " href="/settings">
             <div class="icon icon-shape icon-sm shadow border-radius-md text-center me-2 d-flex align-items-center justify-content-center">

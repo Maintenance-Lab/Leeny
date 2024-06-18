@@ -639,7 +639,7 @@ def inventory_search():
     data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \
                        'name': obj.manufacturer.manufacturer_name if obj.manufacturer else None} \
                         for obj in all_objects]}
-
+    print(data)
     return render_template('app/htmx-results/inventory-results.html', data=data)
 
 @blueprint.route('/inventory/search/small')

@@ -1,6 +1,5 @@
 from apps import db
 
-
 class ProductCategory(db.Model):
 
     __tablename__ = 'productCategory'

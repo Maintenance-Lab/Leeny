@@ -16,17 +16,13 @@ class Ordered(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('productCategory.id'))
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 
-
     # Properties
     title = db.Column(db.String(255), nullable=False)
     reason = db.Column(db.String(255))
     quantity = db.Column(db.Integer, nullable=False, default=1)
     url = db.Column(db.String(255))
     price_when_bought = db.Column(db.Float)
-    # priceBTW = db.Column(db.Float)
-    # priceNoBTW = db.Column(db.Float)
     status = db.Column(db.Integer, default=1)
-
 
     # Timestamps
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))

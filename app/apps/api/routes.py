@@ -1,18 +1,12 @@
-import json
-import random
-
 from apps.api import blueprint
 from apps.api.forms import *
-from apps.authentication.decorators import token_required
 from apps.authentication.models import Users
 from apps.webapp.models import *
 from apps.webapp.forms import *
-from flask import request, jsonify, Response, session, flash, render_template
+from flask import request, jsonify, session, render_template
 from flask_restx import Api, Resource
-from werkzeug.datastructures import MultiDict
 from apps import db
-from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime, timedelta
+from datetime import datetime
 from apps.authentication.util import verify_pass
 from apps.email import send_email
 
@@ -23,7 +17,6 @@ api = Api(blueprint)
 class changeCardUID(Resource):
     def post(self):
         data = request.get_json()
-        print("DATA ---------------------:", data)
         card = data['card']
         new_uid = data['new_uid']
 
@@ -33,9 +26,6 @@ class changeCardUID(Resource):
         exists_2 = Users.query.filter_by(uid_2=new_uid).first() is not None
         # Controleren of er een gebruiker bestaat met uid_3 gelijk aan new_uid
         exists_3 = Users.query.filter_by(uid_3=new_uid).first() is not None
-
-        # Print de resultaten
-        print(exists_1, exists_2, exists_3)
 
         if not (exists_1 or exists_2 or exists_3):
             # Get the user_id from the session
@@ -90,7 +80,6 @@ class AuthenticateAdmin(Resource):
                     print('Error when card scanning:', e3)
 
             if user:
-                print("User role: ", user.role)
                 if user.role == 'admin':
                     return {'authenticated': True, 'role': 'admin'}
                 else:
@@ -111,7 +100,6 @@ class AuthenticateAdmin(Resource):
 class GetBarcode(Resource):
     def post(self):
         barcodes = session.get('barcodes', [])
-        print("Getting barcodes: ", barcodes)
         return {'barcodes': barcodes}, 200
 
 @api.route('/clear_barcode', methods=['POST'])
@@ -143,7 +131,6 @@ class SetProjectDate(Resource):
 
         session['project'] = project
         session['estimated_return_date'] = estimated_return_date
-        print("Project date set")
         return {'message': 'Project date set'}, 200
 
 @api.route('/borrow', methods=['POST'])
@@ -158,17 +145,14 @@ class Borrow(Resource):
             product = Product.query.filter_by(title=barcode).first()
 
         if product:
-            print("PRODUCT TILE: ", product.title)
             if product.barcode:
-                print("PRODUCT BARCODE: ", product.barcode)
                 barcode = product.barcode
             title = product.title
             quantity_total = product.quantity_total
             quantity_unavailable = product.quantity_unavailable
             quantity_borrowed = product.quantity_borrowed
-
             quantity = quantity_total - quantity_unavailable - quantity_borrowed
-            print("sending this barcode: ", barcode)
+
             if quantity > 0:
                 # Product found
                 output = {
@@ -219,7 +203,6 @@ class Borrow2(Resource):
         return_date = session['estimated_return_date']
 
         for items in addedBarcodes.items():
-            print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
             quantity = items[1]
 
@@ -241,7 +224,6 @@ class Borrow2(Resource):
                                     project=project,
                                     estimated_return_date=return_date
                                     )
-                    print("ADD TO TABLE: ", borrow)
 
                     # Check if the user already has a borrowed item with the same product_id
                     existing_borrow = Borrowed.query.filter_by(user_id=user_id, product_id=product.id).first()
@@ -253,7 +235,7 @@ class Borrow2(Resource):
                         print("New borrow added to table.")
 
         # Save changes to database
-        print("COMMITING CHANGES -------------------------------")
+        print("Commiting changes")
         db.session.commit()
 
         session['barcodes'] = []
@@ -322,7 +304,6 @@ class ReturnConfirm(Resource):
         return_data = session['addedBarcodes']
 
         for items in return_data.items():
-            print("barcode: ", items[0], "quantity: ", items[1])
             barcode = items[0]
             quantity = items[1]
 
@@ -330,6 +311,8 @@ class ReturnConfirm(Resource):
             if barcode != 'null':
                 # Subtract from quantity borrowed
                 product = Product.query.filter_by(barcode=barcode).first()
+                if product is None:
+                    product = Product.query.filter_by(title=barcode).first()
                 product.quantity_borrowed -= quantity
 
                 # Change/remove borrow entry from borrowed table
@@ -339,7 +322,7 @@ class ReturnConfirm(Resource):
                 borrow.returned += quantity
 
         # Save changes to database
-        print("COMMITING CHANGES -------------------------------")
+        print("Commiting changes")
         db.session.commit()
 
         session['barcodes'] = []
@@ -426,7 +409,6 @@ class GetVendors(Resource):
 class AddProduct(Resource):
     def post(self):
         data = request.form.to_dict(flat=True)
-        print("DATA: ", data)
 
         # Get manufacturer/category/vendor id or create new entry
         manufacturer_name = data['manufacturer']
@@ -528,13 +510,31 @@ class UpdateProduct(Resource):
 @api.route('/edit-product', methods=['GET', 'POST'])
 class EditProduct(Resource):
     def post(self):
-        # data = request.form.to_dict(flat=True)
         data = request.get_json()
-        print("DATA: ", data)
         values = data['data']
 
         # Get product by id
         product = Product.query.filter_by(id=data['id']).first()
+
+        manufacturer = Manufacturer.query.filter_by(manufacturer_name=values['manufacturer']).first()
+        if not manufacturer:
+            manufacturer = Manufacturer(manufacturer_name=values['manufacturer'])
+            db.session.add(manufacturer)
+            db.session.commit()
+
+        category = ProductCategory.query.filter_by(category_name=values['category']).first()
+        if not category:
+            category = ProductCategory(category_name=values['category'])
+            db.session.add(category)
+            db.session.commit()
+
+        vendor = Vendor.query.filter_by(vendor_name=values['vendor']).first()
+        if not vendor:
+            vendor = Vendor(vendor_name=values['vendor'])
+            db.session.add(vendor)
+            db.session.commit()
+
+
 
         product.title = values['title']
         product.barcode = values['barcode']
@@ -545,12 +545,11 @@ class EditProduct(Resource):
         product.notes = values['notes']
         product.quantity_total = values['quantity']
         product.quantity_unavailable = values['quantity_unavailable']
-        product.manufacturer_id = values['manufacturer']
-        product.category_id = values['category']
-        product.vendor_id = values['vendor']
+        product.manufacturer_id = manufacturer.id
+        product.category_id = category.id
+        product.vendor_id = vendor.id
 
-
-        print("Updaten ----------------------------------------------")
+        print("Commiting changes")
         # Commit to database
         db.session.commit()
 
@@ -758,7 +757,6 @@ class ReturnRoute(Resource):
         user_id = request.args.get('user_id')
         all_objects = Borrowed.query.filter_by(user_id=user_id)
         output = [{**BorrowForm(obj=obj).data} for obj in all_objects]
-        print(output)
         return {
                 'data': output,
                 'success': True

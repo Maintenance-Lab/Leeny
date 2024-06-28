@@ -6,30 +6,18 @@ Copyright (c) 2019 - present AppSeed.us
 import time
 import random
 from datetime import datetime
-
 from flask_restx import Resource, Api
-
 import flask
 from flask import render_template, redirect, request, url_for, flash, session, jsonify
-from flask_login import (
-    current_user,
-    login_user,
-    logout_user
-)
-
+from flask_login import (current_user, login_user, logout_user)
 from flask_dance.contrib.github import github
 
 from apps import db, login_manager
 from apps.authentication import blueprint
 from apps.authentication.forms import *
 from apps.authentication.models import Users, Scanner
-
 from apps.authentication.util import verify_pass, generate_token
-
 from apps.email import send_email
-
-from flask import Flask
-from flask_mail import Mail, Message
 
 # Bind API -> Auth BP
 api = Api(blueprint)
@@ -55,18 +43,16 @@ def get_uid():
     scanner = Scanner()
     uid = None
     if scanner.ser.is_open is False:
-        # print("Serial port is closed. Opening serial port...")
         scanner.open_serial()
-    # print("SCAN ROUND:")
+
     picca_res = scanner.piccactivate()
     if picca_res.startswith(b'50'):
         uid = scanner.response_parse(picca_res)
         print(f"\nUID: {uid}\n")
         scanner.set_led()
-        scanner.set_buzzer()
-    # print("END SCAN ROUND:\n")
+        # scanner.set_buzzer()
+
     if uid:
-        # print("UID found. Exiting...")
         pass
     time.sleep(0.3)
     # close serial
@@ -87,7 +73,6 @@ def rfid_login():
 
         # Check if uid exists
         if uid:
-            print('uid', uid)
             try:
                 user = Users.query.filter_by(uid_1=uid).first()
             except Exception as e1:
@@ -422,13 +407,11 @@ def card_reader():
             if user is None:
                 try:
                     user = Users.query.filter_by(uid_2=uid).first()
-                    print('user2', user)
                 except Exception as e2:
                     print('Error when card scanning:', e2)
             if user is None:
                 try:
                     user = Users.query.filter_by(uid_3=uid).first()
-                    print('user23', user)
                 except Exception as e2:
                     print('Error when card scanning:', e2)
 
@@ -483,7 +466,6 @@ def email_verification():
 
         if code == session['email_code']:
             flash({'category':'success', 'title': 'Person Verified!', 'text': 'Your profile was verified'}, 'General')
-            print(session)
             return redirect(url_for('webapp_blueprint.borrow_confirm'))
         return render_template('accounts/email_verification.html',
                                msg='Invalid code',

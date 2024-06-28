@@ -168,13 +168,11 @@ class Scanner:
         # Option 1: Grab the UID  from the back
         # res1 = res[:-2]
         # uid = res1[-22:]
-        # print(f"UID: {uid}")
 
         # Option 2: Remove the header
         res2 = res[8:]
         # Grab the data
         data = res2[:length]
-        # print(f"Data: {data}")
         return data
 
     def set_led(self):
@@ -185,12 +183,10 @@ class Scanner:
             ucTimes: Flicker ucTimes times
         '''
         hex_code = b'\x50\x00\x02\x03\x05\x01\x55'
-        # print(f"HEX code: {hex_code}")
 
         try:
             # Write the HEX code to the serial port
             self.ser.write(hex_code)
-            print("SET LED")
 
             # Wait for a short time to allow the RFID reader to respond
             time.sleep(0.1)
@@ -202,7 +198,6 @@ class Scanner:
             hex_response = binascii.hexlify(response)
 
             # Print the response
-            # print(f"Response from RFID reader: {response}")
             print(f"Response from RFID reader (hex): {hex_response}")
 
             return hex_response
@@ -218,7 +213,6 @@ class Scanner:
             ucTimes: beep ucTimes times.
         '''
         hex_code = b'\x50\x00\x02\x02\x03\x01\x52'
-        # print(f"HEX code: {hex_code}")
 
         try:
             # Write the HEX code to the serial port
@@ -235,7 +229,6 @@ class Scanner:
             hex_response = binascii.hexlify(response)
 
             # Print the response
-            # print(f"Response from RFID reader: {response}")
             print(f"Response from RFID reader (hex): {hex_response}")
 
             return hex_response

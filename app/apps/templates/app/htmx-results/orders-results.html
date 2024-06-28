@@ -1,14 +1,14 @@
 {% for item in data['data'] %}
             <tr>
-            <td class="p-0">
+            <td class="p-0 text-sm text-dark p-3 ps-4">
                 <div class="d-flex h-100">
-                    <a href="/orders/{{item.id}}">
-                        <u class="text-sm text-dark p-3 ps-4">{{item.id}}</u>
-                    </a>
+                    {{item.id}}
                 </div>
             </td>
             <td class="text-dark text-sm font-weight-bold mb-0">
-                {{item.project}}
+                <a href="/orders/{{item.id}}">
+                    <u class="text-sm text-dark p-3 ps-4">{{item.project}}</u>
+                </a>
             </td>
             <td class=" text-xs font-weight-bold mb-0">
                 {{ item.created_at_ts }}

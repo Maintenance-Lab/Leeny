@@ -5,7 +5,6 @@ from PIL import Image
 from io import BytesIO
 
 def get_largest_image(url):
-    print(url)  
     # Set up headless Chrome browser
     options = Options()
     options.add_argument('--headless')
@@ -42,15 +41,15 @@ def get_largest_image(url):
             if size > largest_size:
                 largest_size = size
                 largest_image = img['src']
-    
+
         if largest_image:
             # Handle relative URLs
             if largest_image.startswith('//'):
                 largest_image = 'http:' + largest_image
             elif largest_image.startswith('/'):
                 largest_image = url + largest_image
-            
-            try:  
+
+            try:
             #   Step 5: Download the image to get its actual size
                 img_response = requests.get(largest_image)
                 img_data = Image.open(BytesIO(img_response.content))

@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from apps import db
-
 
 class Product(db.Model):
 
@@ -13,7 +11,6 @@ class Product(db.Model):
     # Properties
     title = db.Column(db.String(255), nullable=False)
     barcode = db.Column(db.String(255), nullable=True)
-    # price_when_bought = db.Column(db.Float, nullable=False)
     priceBTW = db.Column(db.Float)
     priceNoBTW = db.Column(db.Float)
     description = db.Column(db.Text)
@@ -26,7 +23,6 @@ class Product(db.Model):
 
     # Timestamps
     created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))
-    # updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))
 
     # Foreign keys
     manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id'), nullable=False)
@@ -43,7 +39,6 @@ class Product(db.Model):
             'id': self.id,
             'title': self.title,
             'barcode': self.barcode,
-            # 'price_when_bought': self.price_when_bought,
             'priceBTW': self.priceBTW,
             'priceNoBTW': self.priceNoBTW,
             'description': self.description,

@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from apps import db
-
 
 class Borrowed(db.Model):
 

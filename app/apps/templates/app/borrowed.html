@@ -105,6 +105,41 @@
 
   // Initial load
   htmx.ajax('GET', '/inventory/borrowed/0', { target: '#results' });
+
+  document.addEventListener("DOMContentLoaded", function() {
+    clearBarcode();
+    clearProjectDate();
+  });
+
+  function clearBarcode() {
+        fetch('api/clear_barcode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+    }
+
+    function clearProjectDate() {
+        fetch('api/clear_project_date', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Response was not ok');
+            }
+            return response.json();
+        })
+    }
 </script>
 
 {% endblock javascripts %}

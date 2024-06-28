@@ -17,7 +17,7 @@ def send_email(to, subject, template):
             recipients=[to],
             html=template
         )
-        # mail.send(msg)
+        mail.send(msg)
         return "Message sent!"
 
 
@@ -38,15 +38,11 @@ def send_email_reminder():
                 # Merge the items in session with the ones from the database.
                 borrow = session.merge(borrow)
 
-                # Get item from borrowed item
                 item = borrow.product
-                # Time when item is supposed to be brought back
                 return_date = borrow.estimated_return_date
-                # Current time
                 now = datetime.now()
                 # Current time as unix timestamp
                 now_timestamp = int(now.timestamp())
-                # Time left in seconds
                 time_left = return_date - now_timestamp
 
                 # Convert return Unix timestamp to datetime object
@@ -67,8 +63,6 @@ def send_email_reminder():
                 user = borrow.user
                 user_email = user.email
                 user_name = user.fullname
-
-                # Get item info
                 item_name = item.title
 
                 # Check if return date is passed

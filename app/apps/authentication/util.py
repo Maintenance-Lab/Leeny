@@ -9,8 +9,7 @@ import binascii
 
 import jwt
 from datetime import datetime
-from flask import current_app, request
-
+from flask import current_app
 # Inspiration -> https://www.vitoshacademy.com/hashing-passwords-in-python/
 
 

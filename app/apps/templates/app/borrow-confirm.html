@@ -65,35 +65,6 @@
 
 {% block javascripts %}
 <script>
-  function clearBarcode() {
-        fetch('api/clear_barcode', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-    }
-
-    function clearProjectDate() {
-        fetch('api/clear_project_date', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response was not ok');
-            }
-            return response.json();
-        })
-    }
 
     // Set sweet alert to scan card
     document.getElementById('scan-card').addEventListener('click', function() {
@@ -175,8 +146,6 @@
                         .then(function (result) {
                             if (result.dismiss === Swal.DismissReason.timer) {
                                 window.location.href = "/borrowed";
-                                clearBarcode();
-                                clearProjectDate();
                             }
                         });
                         return response.json();

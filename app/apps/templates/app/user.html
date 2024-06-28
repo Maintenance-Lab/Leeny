@@ -56,8 +56,10 @@ User Profile
                 <div class="form-group">
                   <label>Role</label>
                   <div class="input-group mb-2">
-                    <!-- <input class="form-control" type="text" placeholder="Success" value="{{ data.data[0].role }}" disabled/> -->
-                    {{ form.role(class="form-control", value=data.data[0].role, required=False) }}
+                    <select class="form-select" name="role" id="role">
+                      <option value="student" {% if data.data[0].role == 'student' %} selected {% endif %}>Student</option>
+                      <option value="admin" {% if data.data[0].role == 'admin' %} selected {% endif %}>Admin</option>
+                    </select>
                   </div>
                 </div>
               </div>

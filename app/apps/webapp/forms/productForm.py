@@ -8,7 +8,6 @@ class ProductForm(FlaskForm):
     quantity_total = IntegerField('Quantity Available', validators=[DataRequired()])
     quantity_borrowed = IntegerField('Quantity Borrowed')
 
-    # price_when_bought = IntegerField('Price when bought', validators=[DataRequired()])
     priceBTW = IntegerField('Price including BTW')
     priceNoBTW = IntegerField('Price excluding BTW')
     description = TextAreaField('Description')
@@ -20,11 +19,3 @@ class ProductForm(FlaskForm):
     manufacturer_id = IntegerField('Manufacturer ID', validators=[DataRequired()])
     category_id = IntegerField('Category ID', validators=[DataRequired()])
     vendor_id = IntegerField('Vendor ID', validators=[DataRequired()])
-
-    # # documentation is pdf, doc, or docx file
-    # documentation = FileField('Documentation')
-
-
-    # Timestamps (Nog toevoegen?)
-    # created_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()))
-    # updated_at_ts = db.Column(db.Integer, default=int(datetime.now().timestamp()), onupdate=int(datetime.now().timestamp()))

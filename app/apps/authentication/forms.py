@@ -5,10 +5,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 from flask_wtf import FlaskForm
 from wtforms import (
-    StringField, PasswordField,
-    ValidationError, EmailField,
-    IntegerField
-)
+    StringField, PasswordField, EmailField, SelectField)
 from wtforms.validators import (
     Email, DataRequired, Optional,
     InputRequired, Regexp, Length,
@@ -82,9 +79,15 @@ class CreateAccountForm(FlaskForm):
     uid_1 = StringField('Card 1',
                         id='card_create',
                         validators=[])
-    role = StringField('Role',
+    # role = StringField('Role',
+    #                    id='role_create',
+    #                    validators=[])
+    role = SelectField('Role',
                        id='role_create',
-                       validators=[])
+                       choices=[('admin', 'Admin'),
+                                ('student', 'Student')],
+                        validators=[],
+                        default='student')
 
 
 class EmailForm(FlaskForm):

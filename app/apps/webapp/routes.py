@@ -10,25 +10,21 @@ import requests
 from apps.config import API_GENERATOR
 from apps.webapp import blueprint
 from flask import current_app, flash, render_template, redirect, url_for, request, session, jsonify
-from flask_login import login_required, login_user, logout_user
+from flask_login import login_required, login_user, logout_user, current_user
 from jinja2 import TemplateNotFound
 import http
-from datetime import datetime
+from datetime import datetime, timedelta
 from apps.authentication.forms import CreateAccountForm, LoginForm
 from apps.authentication.models import Users
 from flask_login import current_user
-from apps import db, login_manager
-from flask_restx import Resource
+from apps import db
 
 from apps.webapp.models import *
 from apps.authentication.models import *
 from apps.webapp.forms import *
-# staat nog niet goed ivm verplaatsing ivm api traag
+
 from apps.api.forms import *
-from sqlalchemy import update, func
-from sqlalchemy.inspection import inspect
-from googlesearch import search
-from apps.webapp.imagescraper import get_largest_image
+from sqlalchemy import func
 
 import json
 from datetime import datetime
@@ -89,13 +85,11 @@ def start():
 
 
 @blueprint.route('/borrow', methods=["GET","POST"])
-# @login_required
+@login_required
 def post():
     if request.method == "POST":
         # Check if post is from continue button
         if 'continue' in request.form:
-            print("form data: ", request.form["borrow_data"])
-
             # add data to session
             borrow_data = json.loads(request.form["borrow_data"])
             session['addedBarcodes'] = borrow_data
@@ -163,7 +157,6 @@ def card_forgotten():
     if request.method == "POST":
         if "email_login" in request.form:
             email = request.form['email']
-            print("test--------------------------------------")
             if email:
                 try:
                     user = Users.query.filter_by(email=email).first()
@@ -172,7 +165,6 @@ def card_forgotten():
 
 
             if user:
-                print('user')
                 session['fullname'] = user.fullname
                 session['role'] = user.role
                 login_user(user)
@@ -185,7 +177,7 @@ def card_forgotten():
     return render_template('app/card_forgotten.html', form=login_form)
 
 @blueprint.route('/borrow-date', methods=["GET","POST"])
-# @login_required
+@login_required
 def borrow_date():
     form = BorrowDateForm()
     if request.method == "POST":
@@ -194,13 +186,10 @@ def borrow_date():
 
             # lookup name with session uid
             user_id = session['_user_id']
-            print("User id: ", user_id)
-
             user = Users.query.filter_by(id=user_id).first()
 
             if user:
                 name = user.fullname
-                print("User: ", user.fullname)
                 session["name"] = name
             else:
                 session["name"] = None
@@ -227,7 +216,7 @@ def borrow_date():
 
 
 @blueprint.route('/return', methods=["GET","POST"])
-# @login_required
+@login_required
 def post_return():
     if request.method == "POST":
         # Check if post is from continue button
@@ -255,11 +244,12 @@ def post_return():
     return render_template('app/return.html')
 
 @blueprint.route('/return-confirm', methods=["GET","POST"])
-# @login_required
+@login_required
 def return_confirm():
     return render_template('app/return-confirm.html')
 
 @blueprint.route('/borrow/confirm', methods=["GET","POST"])
+@login_required
 def borrow_confirm():
     timestamp = datetime.fromtimestamp(int(session['estimated_return_date'])).strftime('%d-%m-%Y')
     return render_template('app/borrow-confirm.html', timestamp=timestamp)
@@ -270,12 +260,12 @@ def home():
     return render_template('app/home.html', segment='home')
 
 @blueprint.route('/admin-dashboard')
-# @login_required
+@login_required
 def admin_dashboard():
     return render_template('app/admin-dashboard.html', segment='admin-dashboard')
 
 @blueprint.route('/add-product')
-# @login_required
+@login_required
 def admin_add_product():
     form = AddProductForm()
     return render_template('app/add-product.html', segment='add-product', form=form)
@@ -299,7 +289,7 @@ def dropdown_vendor():
     return jsonify(data)
 
 @blueprint.route('/edit-product/<int:id>')
-# @login_required
+@login_required
 def admin_edit_product(id):
     form = EditProductForm()
     select_columns = [Product.id, Product.barcode, Product.title, Product.description, Product.barcode, Product.priceBTW, Product.priceNoBTW, Product.url, Product.notes, Manufacturer.manufacturer_name, ProductCategory.category_name, Vendor.vendor_name, Product.quantity_total, Product.quantity_unavailable, Product.documentation]
@@ -311,35 +301,34 @@ def admin_edit_product(id):
         .with_entities(*select_columns)
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
-    print("DATA: ", data)
     return render_template('app/edit-product.html', product=data, form=form)
 
 @blueprint.route('/inventory')
-# @login_required
+@login_required
 def inventory():
     # Add pagination
     return render_template('app/inventory.html', segment='inventory')
 
 @blueprint.route('/users')
-# @login_required
+@login_required
 def users():
     # Add pagination
     return render_template('app/users.html', segment='users')
 
 @blueprint.route('/orders')
-# @login_required
+@login_required
 def orders():
     return render_template('app/orders.html', segment='orders')
 
 @blueprint.route('/borrowed')
-# @login_required
+@login_required
 def borrows():
     # Add pagination
     return render_template('app/borrowed.html', segment='borrowed')
 
 
 @blueprint.route('/settings' , methods=["GET","POST"])
-# @login_required
+@login_required
 def settings():
     create_account_form = CreateAccountForm(request.form)
 
@@ -356,15 +345,12 @@ def settings():
             # Check if user exists and is not current user
             user = Users.query.filter(func.lower(Users.fullname)==fullname.strip().lower()).first()
 
-            print("User: ", Users.fullname, "Current user: ", current_user.fullname.strip().lower())
             if user and user != current_user:
                 flash({'category':'error', 'title': 'User exists!', 'text': 'This user already exists'}, 'General')
                 return redirect(url_for('webapp_blueprint.settings'))
 
-
             # check if email appears in database
             existing_email = Users.query.filter(func.lower(Users.email)==email.strip().lower()).first()
-            print("Existing email: ", email.strip().lower(), "Current user email: ", current_user.email.strip().lower())
 
             if existing_email and email.strip().lower() != current_user.email.strip().lower():
                 flash({'category':'error', 'title': 'Email exists!', 'text': 'This email is already in use'}, 'General')
@@ -372,7 +358,6 @@ def settings():
 
             test = Users.query.filter_by(id=session['_user_id']).update(dict(fullname=fullname, email=email\
                                                                              , study=request.form['study'], faculty=request.form['faculty']))
-            # test5 = Users.query.filter_by(id=session['_user_id']).update(dict(role=request.form['role']))
             db.session.commit()
             session['fullname'] = request.form['fullname']
             flash({'category':'success', 'title': 'Changes saved!', 'text': 'Your profile has been updated'}, 'General')
@@ -381,6 +366,7 @@ def settings():
     return render_template('app/settings.html', segment='settings', data=data, session=session, form=create_account_form)
 
 @blueprint.route('/user/<int:id>', methods=["GET", "POST"])
+@login_required
 def user(id):
     create_account_form = CreateAccountForm(request.form)
     all_objects = Users.query.filter_by(id=id)
@@ -443,11 +429,13 @@ def user(id):
     return render_template('app/user.html', data=data, segment='users', id=id, borrowdata=borrowdata, form=create_account_form)
 
 @blueprint.route('/item/<int:id>')
+@login_required
 def item(id):
     data = id
     return render_template('app/item.html', data=data, segment='inventory')
 
 @blueprint.route('/orders/<int:order_id>')
+@login_required
 def order_info(order_id = None):
 
     all_objects = Ordered.query.filter(Ordered.order_id == order_id).all()
@@ -480,6 +468,7 @@ def order_info(order_id = None):
     return render_template('app/order-info.html', data=data, segment='orders')
 
 @blueprint.route('/orders/new', methods=["GET", "POST"])
+@login_required
 def new_order():
     if request.method == 'POST':
         flash({}, 'ConfirmOrder')
@@ -489,6 +478,7 @@ def new_order():
     return render_template('app/new-order.html', data=session['cart'], segment='orders')
 
 @blueprint.route('/orders/clear_cart', methods=["GET", "POST"])
+@login_required
 def clear_cart():
     if 'cart' in session:
         [session.pop(key) for key in list(session.keys()) if key == 'cart']
@@ -496,6 +486,7 @@ def clear_cart():
 
 
 @blueprint.route('/orders/new/confirm', methods=["GET", "POST"])
+@login_required
 def confirm_order():
     form = confirmOrderForm(request.form)
 
@@ -594,6 +585,7 @@ def confirm_order():
     return render_template('app/order-confirm.html', data=session['cart'], segment='orders', form=form)
 
 @blueprint.route('/orders/new/remove/<int:index>', methods=["GET", "POST"])
+@login_required
 def new_order_remove(index):
     cart = session['cart']
     cart.pop(index)
@@ -601,19 +593,21 @@ def new_order_remove(index):
     return redirect(url_for('webapp_blueprint.new_order'))
 
 @blueprint.route('/orders/new/item')
+@login_required
 def new_order_item():
     if 'cart' not in session:
         return redirect(url_for("webapp_blueprint.new_order"))
     return render_template('app/new-item.html', data=session['cart'], segment='orders')
 
 @blueprint.route('/orders/new/unknown')
+@login_required
 def new_order_item_unknown():
     if 'cart' not in session:
         return redirect(url_for("webapp_blueprint.new_order"))
     return render_template('app/new-item-unknown.html', data=session['cart'], segment='orders')
 
 @blueprint.route('/<template>')
-# @login_required
+@login_required
 def route_template(template):
     print('route_template: ', template)
     try:
@@ -650,7 +644,6 @@ def route_template(template):
     except TemplateNotFound:
         return render_template('app/page-error.html', status_code=404, status_text=http.HTTPStatus(404).phrase), 404
 
-
 # Helper - Extract current page name from request
 def get_segment(request):
 
@@ -667,8 +660,8 @@ def get_segment(request):
         return None
 
 ### HTMX Routes
-
 @blueprint.route('/inventory/search')
+@login_required
 def inventory_search():
 
     all_objects = Product.query \
@@ -678,10 +671,10 @@ def inventory_search():
     data = {'data':[{'id': obj.id, **ProductForm(obj=obj).data, \
                        'name': obj.manufacturer.manufacturer_name if obj.manufacturer else None} \
                         for obj in all_objects]}
-    print(data)
     return render_template('app/htmx-results/inventory-results.html', data=data)
 
 @blueprint.route('/inventory/search/small')
+@login_required
 def inventory_search_small():
     q = request.args.get("q")
 
@@ -698,6 +691,7 @@ def inventory_search_small():
     return render_template('app/htmx-results/inventory-results-small.html', data=data)
 
 @blueprint.route('/inventory/search/borrow')
+@login_required
 def inventory_search_borrow():
     q = request.args.get("q")
     select_columns = [Product.id, Product.title, Manufacturer.manufacturer_name, Product.quantity_borrowed, Product.quantity_total]
@@ -713,6 +707,7 @@ def inventory_search_borrow():
     return render_template('app/htmx-results/inventory-results-borrow.html', data=data)
 
 @blueprint.route('/inventory/search/return')
+@login_required
 def inventory_search_return():
     q = request.args.get("q")
 
@@ -735,6 +730,7 @@ def inventory_search_return():
     return render_template('app/htmx-results/inventory-results-return.html', data=data)
 
 @blueprint.route('/inventory/borrowed/<int:load>')
+@login_required
 def inventory_borrowed(load):
     select_columns = [Product.id, Product.title, Borrowed.quantity, Borrowed.created_at_ts, Borrowed.estimated_return_date, Manufacturer.manufacturer_name, Users.fullname]
 
@@ -773,6 +769,7 @@ def inventory_borrowed(load):
     return render_template('app/htmx-results/borrowed-results.html', data=data)
 
 @blueprint.route('/item/load/<int:id>')
+@login_required
 def item_load(id):
     # Load product info
     select_columns = [Product.id, Product.title, Product.quantity_borrowed, Product.quantity_total,
@@ -807,9 +804,8 @@ def item_load(id):
 
     return render_template('app/htmx-results/item-result.html', data=data, borrowdata=borrowdata)
 
-from datetime import datetime, timedelta
-
 @blueprint.route('/orders/load/<int:output>')
+# @login_required
 def orders_load(output):
 
     select_columns = [Order.id, Order.created_at_ts, Users.fullname, Order.project, Order.user_id]
@@ -840,8 +836,8 @@ def orders_load(output):
 
     return render_template('app/htmx-results/orders-results.html', data=data, user_id=user_id)
 
-# @blueprint.route('/ordered/load/<int:id>')
 @blueprint.route('/ordered/load/<int:id>/<int:load>')
+# @login_required
 def ordered_load(id, load=0):
 
     select_columns = [Ordered.id, Ordered.product_id, Ordered.title, Ordered.price_when_bought, Ordered.url,
@@ -864,6 +860,7 @@ def ordered_load(id, load=0):
     return render_template('app/htmx-results/ordered-info.html', data=data['data'][0], load=load)
 
 @blueprint.route('/orders/googlesearch/')
+@login_required
 def googlesearchURL():
     q = request.args.get("q")
     data = None
@@ -886,7 +883,6 @@ def googlesearchURL():
             return match.group()
         else:
             return "No price found."
-
 
     def get_url_data(url):
         # Send a GET request to the URL
@@ -929,24 +925,24 @@ def googlesearchURL():
 
     return render_template('app/htmx-results/googlesearch-results.html', data=data)
 
-# @blueprint.route('/manufacturer/dropdown/')
-@blueprint.route('/manufacturer/dropdown/<string:preselect>')
+@blueprint.route('/manufacturer/dropdown/')
+# @blueprint.route('/manufacturer/dropdown/<string:preselect>')
 def manufacturer_dropdown(preselect=-1):
     all_objects = Manufacturer.query.all()
     data = [[obj.id, obj.manufacturer_name] for obj in all_objects]
 
     return render_template('app/htmx-results/manufacturer-dropdown.html', data=data, value=preselect)
 
-# @blueprint.route('/category/dropdown/')
-@blueprint.route('/category/dropdown/<string:preselect>')
+@blueprint.route('/category/dropdown/')
+# @blueprint.route('/category/dropdown/<string:preselect>')
 def category_dropdown(preselect=-1):
     all_objects = ProductCategory.query.all()
     data = [[obj.id, obj.category_name] for obj in all_objects]
 
     return render_template('app/htmx-results/category-dropdown.html', data=data, value=preselect)
 
-# @blueprint.route('/vendor/dropdown/')
-@blueprint.route('/vendor/dropdown/<string:preselect>')
+@blueprint.route('/vendor/dropdown/')
+# @blueprint.route('/vendor/dropdown/<string:preselect>')
 def vendor_dropdown(preselect=-1):
     all_objects = Vendor.query.all()
     data = [[obj.id, obj.vendor_name] for obj in all_objects]
@@ -956,17 +952,17 @@ def vendor_dropdown(preselect=-1):
 
 
 @blueprint.route('/users/search')
+@login_required
 def users_search():
-
-    form = EditProductForm()
     select_columns = [Users.id, Users.fullname, Users.email, Users.study, Users.faculty, Users.role]
-
     all_objects = Users.query.with_entities(*select_columns)
 
     data = {'data':[{col.key: obj_field for col, obj_field in zip(select_columns,obj)} for obj in all_objects]}
 
     return render_template('app/htmx-results/users-results.html', data=data)
 
-@blueprint.route('/reload/<string:route>') # Used to reload pages after changing content
+# Used to reload pages after changing content
+@blueprint.route('/reload/<string:route>')
+@login_required
 def reload_route(route):
     return redirect(url_for(f'webapp_blueprint.{route}'))

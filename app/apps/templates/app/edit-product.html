@@ -12,91 +12,125 @@
           {% if session['role'] == 'admin' %}
           <h1 class="text-center">Edit product</h1>
 
-          <!-- Step 3 -->
           <form autocomplete="off" method="post" action="api/edit-product">
-              <div class="row">
-                <!-- First Column -->
-                <div class="col-md-4 text-start">
-                  <div class="form-group">
-                    <label for="title">Product Name *</label>
-                    <input type="text" class="form-control" id="title" name="title" value="{{ product['data'][0].title }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="barcode">Barcode *</label>
-                    <input type="text" class="form-control" id="barcodeStep3" name="barcode" value="{{ product['data'][0].barcode }}" required>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="priceBTW">Price incl. BTW €</label>
-                    <div class="input-group">
-                      <input type="text" class="form-control" id="priceBTW" name="priceBTW" placeholder="50.00" value="{{ product['data'][0].priceBTW }}" required>
-                    </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="priceNoBTW">Price excl. BTW €</label>
-                    <div class="input-group">
-                      <input type="text" class="form-control" id="priceNoBTW" name="priceNoBTW" placeholder="50.00" value="{{ product['data'][0].priceNoBTW }}" required>
-                    </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea type="text" class="form-control" id="description" name="description" rows="3">{{ product['data'][0].description }}</textarea>
+            <div class="row">
+              <!-- First Column -->
+              <div class="col-md-4 text-start">
+                <div class="form-group">
+                  <label for="title">Product Name *</label>
+                  <input type="text" class="form-control" id="title" name="title" value="{{ product['data'][0].title }}" required>
+                </div>
+                <div class="form-group">
+                  <label for="barcode">Barcode </label>
+                  <input type="text" class="form-control" id="barcodeStep3" name="barcode" value="{{ product['data'][0].barcode }}">
+                </div>
+                <div class="form-group">
+                  <label for="priceBTW">Price incl. BTW € *</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="priceBTW" name="priceBTW" placeholder="50.00" value="{{ product['data'][0].priceBTW }}" required>
                   </div>
                 </div>
-
-                <!-- Second Column -->
-                <div class="col-md-4 text-start">
-                  <div class="form-group">
-                    <label for="quantity">Quantity *</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="{{ product['data'][0].quantity_total }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="quantity_unavailable">Quantity Unavailable For Borrowing</label>
-                    <input type="number" class="form-control" id="quantity_unavailable" name="quantity_unavailable" min="0" value="{{ product['data'][0].quantity_unavailable }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="url">Vendor URL *</label>
-                    <input type="text" class="form-control" id="url" name="url" placeholder="www.example.com" value="{{ product['data'][0].url }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="notes">Notes</label>
-                    <textarea type="text" class="form-control" id="notes" name="notes" rows="3">{{ product['data'][0].notes }}</textarea>
-                  </div>
-                </div>
-
-                <!-- Third Column -->
-                <div class="col-md-4 text-start">
-                  <div class="form-group">
-                    <label for="category">Category *</label>
-                    <select id="categoryDropdown" class="form-control" name="category" required></select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="vendor">Vendor *</label>
-                    <select id="vendorDropdown" class="form-control" name="vendor" required></select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="manufacturer">Manufacturer *</label>
-                    <select id="manufacturerDropdown" class="form-control" name="manufacturer" required></select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="document_url">Document URL *</label>
-                    <input type="text" class="form-control" id="document_url" name="document_url" value="{{ product['data'][0].documentation}}">
+                <div class="form-group">
+                  <label for="priceNoBTW">Price excl. BTW € *</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="priceNoBTW" name="priceNoBTW" placeholder="50.00" value="{{ product['data'][0].priceNoBTW }}" required>
                   </div>
                 </div>
               </div>
 
-              <div class="col-12 text-center mt-3 d-flex gap-3 justify-content-center">
-                <button type="button" class="btn btn-dark" style="width: 150px;"  onclick="goBack()">Back</button>
-                <button type="button" class="btn btn-danger" style="width: 150px;" id="delete-btn">Delete Product</button>
-                <button type="submit" class="btn btn-success" style="width: 150px;">Save Changes</button>
+              <!-- Second Column -->
+              <div class="col-md-4 text-start">
+                <div class="form-group">
+                  <label for="quantity">Quantity *</label>
+                  <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="{{ product['data'][0].quantity_total }}" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="quantity_unavailable">Quantity Unavailable For Borrowing</label>
+                  <input type="number" class="form-control" id="quantity_unavailable" name="quantity_unavailable" min="0" value="{{ product['data'][0].quantity_unavailable }}" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="url">Vendor URL *</label>
+                  <input type="text" class="form-control" id="url" name="url" placeholder="www.example.com" value="{{ product['data'][0].url }}" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="document_url">Documentation URL </label>
+                  <input type="text" class="form-control" id="document_url" name="document_url" value="{{ product['data'][0].documentation }}">
+                </div>
               </div>
+
+              <!-- Third Column -->
+              <div class="col-md-4 text-start">
+
+                  <div class="form-group">
+                    <label for="category">Category</label>
+                    <div id="categoryDropdown">
+                      <span hx-get="/category/dropdown" hx-trigger="load" hx-target="#categoryDropdown" hx-swap="innerHTML"></span>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="vendor">Vendor</label>
+                    <div id="vendorDropdown">
+                      <span hx-get="/vendor/dropdown" hx-trigger="load" hx-target="#vendorDropdown" hx-swap="innerHTML"></span>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="manufacturer">Manufacturer</label>
+                    <div id="manufacturerDropdown">
+                      <span hx-get="/manufacturer/dropdown" hx-trigger="load" hx-target="#manufacturerDropdown" hx-swap="innerHTML"></span>
+                    </div>
+                  </div>
+
+              </div>
+            </div>
+
+            <div class="row mt-4">
+              <div class="col-md-6 text-start">
+                <div class="form-group">
+                  <label for="description">Description</label>
+                  <textarea type="text" class="form-control" id="description" name="description" rows="3">{{ product['data'][0].description }}</textarea>
+                </div>
+              </div>
+              <div class="col-md-6 text-start">
+                <div class="form-group">
+                  <label for="notes">Notes</label>
+                  <textarea type="text" class="form-control" id="notes" name="notes" rows="3">{{ product['data'][0].notes }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 text-center mt-3 d-flex gap-3 justify-content-center">
+              <button type="button" class="btn btn-dark" style="width: 150px;" onclick="goBack()">Back</button>
+              <button type="button" class="btn btn-danger" style="width: 150px;" id="delete-btn">Delete Product</button>
+              <button type="submit" class="btn btn-success" style="width: 150px;">Save Changes</button>
+            </div>
 
           </form>
+
+          <!-- JavaScript for automatic calculation of BTW -->
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const priceBTW = document.getElementById('priceBTW');
+              const priceNoBTW = document.getElementById('priceNoBTW');
+
+              priceBTW.addEventListener('input', function() {
+                if (priceBTW.value) {
+                  priceNoBTW.value = (parseFloat(priceBTW.value) * 0.79).toFixed(2);
+                }
+              });
+
+              priceNoBTW.addEventListener('input', function() {
+                if (priceNoBTW.value) {
+                  priceBTW.value = (parseFloat(priceNoBTW.value) * 1.21).toFixed(2);
+                }
+              });
+            });
+          </script>
+
           {% else %}
           <h1>Permission denied</h1>
           <p>Please login as admin.</p>
@@ -117,30 +151,18 @@
       window.history.back();
     }
 
-    function loadDropdown(dropdownId, url, selectedValue) {
-        const dropdown = document.getElementById(dropdownId);
-        dropdown.innerHTML = '';
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.id;
-                    option.textContent = item.name;
-                    if (item.name === selectedValue) {
-                        option.selected = true;
-                    }
-                    dropdown.add(option);
-                });
-            })
-            .catch(error => console.error('Error loading dropdown:', error));
-    }
     const product_id = "{{ product['data'][0].id }}";
 
     function editProduct() {
       const form = document.querySelector('form');
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
+
+      data['category'] = $('#category-select').val() || "{{ product['data'][0].category_name }}";
+      data['vendor'] = $('#vendor-select').val() || "{{ product['data'][0].vendor_name }}";
+      data['manufacturer'] = $('#manufacturer-select').val() || "{{ product['data'][0].manufacturer_name }}";
+
+      console.log(data);
 
       fetch('/api/edit-product', {
         method: 'POST',
@@ -182,7 +204,7 @@
       })
     }
 
-  function deleteProduct() {
+    function deleteProduct() {
     Swal.fire({
       title: "Do you really want to delete this product?",
       icon: "warning",
@@ -243,8 +265,7 @@
     })
   }
 
-
-  function priceBlock() {
+    function priceBlock() {
       let inputValue = event.target.value;
         inputValue = inputValue.replace(/,/g, '.');
 
@@ -285,15 +306,60 @@
       event.target.value = inputValue;
     }
 
-    // Populate dropdowns
-    document.addEventListener('DOMContentLoaded', function() {
-        const category = "{{ product['data'][0].category_name }}";
-        const vendor = "{{ product['data'][0].vendor_name }}";
-        const manufacturer = "{{ product['data'][0].manufacturer_name }}";
+    $(document).ready(function() {
+        setTimeout(function() {
+            // Initialize Select2 and set category value
+            $('#category-select').select2({
+                placeholder: "Select Category...",
+                tags: true
+            });
 
-        loadDropdown('categoryDropdown', '/api/category/dropdown', category);
-        loadDropdown('vendorDropdown', '/api/vendor/dropdown', vendor);
-        loadDropdown('manufacturerDropdown', '/api/manufacturer/dropdown', manufacturer);
+            var category = "{{ product['data'][0].category_name }}";
+            var vendor = "{{ product['data'][0].vendor_name }}";
+            var manufacturer = "{{ product['data'][0].manufacturer_name }}";
+
+            if (category && category !== "") {
+                $('#category-select').val(category).trigger('change');
+            } else {
+                console.warn("Category value is not valid or empty.");
+            }
+
+            if (vendor && vendor !== "") {
+                $('#vendor-select').val(vendor).trigger('change');
+            } else {
+                console.warn("Vendor value is not valid or empty.");
+            }
+
+            if (manufacturer && manufacturer !== "") {
+                $('#manufacturer-select').val(manufacturer).trigger('change');
+            } else {
+                console.warn("Manufacturer value is not valid or empty.");
+            }
+
+            $('#category-select').on('change', function() {
+                try {
+                    handleInputChange();
+                } catch (error) {
+                    console.error("Error in handleInputChange:", error);
+                }
+            });
+
+            $('#vendor-select').on('change', function() {
+                try {
+                    handleInputChange();
+                } catch (error) {
+                    console.error("Error in handleInputChange:", error);
+                }
+            });
+
+            $('#manufacturer-select').on('change', function() {
+                try {
+                    handleInputChange();
+                } catch (error) {
+                    console.error("Error in handleInputChange:", error);
+                }
+            });
+        }, 50);
     });
 
     // Add event listener to price field to format input
@@ -311,6 +377,18 @@
 
     document.getElementById('priceNoBTW').addEventListener('input', function(event) {
         priceBlock();
+    });
+
+    document.getElementById('priceBTW').addEventListener('input', function() {
+      if (priceBTW.value) {
+        priceNoBTW.value = (parseFloat(priceBTW.value) * 0.79).toFixed(2);
+      }
+    });
+
+    document.getElementById('priceNoBTW').addEventListener('input', function() {
+      if (priceNoBTW.value) {
+        priceBTW.value = (parseFloat(priceNoBTW.value) * 1.21).toFixed(2);
+      }
     });
 
     // Add event listener to quantity fields to allow only numbers
@@ -344,3 +422,11 @@
 
 </script>
 {% endblock javascripts %}
+
+{% block stylesheets %}
+<style>
+  textarea {
+      resize: none;
+  }
+</style>
+{% endblock stylesheets %}

@@ -29,6 +29,7 @@
                 </div>
                 <div class="col-12 text-center">
                   <a href="/inventory" class="btn btn-dark mt-3 me-2" style="width: 150px;">Cancel</a>
+                  <a onclick="showStep3Part1()" class="btn btn-dark mt-3 me-2">No Barcode</a>
                   <a onclick="showStep2()" class="btn btn-dark mt-3 me-2" style="width: 180px;">Enter Manually</a>
                 </div>
             </div>
@@ -145,6 +146,7 @@
                     <button type="button" class="btn btn-dark mt-3" onclick="showStep3Part2()" style="position: absolute; top: 20px; right: 40px;">Add More Details</button>
                   </div>
                 </div>
+              </div>
 
               <!-- Part 2 -->
               <div id="step-3-part-2" class="col-12 d-none text-center">
@@ -180,7 +182,9 @@
                       <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                     </div>
                   </div>
+
                 </div>
+
                 <div class="col-12 text-center">
                   <button type="button" class="btn btn-dark mt-3 me-2" onclick="showStep3Part1()" style="width: 150px;">Back</button>
                 </div>
@@ -280,6 +284,7 @@
     }
 
     function showStep3Part2() {
+        console.log("showStep3Part2");
         document.getElementById('step-1').classList.add('d-none');
         document.getElementById('step-2').classList.add('d-none');
         document.getElementById('step-3-part-1').classList.add('d-none');
@@ -342,34 +347,6 @@
           continueButton.disabled = true;
         }
     }
-
-    // function checkName() {
-    //   fetch ('api/check-name', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ name: document.getElementById('title').value })
-    //     })
-    //     .then(response => {
-    //         if (!response.ok) throw new Error('Response was not ok');
-    //         return response.json();
-    //     })
-    //     .then(data => {
-    //         if (data.message === 'Product name already exists') {
-    //             document.getElementById('topMessage').innerText = 'Product name already exists';
-    //             console.log('Product name already exists');
-    //             validName = false;
-    //             return false;
-    //         }
-    //         else {
-    //             document.getElementById('topMessage').innerText = '';
-    //             console.log('Product name is valid');
-    //             validName = true;
-    //             return true;
-    //         }
-    //     })
-    // }
 
     async function checkName() {
       const response = await fetch('api/check-name', {
@@ -495,6 +472,18 @@
         priceFill();
     });
 
+    document.getElementById('priceBTW').addEventListener('input', function() {
+      if (priceBTW.value) {
+        priceNoBTW.value = (parseFloat(priceBTW.value) * 0.79).toFixed(2);
+      }
+    });
+
+    document.getElementById('priceNoBTW').addEventListener('input', function() {
+      if (priceNoBTW.value) {
+        priceBTW.value = (parseFloat(priceNoBTW.value) * 1.21).toFixed(2);
+      }
+    });
+
     document.getElementById('url').addEventListener('blur', function(event) {
         let inputValue = event.target.value;
 
@@ -587,7 +576,7 @@
             hasError = true;
         }
         if (!priceBTW && !priceNoBTW) {
-            document.getElementById('topMessage').innerText = 'Please enter a price';
+            document.getElementById('topMessage').innerText = 'Please enter a price including and/or excluding BTW';
             return;
             console.log('hasError in  price');
             hasError = true;

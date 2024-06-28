@@ -3,18 +3,13 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-import os
-from flask import current_app as app 
 from flask_login import current_user, login_user
 from flask_dance.consumer import oauth_authorized
 from flask_dance.contrib.github import github, make_github_blueprint
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
-from flask_dance.contrib.twitter import twitter, make_twitter_blueprint
 from sqlalchemy.orm.exc import NoResultFound
 from apps.config import Config
 from .models import Users, db, OAuth
-from flask import redirect, url_for
-from flask import flash
 
 github_blueprint = make_github_blueprint(
     client_id=Config.GITHUB_ID,
@@ -24,8 +19,8 @@ github_blueprint = make_github_blueprint(
         OAuth,
         db.session,
         user=current_user,
-        user_required=False,        
-    ),   
+        user_required=False,
+    ),
 )
 
 @oauth_authorized.connect_via(github_blueprint)

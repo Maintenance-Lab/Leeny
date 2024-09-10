@@ -432,23 +432,9 @@ class AddProduct(Resource):
             db.session.add(vendor)
             db.session.commit()
 
-        priceBTW = 0
-        priceNoBTW = 0
-        # Check if BTW and No BTW are not '' or None?
-        if data['priceBTW'] != '' and data['priceNoBTW'] != '':
-            priceBTW = data['priceBTW']
-            priceNoBTW = data['priceNoBTW']
-        elif data['priceBTW'] != '' and data['priceNoBTW'] == '':
-            priceBTW = float(data['priceBTW'])
-            priceNoBTW = priceBTW * 0.79
-        elif data['priceBTW'] == '' and data['priceNoBTW'] != '':
-            priceNoBTW = float(data['priceNoBTW'])
-            priceBTW = priceNoBTW * 1.21
-
         product = Product(title=data['title'],
                     barcode=data['barcode'],
-                    priceBTW=priceBTW,
-                    priceNoBTW=priceNoBTW,
+                    price_when_bought=data['price_when_bought'],
                     description=data['description'],
                     url=data['url'],
                     notes=data['notes'],
@@ -538,8 +524,7 @@ class EditProduct(Resource):
 
         product.title = values['title']
         product.barcode = values['barcode']
-        product.priceBTW = values['priceBTW']
-        product.priceNoBTW = values['priceNoBTW']
+        product.price_when_bought = values['price_when_bought']
         product.description = values['description']
         product.url = values['url']
         product.notes = values['notes']

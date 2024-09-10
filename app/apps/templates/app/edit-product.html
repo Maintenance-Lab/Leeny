@@ -25,15 +25,9 @@
                   <input type="text" class="form-control" id="barcodeStep3" name="barcode" value="{{ product['data'][0].barcode }}">
                 </div>
                 <div class="form-group">
-                  <label for="priceBTW">Price incl. BTW € *</label>
+                  <label for="price_when_bought">Price € *</label>
                   <div class="input-group">
-                    <input type="text" class="form-control" id="priceBTW" name="priceBTW" placeholder="50.00" value="{{ product['data'][0].priceBTW }}" required>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="priceNoBTW">Price excl. BTW € *</label>
-                  <div class="input-group">
-                    <input type="text" class="form-control" id="priceNoBTW" name="priceNoBTW" placeholder="50.00" value="{{ product['data'][0].priceNoBTW }}" required>
+                    <input type="text" class="form-control" id="price_when_bought" name="price_when_bought" placeholder="50.00" value="{{ product['data'][0].price_when_bought }}" required>
                   </div>
                 </div>
               </div>
@@ -110,26 +104,6 @@
             </div>
 
           </form>
-
-          <!-- JavaScript for automatic calculation of BTW -->
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const priceBTW = document.getElementById('priceBTW');
-              const priceNoBTW = document.getElementById('priceNoBTW');
-
-              priceBTW.addEventListener('input', function() {
-                if (priceBTW.value) {
-                  priceNoBTW.value = (parseFloat(priceBTW.value) * 0.79).toFixed(2);
-                }
-              });
-
-              priceNoBTW.addEventListener('input', function() {
-                if (priceNoBTW.value) {
-                  priceBTW.value = (parseFloat(priceNoBTW.value) * 1.21).toFixed(2);
-                }
-              });
-            });
-          </script>
 
           {% else %}
           <h1>Permission denied</h1>
@@ -363,32 +337,12 @@
     });
 
     // Add event listener to price field to format input
-    document.getElementById('priceBTW').addEventListener('blur', function(event) {
+    document.getElementById('price_when_bought').addEventListener('blur', function(event) {
         priceFill();
     });
 
-    document.getElementById('priceNoBTW').addEventListener('blur', function(event) {
-        priceFill();
-    });
-
-    document.getElementById('priceBTW').addEventListener('input', function(event) {
+    document.getElementById('price_when_bought').addEventListener('input', function(event) {
         priceBlock();
-    });
-
-    document.getElementById('priceNoBTW').addEventListener('input', function(event) {
-        priceBlock();
-    });
-
-    document.getElementById('priceBTW').addEventListener('input', function() {
-      if (priceBTW.value) {
-        priceNoBTW.value = (parseFloat(priceBTW.value) * 0.79).toFixed(2);
-      }
-    });
-
-    document.getElementById('priceNoBTW').addEventListener('input', function() {
-      if (priceNoBTW.value) {
-        priceBTW.value = (parseFloat(priceNoBTW.value) * 1.21).toFixed(2);
-      }
     });
 
     // Add event listener to quantity fields to allow only numbers

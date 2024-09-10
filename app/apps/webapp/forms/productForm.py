@@ -8,8 +8,7 @@ class ProductForm(FlaskForm):
     quantity_total = IntegerField('Quantity Available', validators=[DataRequired()])
     quantity_borrowed = IntegerField('Quantity Borrowed')
 
-    priceBTW = IntegerField('Price including BTW')
-    priceNoBTW = IntegerField('Price excluding BTW')
+    price_when_bought = IntegerField('Price when bought')
     description = TextAreaField('Description')
     url = StringField('url')
     documentation = StringField('Documentation')

@@ -70,10 +70,10 @@
                   <!-- Second Column -->
                   <div class="col-md-6 text-start">
                     <div class="form-group">
-                      <label for="priceBTW">Price incl. BTW</label>
+                      <label for="price_when_bought">Price</label>
                       <div class="input-group">
                         <span class="input-group-text" style="z-index: 4;">€</span>
-                        <input type="text" class="form-control" id="priceBTW" name="priceBTW" placeholder="50.00">
+                        <input type="text" class="form-control" id="price_when_bought" name="price_when_bought" placeholder="50.00">
                       </div>
                     </div>
                   </div>
@@ -87,15 +87,6 @@
                   </div>
 
                   <!-- Fourth Column -->
-                  <div class="col-md-6 text-start">
-                    <div class="form-group">
-                      <label for="priceNoBTW">Price excl. BTW</label>
-                      <div class="input-group">
-                        <span class="input-group-text" style="z-index: 4;">€</span>
-                        <input type="text" class="form-control" id="priceNoBTW" name="priceNoBTW" placeholder="50.00">
-                      </div>
-                    </div>
-                  </div>
 
                   <!-- Fifth Column -->
                   <div class="col-md-6 text-start">
@@ -464,24 +455,8 @@
     }
 
     // Add event listener to price field to format input
-    document.getElementById('priceBTW').addEventListener('blur', function(event) {
+    document.getElementById('price_when_bought').addEventListener('blur', function(event) {
         priceFill();
-    });
-
-    document.getElementById('priceNoBTW').addEventListener('blur', function(event) {
-        priceFill();
-    });
-
-    document.getElementById('priceBTW').addEventListener('input', function() {
-      if (priceBTW.value) {
-        priceNoBTW.value = (parseFloat(priceBTW.value) * 0.79).toFixed(2);
-      }
-    });
-
-    document.getElementById('priceNoBTW').addEventListener('input', function() {
-      if (priceNoBTW.value) {
-        priceBTW.value = (parseFloat(priceNoBTW.value) * 1.21).toFixed(2);
-      }
     });
 
     document.getElementById('url').addEventListener('blur', function(event) {
@@ -511,11 +486,7 @@
         }
     });
 
-    document.getElementById('priceBTW').addEventListener('input', function(event) {
-        priceBlock();
-    });
-
-    document.getElementById('priceNoBTW').addEventListener('input', function(event) {
+    document.getElementById('price_when_bought').addEventListener('input', function(event) {
         priceBlock();
     });
 
@@ -566,8 +537,7 @@
         const vendor = document.querySelector('#vendorDropdown select').value;
         const manufacturer = document.querySelector('#manufacturerDropdown select').value;
 
-        const priceBTW = document.getElementById('priceBTW').value.trim();
-        const priceNoBTW = document.getElementById('priceNoBTW').value.trim();
+        const price_when_bought = document.getElementById('price_when_bought').value.trim();
 
         if (category === '' || vendor === '' || manufacturer === '') {
             document.getElementById('topMessage').innerText = 'Please select a category, vendor, and manufacturer';
@@ -575,8 +545,8 @@
             console.log('hasError in category, vendor, manufacturer');
             hasError = true;
         }
-        if (!priceBTW && !priceNoBTW) {
-            document.getElementById('topMessage').innerText = 'Please enter a price including and/or excluding BTW';
+        if (!price_when_bought) {
+            document.getElementById('topMessage').innerText = 'Please enter a price';
             return;
             console.log('hasError in  price');
             hasError = true;

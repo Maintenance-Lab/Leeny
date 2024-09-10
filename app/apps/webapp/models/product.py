@@ -11,14 +11,12 @@ class Product(db.Model):
     # Properties
     title = db.Column(db.String(255), nullable=False)
     barcode = db.Column(db.String(255), nullable=True)
-    priceBTW = db.Column(db.Float)
-    priceNoBTW = db.Column(db.Float)
+    pricen_when_bought = db.Column(db.Float)
     description = db.Column(db.Text)
     url = db.Column(db.String(255))
     documentation = db.Column(db.String(255))
     notes = db.Column(db.String(10000))
-    quantity_unavailable = db.Column(db.Integer, default=0)
-    quantity_total = db.Column(db.Integer)
+    # quantity_unavailable = db.Column(db.Integer, default=0)
     quantity_borrowed = db.Column(db.Integer, default=0)
 
     # Timestamps
@@ -39,8 +37,7 @@ class Product(db.Model):
             'id': self.id,
             'title': self.title,
             'barcode': self.barcode,
-            'priceBTW': self.priceBTW,
-            'priceNoBTW': self.priceNoBTW,
+            'price_when_bought': self.price_when_bought,
             'description': self.description,
             'url': self.url,
             'documentation': self.documentation,

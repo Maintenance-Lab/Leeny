@@ -5,8 +5,7 @@ from wtforms.validators import DataRequired
 class EditProductForm(FlaskForm):
     title = StringField('Product Name', validators=[DataRequired()])
     barcode = StringField('Barcode')
-    priceBTW = StringField('Price BTW', validators=[DataRequired()])
-    priceNoBTW = StringField('Price No BTW', validators=[DataRequired()])
+    price_when_bought = StringField('Price When Bought', validators=[DataRequired()])
     quantity = IntegerField('Quantity', validators=[DataRequired()])
     quantity_unavailable = IntegerField('Quantity Unavailable', validators=[DataRequired()])
     url = StringField('Website', validators=[DataRequired()])

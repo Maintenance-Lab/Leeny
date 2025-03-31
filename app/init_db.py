@@ -191,7 +191,7 @@ def log_database():
 def initialize_database():
     print('> Initializing database...')
     with app.app_context():
-        db.init_app(app)
+        # db.init_app(app)
         db.create_all()
         print('> Database initialized')
 
